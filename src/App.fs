@@ -1,14 +1,42 @@
 module App
 
-open Browser.Dom
+open StaticWebGenerator
 
-// Mutable variable to count the number of times we clicked the button
-let mutable count = 0
+// let markdownPath = IO.resolve "${entryDir}/../README.md"
+// let dataPath = IO.resolve "${entryDir}/../data/people.json"
+let private indexPath = IO.resolve "../public/index.html"
+// let indexPath =
+//     "C:/Users/takatoshi/dev/github.com/krymtkts/blog-fable/public/index.html"
 
-// Get a reference to our button and cast the Element to an HTMLButtonElement
-let myButton = document.querySelector(".my-button") :?> Browser.Types.HTMLButtonElement
+let private render () =
+    // let content =
+    //     IO.readFile markdownPath
+    //     |> parseMarkdownAsReactEl "content"
 
-// Register our listener
-myButton.onclick <- fun _ ->
-    count <- count + 1
-    myButton.innerText <- sprintf "You clicked: %i time(s)" count
+    // let data = createTable ()
+
+    """
+    <!doctype html>
+    <html>
+    <head>
+      <title>Fable</title>
+      <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="shortcut icon" href="fable.ico" />
+    </head>
+    <body>
+        <p>Fable is running</p>
+        <p>You can click on this button:</p>
+        <button class="my-button">Click me</button>
+        <script src="bundle.js"></script>
+    </body>
+    </html>
+    """
+    // |> parseReactStatic
+    |> IO.writeFile indexPath
+
+    printfn "Render complete!"
+
+printfn "path> %s" indexPath
+
+render ()

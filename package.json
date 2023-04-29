@@ -1,14 +1,16 @@
 {
   "private": true,
+  "type": "module",
   "scripts": {
     "postinstall": "dotnet tool restore",
-    "start": "dotnet fable watch src --run webpack-dev-server",
-    "build": "dotnet fable src && webpack"
+    "start-server": "live-server public",
+    "start-fable": "dotnet fable watch src --runScript",
+    "start": "concurrently npm:start-*"
   },
+  "version": "1.0.0",
   "devDependencies": {
-    "webpack": "^5.81.0",
-    "webpack-cli": "^5.0.2",
-    "webpack-dev-server": "^4.13.3"
-  },
-  "version": "1.0.0"
+    "concurrently": "^8.0.1",
+    "fs-extra": "^11.1.1",
+    "live-server": "^1.2.2"
+  }
 }
