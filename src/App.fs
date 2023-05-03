@@ -2,19 +2,21 @@ module App
 
 open StaticWebGenerator
 
-let private markdownPath = IO.resolve "../README.md"
-let private indexPath = IO.resolve "../docs/index.html"
+let private markdownPath = IO.resolve "README.md"
+let private indexPath = IO.resolve "docs/index.html"
 
 let private render () =
-    let content =
-        IO.readFile markdownPath
-        |> parseMarkdownAsReactEl "content"
+    promise {
+        let! el =
+            IO.readFile markdownPath
+            |> Promise.map (fun m -> parseMarkdownAsReactEl "content" m)
 
-    frame "Fable" content
-    |> parseReactStatic
-    |> IO.writeFile indexPath
+        let content = frame "Fable" el |> parseReactStatic
+        do! IO.writeFile indexPath content
+        do! IO.copy "static/fable.ico" "docs/fable.ico"
+    }
+    |> ignore
 
     printfn "Render complete!"
 
-IO.copy "static/fable.ico" "docs/fable.ico"
 render ()
