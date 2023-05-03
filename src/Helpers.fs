@@ -4,8 +4,7 @@ open System.Text.RegularExpressions
 open Fable.Core.JsInterop
 open Fable.Core
 open Feliz
-
-module Node = Node.Api
+open Node
 
 module private Util =
     let private highlight: obj = importAll "highlight.js"
@@ -39,7 +38,7 @@ module private Util =
 
 /// Parses a markdown file
 let parseMarkdownFile path =
-    Node.fs.readFileSync(path).ToString()
+    fs.readFileSync(path).ToString()
     |> Util.parseMarkdown
 
 /// Parses a markdown string
@@ -73,38 +72,11 @@ let frame titleText content =
                 Html.body [ Html.div [ prop.children [ content ] ] ] ]
 
 module IO =
-    type private IJsLib =
-        abstract getDirName: unit -> string
 
-    [<ImportAll("../js/path.js")>]
-    let private jsLib: IJsLib = jsNative
+    let inline resolve (path: string) = File.absolutePath path
 
-    let private fsExtra: obj = importDefault "fs-extra"
+    let writeFile = File.write
 
-    let rec private ensureDirExists (dir: string) (cont: (unit -> unit) option) =
-        if Node.fs.existsSync (!^dir) then
-            match cont with
-            | Some c -> c ()
-            | None -> ()
-        else
-            ensureDirExists
-                (Node.path.dirname dir)
-                (Some (fun () ->
-                    if not (Node.fs.existsSync !^dir) then
-                        Node.fs.mkdirSync dir |> ignore
+    let readFile = File.read
 
-                    match cont with
-                    | Some c -> c ()
-                    | None -> ()))
-
-    let inline resolve (path: string) =
-        Node.path.resolve (jsLib.getDirName (), path)
-
-    let writeFile (path: string) (content: string) =
-        ensureDirExists (Node.path.dirname path) None
-        Node.fs.writeFileSync (path, content)
-
-    let readFile (path: string) = Node.fs.readFileSync(path).ToString()
-
-    let copy (source: string) (target: string) : unit =
-        fsExtra?copySync (source, target, createObj [ "overwrite" ==> true ])
+    let copy = File.copy

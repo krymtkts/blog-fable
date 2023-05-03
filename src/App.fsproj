@@ -3,6 +3,7 @@
     <TargetFramework>net7</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Node.Extra.fs" />
     <Compile Include="Helpers.fs" />
     <Compile Include="App.fs" />
   </ItemGroup>
@@ -10,6 +11,7 @@
     <PackageReference Include="Fable.Browser.Dom" Version="2.14.0" />
     <PackageReference Include="Fable.Core" Version="4.0.0" />
     <PackageReference Include="Fable.Node" Version="1.2.0" />
+    <PackageReference Include="Fable.Promise" Version="3.2.0" />
     <PackageReference Include="Feliz" Version="2.6.0" />
   </ItemGroup>
 </Project>
