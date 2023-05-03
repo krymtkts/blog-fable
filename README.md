@@ -16,3 +16,10 @@ This repository re-creates a subset of [fable-compiler/static-web-generator](htt
 - Build pages: `npm run build`
 - Build pages and start a development server: `npm run start`
   - After finished the first compilation, open: `http://localhost:8080/`
+
+## Credits
+
+This repository incorporates parts of the following open source software:
+
+- project based on [fable-compiler/static-web-generator: Simple Fable Node.js app to generate static pages](https://github.com/fable-compiler/static-web-generator)
+- `Node.Extra.fs` is originally written in [MangelMaxime/Nacara](https://github.com/MangelMaxime/Nacara)
