@@ -76,22 +76,22 @@ module Directory =
                         |> ignore)
             ))
 
-let rmdir (dir: string) =
-    let options = createObj [ "recursive" ==> true ]
+    let rmdir (dir: string) =
+        let options = createObj [ "recursive" ==> true ]
 
-    promise {
-        let! dirExist = Directory.exists dir
+        promise {
+            let! dirExist = Directory.exists dir
 
-        if dirExist then
-            do!
-                Promise.create (fun resolve reject ->
-                    fs?rm (dir,
-                           options,
-                           (fun (err: Base.ErrnoException option) ->
-                               match err with
-                               | Some err -> reject (err :?> System.Exception)
-                               | None -> resolve ())))
-    }
+            if dirExist then
+                do!
+                    Promise.create (fun resolve reject ->
+                        fs?rm (dir,
+                               options,
+                               (fun (err: Base.ErrnoException option) ->
+                                   match err with
+                                   | Some err -> reject (err :?> System.Exception)
+                                   | None -> resolve ())))
+        }
 
 [<RequireQualifiedAccess>]
 module File =

@@ -36,23 +36,25 @@ module private Util =
         marked?parse
         $ (content, createObj [ "renderer" ==> renderer ])
 
-/// Parses a markdown file
-let parseMarkdownFile path =
-    fs.readFileSync(path).ToString()
-    |> Util.parseMarkdown
+module Parser =
+    let parseMarkdownFile path =
+        printfn "path: %s" path
 
-/// Parses a markdown string
-let parseMarkdown str = Util.parseMarkdown str
+        fs.readFileSync(path).ToString()
+        |> Util.parseMarkdown
 
-let parseMarkdownAsReactEl className content =
-    Html.div [ prop.className [ className ]
-               prop.dangerouslySetInnerHTML (parseMarkdown content) ]
+    /// Parses a markdown string
+    let parseMarkdown str = Util.parseMarkdown str
 
-/// Parses a React element invoking ReactDOMServer.renderToString
-let parseReact el = ReactDOMServer.renderToString el
+    let parseMarkdownAsReactEl className content =
+        Html.div [ prop.className [ className ]
+                   prop.dangerouslySetInnerHTML (parseMarkdown content) ]
 
-/// Parses a React element invoking ReactDOMServer.renderToStaticMarkup
-let parseReactStatic el = ReactDOMServer.renderToStaticMarkup el
+    /// Parses a React element invoking ReactDOMServer.renderToString
+    let parseReact el = ReactDOMServer.renderToString el
+
+    /// Parses a React element invoking ReactDOMServer.renderToStaticMarkup
+    let parseReactStatic el = ReactDOMServer.renderToStaticMarkup el
 
 let frame titleText content =
     let cssLink path =
@@ -72,11 +74,8 @@ let frame titleText content =
                 Html.body [ Html.div [ prop.children [ content ] ] ] ]
 
 module IO =
-
     let inline resolve (path: string) = File.absolutePath path
-
     let writeFile = File.write
-
     let readFile = File.read
-
     let copy = File.copy
+    let getFiles = Directory.getFiles true
