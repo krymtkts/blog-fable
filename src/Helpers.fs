@@ -5,36 +5,59 @@ open Fable.Core.JsInterop
 open Fable.Core
 open Feliz
 open Node
+open Marked
+open HighlightJs
 
 module private Util =
-    let private highlight: obj = importAll "highlight.js"
-    let private marked: obj = importAll "marked"
+    let private me: ResizeArray<Marked.MarkedExtension> =
+        let markedHighlight: obj -> Marked.MarkedExtension = importMember "marked-highlight"
 
-    marked?setOptions (createObj [ "highlight"
-                                   ==> fun code lang -> highlight?highlightAuto (code, [| lang |])?value ])
+        let renderer =
+            let heading =
+                fun (text: string) (level: int) ->
+                    let escapedText = Regex.Replace(string text, @"[^\w]+", "-")
+                    let l = level.ToString()
 
-    let private renderer =
-        let renderer = createNew marked?Renderer ()
-        // NOTE: heading and link are not work with let bindings.
-        renderer?heading <- fun text level ->
-                                let escapedText = Regex.Replace(string text, @"[^\w]+", "-")
+                    sprintf
+                        """<h%s><a name="%s" class="anchor" href="#%s">%s</a></h%s>"""
+                        l
+                        escapedText
+                        escapedText
+                        text
+                        l
 
-                                sprintf
-                                    """<h%s><a name="%s" class="anchor" href="#%s">%s</a></h%s>"""
-                                    level
-                                    escapedText
-                                    escapedText
-                                    text
-                                    level
+            let link =
+                fun href title text ->
+                    let ref =
+                        match href with
+                        | Some s -> Regex.Replace(s, @"\.md\b", ".html")
+                        | None -> ""
 
-        renderer?link <- fun href title text ->
-                             sprintf """<a href="%s">%s</a>""" (Regex.Replace(href, @"\.md\b", ".html")) text
+                    sprintf """<a href="%s">%s</a>""" ref text
 
-        renderer
+            let mops = !!{| heading = heading; link = link |}
+
+
+            jsOptions<Marked.MarkedExtension> (fun o ->
+                o.renderer <- Some <| U2.Case2 mops
+                o.gfm <- Some true
+                o.headerIds <- Some true)
+
+        let highlighter =
+            let highlight =
+                fun (code: string) (lang: string) -> (hljs.highlight (code, !!{| language = lang |}))?value
+
+            markedHighlight !!{| highlight = highlight |}
+
+        let mes = [ renderer; highlighter ]
+        ResizeArray mes
+
+    marked.``use`` me
 
     let parseMarkdown (content: string) : string =
-        marked?parse
-        $ (content, createObj [ "renderer" ==> renderer ])
+        printfn "content: %s" content
+
+        marked?parse $ (content)
 
 module Parser =
     let parseMarkdownFile path =
@@ -74,7 +97,7 @@ let frame titleText content =
                 Html.body [ Html.div [ prop.children [ content ] ] ] ]
 
 module IO =
-    let inline resolve (path: string) = File.absolutePath path
+    let resolve (path: string) = File.absolutePath path
     let writeFile = File.write
     let readFile = File.read
     let copy = File.copy
