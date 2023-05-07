@@ -45,7 +45,9 @@ module private Util =
 
         let highlighter =
             let highlight =
-                fun (code: string) (lang: string) -> (hljs.highlight (code, !!{| language = lang |}))?value
+                fun (code: string) (lang: string) ->
+                    (hljs.highlight (code, !!{| language = lang |}))
+                        .value
 
             markedHighlight !!{| highlight = highlight |}
 
@@ -54,10 +56,7 @@ module private Util =
 
     marked.``use`` me
 
-    let parseMarkdown (content: string) : string =
-        printfn "content: %s" content
-
-        marked?parse $ (content)
+    let parseMarkdown (content: string) : string = marked.parse $ (content)
 
 module Parser =
     let parseMarkdownFile path =

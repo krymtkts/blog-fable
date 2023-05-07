@@ -227,9 +227,9 @@ module Marked =
         abstract list: this: U2<Renderer, RendererThis> * body: string * ordered: bool * start: float -> U2<string, 'T>
 
         abstract listitem:
-            this: U2<Renderer, RendererThis> * text: string * task: bool * checked: bool -> U2<string, 'T>
+            this: U2<Renderer, RendererThis> * text: string * task: bool * ``checked``: bool -> U2<string, 'T>
 
-        abstract checkbox: this: U2<Renderer, RendererThis> * checked: bool -> U2<string, 'T>
+        abstract checkbox: this: U2<Renderer, RendererThis> * ``checked``: bool -> U2<string, 'T>
         abstract paragraph: this: U2<Renderer, RendererThis> * text: string -> U2<string, 'T>
         abstract table: this: U2<Renderer, RendererThis> * header: string * body: string -> U2<string, 'T>
         abstract tablerow: this: U2<Renderer, RendererThis> * content: string -> U2<string, 'T>
@@ -420,7 +420,7 @@ module Marked =
             abstract ``type``: string with get, set
             abstract raw: string with get, set
             abstract task: bool with get, set
-            abstract checked: bool option with get, set
+            abstract ``checked``: bool option with get, set
             abstract loose: bool with get, set
             abstract text: string with get, set
             abstract tokens: ResizeArray<Token> with get, set
