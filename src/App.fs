@@ -2,48 +2,80 @@ module App
 
 open StaticWebGenerator
 
-let private docsPath = IO.resolve "docs"
+let private getMarkdownFiles dir =
+    promise {
+        let! paths = IO.getFiles dir
 
+        let files =
+            paths
+            |> List.filter (fun p -> p.EndsWith ".md")
+            |> List.map (sprintf "%s/%s" dir)
+            |> List.map IO.resolve
+
+        return files
+    }
+
+let getLeafPath (source: string) =
+    source.Replace("\\", "/").Split("/") |> Seq.last
+
+let getDistPath (source: string) (dir: string) =
+    getLeafPath source
+    |> fun x -> x.Replace(".md", ".html")
+    |> sprintf "%s/%s" dir
+    |> IO.resolve
+
+let private readAndWrite source dist =
+    promise {
+        printfn "Rendering %s..." source
+        let! m = IO.readFile source
+
+        let content =
+            m
+            |> Parser.parseMarkdownAsReactEl "content"
+            |> frame "Fable"
+            |> Parser.parseReactStatic
+
+        printfn "Writing %s..." dist
+
+        do! IO.writeFile dist content
+    }
+
+let private renderPosts sourceDir distDir =
+    promise {
+        let! files = getMarkdownFiles sourceDir
+
+        do!
+            files
+            |> List.sortBy getLeafPath
+            |> Seq.last
+            |> fun source ->
+                let dist = IO.resolve "docs/index.html"
+                promise { do! readAndWrite source dist }
+
+        files
+        |> List.map (fun source ->
+            let dist = getDistPath source distDir
+            promise { do! readAndWrite source dist })
+        |> Promise.all
+        |> ignore
+    }
 
 let private renderMarkdowns sourceDir distDir =
     promise {
-        let! paths = IO.getFiles sourceDir
+        let! files = getMarkdownFiles sourceDir
 
-        paths
-        |> List.filter (fun p -> p.EndsWith ".md")
-        |> List.map (fun p ->
-            let source = IO.resolve <| sprintf "%s/%s" sourceDir p
-            printfn "Rendering %s..." source
-
-            promise {
-                let! m = IO.readFile source
-
-                let content =
-                    m
-                    |> Parser.parseMarkdownAsReactEl "content"
-                    |> frame "Fable"
-                    |> Parser.parseReactStatic
-
-                let filePath =
-                    p.Replace("\\", "/").Split("/") // TODO: remove only date path.
-                    |> Seq.last
-                    |> fun x -> x.Replace(".md", ".html")
-
-                let dist = IO.resolve <| sprintf "%s/%s" distDir filePath
-
-                printfn "Writing %s..." dist
-
-                do! IO.writeFile dist content
-            })
+        files
+        |> List.map (fun source ->
+            let dist = getDistPath source distDir
+            promise { do! readAndWrite source dist })
         |> Promise.all
-        |> Promise.map (fun _ -> ())
         |> ignore
     }
 
 let private render () =
     promise {
         do! renderMarkdowns "contents/pages" "docs/pages"
-        do! renderMarkdowns "contents/posts" "docs/posts"
+        do! renderPosts "contents/posts" "docs/posts"
         do! IO.copy "contents/fable.ico" "docs/fable.ico"
 
         printfn "Render complete!"
