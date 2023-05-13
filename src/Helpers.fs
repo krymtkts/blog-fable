@@ -8,7 +8,17 @@ open Node
 open Marked
 open HighlightJs
 
+module IO =
+    let resolve (path: string) = File.absolutePath path
+    let writeFile = File.write
+    let readFile = File.read
+    let copy = File.copy
+    let getFiles = Directory.getFiles true
+
 module private Util =
+
+    let mdToHtml s = Regex.Replace(s, @"\.md\b", ".html")
+
     let private me: ResizeArray<Marked.MarkedExtension> =
         let markedHighlight: obj -> Marked.MarkedExtension = importMember "marked-highlight"
 
@@ -30,7 +40,7 @@ module private Util =
                 fun href title text ->
                     let ref =
                         match href with
-                        | Some s -> Regex.Replace(s, @"\.md\b", ".html")
+                        | Some s -> mdToHtml s
                         | None -> ""
 
                     sprintf """<a href="%s">%s</a>""" ref text
@@ -58,10 +68,13 @@ module private Util =
 
     let parseMarkdown (content: string) : string = marked.parse $ (content)
 
+    let liA ref title =
+        Html.li [ Html.a [ prop.href ref
+                           prop.title title
+                           prop.text title ] ]
+
 module Parser =
     let parseMarkdownFile path =
-        printfn "path: %s" path
-
         fs.readFileSync(path).ToString()
         |> Util.parseMarkdown
 
@@ -78,7 +91,7 @@ module Parser =
     /// Parses a React element invoking ReactDOMServer.renderToStaticMarkup
     let parseReactStatic el = ReactDOMServer.renderToStaticMarkup el
 
-let frame titleText content =
+let frame (navbar: Fable.React.ReactElement) (titleText: string) content =
     let cssLink path =
         Html.link [ prop.rel "stylesheet"
                     prop.type' "text/css"
@@ -93,11 +106,65 @@ let frame titleText content =
                                             prop.content "width=device-width, initial-scale=1" ]
                             yield cssLink "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
                             yield cssLink "https://cdnjs.cloudflare.com/ajax/libs/bulma/0.5.1/css/bulma.min.css" ]
-                Html.body [ Html.div [ prop.children [ content ] ] ] ]
+                Html.body [ Html.nav [ navbar ]
+                            Html.div [ prop.children [ content ] ] ] ]
 
-module IO =
-    let resolve (path: string) = File.absolutePath path
-    let writeFile = File.write
-    let readFile = File.read
-    let copy = File.copy
-    let getFiles = Directory.getFiles true
+let getDistPath (source: string) (dir: string) =
+    Directory.leaf source
+    |> Util.mdToHtml
+    |> Directory.join2 dir
+    |> IO.resolve
+
+let isMarkdwon (path: string) = path.EndsWith ".md"
+
+let getMarkdownFiles dir =
+    promise {
+        let! paths = IO.getFiles dir
+
+        let files =
+            paths
+            |> List.filter isMarkdwon
+            |> List.map (Directory.join2 dir)
+            |> List.map IO.resolve
+
+        return files
+    }
+
+let getLatestPost paths =
+    paths |> List.sortBy Directory.leaf |> Seq.last
+
+let generateArchives sourceDir group =
+    promise {
+        let! files = getMarkdownFiles sourceDir
+
+        let archives =
+            files
+            |> List.filter isMarkdwon
+            |> List.sortBy Directory.leaf
+            |> List.rev
+            |> List.groupBy (fun path ->
+                let leaf = Directory.leaf path
+                leaf.Substring(0, 7))
+            |> List.map (fun (yearMonth, paths) ->
+                let lis =
+                    paths
+                    |> List.map (fun source ->
+                        let leaf = Directory.leaf source
+                        let title = leaf.Replace(".md", "")
+                        let ref = Directory.join3 "/" group <| Util.mdToHtml leaf
+
+                        Util.liA ref title)
+
+                [ Html.li [ Html.h2 yearMonth ]
+                  Html.ul lis ])
+
+        return Html.ul [ prop.children (List.concat archives) ]
+    }
+
+let generateNavbar =
+    Html.ul [ Html.h1 [ prop.text "Blog Title" ]
+              Util.liA "/index.html" "Index"
+              Util.liA "/archives.html" "Archives"
+              Util.liA "/pages/about.html" "About Me"
+              Util.liA "/atom.xml" "RSS"
+              Util.liA "/tags.html" "Tags" ]
