@@ -20,10 +20,10 @@ let private readAndWrite navbar source dist =
         do! IO.writeFile dist content
     }
 
-let renderArchives navbar sourceDir dist group =
+let renderArchives navbar sourceDir dist =
     promise {
         printfn "Rendering archives..."
-        let! archives = generateArchives sourceDir "posts"
+        let! archives = generateArchives sourceDir
 
         let content =
             archives
@@ -71,7 +71,7 @@ let private render () =
     promise {
         let navbar = generateNavbar
 
-        do! renderArchives navbar "contents/posts" "docs/archives.html" "posts"
+        do! renderArchives navbar "contents" "docs/archives.html"
         do! renderPosts "contents/posts" "docs/posts" navbar
         do! renderMarkdowns "contents/pages" "docs/pages" navbar
         do! IO.copy "contents/fable.ico" "docs/fable.ico"

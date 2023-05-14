@@ -133,9 +133,18 @@ let getMarkdownFiles dir =
 let getLatestPost paths =
     paths |> List.sortBy Directory.leaf |> Seq.last
 
-let generateArchives sourceDir group =
+let pathToLi group source =
+    let leaf = Directory.leaf source
+    let title = leaf.Replace(".md", "")
+    let ref = Directory.join3 "/" group <| Util.mdToHtml leaf
+
+    Util.liA ref title
+
+let generatePostArchives sourceDir group =
     promise {
-        let! files = getMarkdownFiles sourceDir
+        let! files =
+            getMarkdownFiles
+            <| Directory.join2 sourceDir group
 
         let archives =
             files
@@ -146,19 +155,40 @@ let generateArchives sourceDir group =
                 let leaf = Directory.leaf path
                 leaf.Substring(0, 7))
             |> List.map (fun (yearMonth, paths) ->
-                let lis =
-                    paths
-                    |> List.map (fun source ->
-                        let leaf = Directory.leaf source
-                        let title = leaf.Replace(".md", "")
-                        let ref = Directory.join3 "/" group <| Util.mdToHtml leaf
+                let lis = paths |> List.map (pathToLi group)
 
-                        Util.liA ref title)
-
-                [ Html.li [ Html.h2 yearMonth ]
+                [ Html.li [ Html.h3 yearMonth ]
                   Html.ul lis ])
 
         return Html.ul [ prop.children (List.concat archives) ]
+    }
+
+let generatePageArchives sourceDir group =
+    promise {
+        let! files =
+            getMarkdownFiles
+            <| Directory.join2 sourceDir group
+
+        let archives =
+            files
+            |> List.filter isMarkdwon
+            |> List.sortBy Directory.leaf
+            |> List.map (pathToLi group)
+
+        return Html.ul [ prop.children archives ]
+    }
+
+let generateArchives sourceDir =
+    promise {
+        let! posts = generatePostArchives sourceDir "posts"
+        let! pages = generatePageArchives sourceDir "pages"
+
+        return
+            Html.div [ prop.className [ "content" ]
+                       prop.children [ Html.ul [ prop.children [ Html.li [ Html.h2 "Posts" ]
+                                                                 posts
+                                                                 Html.li [ Html.h2 "Pages" ]
+                                                                 pages ] ] ] ]
     }
 
 let generateNavbar =
