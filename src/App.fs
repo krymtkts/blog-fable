@@ -2,29 +2,9 @@ module App
 
 open StaticWebGenerator
 
-let private getMarkdownFiles dir =
-    promise {
-        let! paths = IO.getFiles dir
 
-        let files =
-            paths
-            |> List.filter (fun p -> p.EndsWith ".md")
-            |> List.map (sprintf "%s/%s" dir)
-            |> List.map IO.resolve
 
-        return files
-    }
-
-let getLeafPath (source: string) =
-    source.Replace("\\", "/").Split("/") |> Seq.last
-
-let getDistPath (source: string) (dir: string) =
-    getLeafPath source
-    |> fun x -> x.Replace(".md", ".html")
-    |> sprintf "%s/%s" dir
-    |> IO.resolve
-
-let private readAndWrite source dist =
+let private readAndWrite navbar source dist =
     promise {
         printfn "Rendering %s..." source
         let! m = IO.readFile source
@@ -32,7 +12,7 @@ let private readAndWrite source dist =
         let content =
             m
             |> Parser.parseMarkdownAsReactEl "content"
-            |> frame "Fable"
+            |> frame navbar "Blog - Fable"
             |> Parser.parseReactStatic
 
         printfn "Writing %s..." dist
@@ -40,42 +20,60 @@ let private readAndWrite source dist =
         do! IO.writeFile dist content
     }
 
-let private renderPosts sourceDir distDir =
+let renderArchives navbar sourceDir dist =
+    promise {
+        printfn "Rendering archives..."
+        let! archives = generateArchives sourceDir
+
+        let content =
+            archives
+            |> frame navbar "Blog - Fable"
+            |> Parser.parseReactStatic
+
+        printfn "Writing archives %s..." dist
+
+        do! IO.writeFile dist content
+    }
+
+let private renderPosts sourceDir distDir navbar =
     promise {
         let! files = getMarkdownFiles sourceDir
+        let rw = readAndWrite navbar
 
         do!
-            files
-            |> List.sortBy getLeafPath
-            |> Seq.last
+            getLatestPost files
             |> fun source ->
                 let dist = IO.resolve "docs/index.html"
-                promise { do! readAndWrite source dist }
+                promise { do! rw source dist }
 
         files
         |> List.map (fun source ->
             let dist = getDistPath source distDir
-            promise { do! readAndWrite source dist })
+            promise { do! rw source dist })
         |> Promise.all
         |> ignore
     }
 
-let private renderMarkdowns sourceDir distDir =
+let private renderMarkdowns sourceDir distDir navbar =
     promise {
         let! files = getMarkdownFiles sourceDir
+        let rw = readAndWrite navbar
 
         files
         |> List.map (fun source ->
             let dist = getDistPath source distDir
-            promise { do! readAndWrite source dist })
+            promise { do! rw source dist })
         |> Promise.all
         |> ignore
     }
 
 let private render () =
     promise {
-        do! renderMarkdowns "contents/pages" "docs/pages"
-        do! renderPosts "contents/posts" "docs/posts"
+        let navbar = generateNavbar
+
+        do! renderArchives navbar "contents" "docs/archives.html"
+        do! renderPosts "contents/posts" "docs/posts" navbar
+        do! renderMarkdowns "contents/pages" "docs/pages" navbar
         do! IO.copy "contents/fable.ico" "docs/fable.ico"
 
         printfn "Render complete!"

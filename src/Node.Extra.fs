@@ -17,7 +17,8 @@ module Directory =
         |> Array.skip 1
         |> String.concat Node.Api.path.sep
 
-    let join (pathA: string) (pathB: string) = path.join (pathA, pathB)
+    let join2 (pathA: string) (pathB: string) = path.join (pathA, pathB)
+    let join3 (pathA: string) (pathB: string) (pathC: string) = path.join (pathA, pathB, pathC)
 
     let exists (dir: string) =
         Promise.create (fun resolve reject -> fs.exists ((U2.Case1 dir), (fun res -> resolve res)))
@@ -42,6 +43,8 @@ module Directory =
 
     let dirname (dir: string) = path.dirname (dir)
 
+    let leaf (dir: string) = path.basename (dir)
+
     let getFiles (isRecursive: bool) (dir: string) =
         Promise.create (fun resolve reject ->
             fs.readdir (
@@ -51,14 +54,14 @@ module Directory =
                     | Some err -> reject (err :?> System.Exception)
                     | None ->
                         files.ToArray()
-                        |> Array.map (fun file -> file, File.statsSync (Directory.join dir file))
+                        |> Array.map (fun file -> file, File.statsSync (Directory.join2 dir file))
                         |> Array.map (fun (filePath, fileInfo) ->
                             if fileInfo.isDirectory () then
                                 // If recursive then get the files from the others sub dirs
                                 if isRecursive then
                                     promise {
-                                        let! files = getFiles true (Directory.join dir filePath)
-                                        return files |> List.map (Directory.join filePath)
+                                        let! files = getFiles true (Directory.join2 dir filePath)
+                                        return files |> List.map (Directory.join2 filePath)
                                     }
                                 else
                                     // Else, we return an empty list and this will have the effect
