@@ -7,7 +7,7 @@ let private readAndWrite navbar source dist =
         printfn "Rendering %s..." source
         let! m = IO.readFile source
 
-        let frontmatter, content =
+        let frontMatter, content =
             m
             |> Parser.parseMarkdownAsReactEl "content"
             |> fun (fm, c) ->
@@ -19,7 +19,7 @@ let private readAndWrite navbar source dist =
         printfn "Writing %s..." dist
 
         do! IO.writeFile dist content
-        return frontmatter
+        return frontMatter
     }
 
 let renderTags navbar (meta: Meta seq) dist =
