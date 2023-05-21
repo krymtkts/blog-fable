@@ -176,7 +176,7 @@ let getMarkdownFiles dir =
     }
 
 let getLatestPost paths =
-    paths |> List.sortBy Directory.leaf |> Seq.last
+    paths |> List.sortBy Directory.leaf |> List.last
 
 let pathToLi group source =
     let leaf = Directory.leaf source
@@ -185,22 +185,18 @@ let pathToLi group source =
 
     Util.liA ref title
 
-let generatePostArchives sourceDir group =
+let generatePostArchives (meta: Meta seq) group =
     promise {
-        let! files =
-            getMarkdownFiles
-            <| Directory.join2 sourceDir group
-
         let archives =
-            files
-            |> List.filter isMarkdwon
-            |> List.sortBy Directory.leaf
-            |> List.rev
-            |> List.groupBy (fun path ->
+            meta
+            |> Seq.map (fun m -> m.source)
+            |> Seq.sortBy Directory.leaf
+            |> Seq.rev
+            |> Seq.groupBy (fun path ->
                 let leaf = Directory.leaf path
                 leaf.Substring(0, 7))
-            |> List.map (fun (yearMonth, paths) ->
-                let lis = paths |> List.map (pathToLi group)
+            |> Seq.map (fun (yearMonth, paths) ->
+                let lis = paths |> Seq.map (pathToLi group)
 
                 [ Html.li [ Html.h3 yearMonth ]
                   Html.ul lis ])
@@ -208,25 +204,21 @@ let generatePostArchives sourceDir group =
         return Html.ul [ prop.children (List.concat archives) ]
     }
 
-let generatePageArchives sourceDir group =
+let generatePageArchives (meta: Meta seq) group =
     promise {
-        let! files =
-            getMarkdownFiles
-            <| Directory.join2 sourceDir group
-
         let archives =
-            files
-            |> List.filter isMarkdwon
-            |> List.sortBy Directory.leaf
-            |> List.map (pathToLi group)
+            meta
+            |> Seq.map (fun m -> m.source)
+            |> Seq.sortBy Directory.leaf
+            |> Seq.map (pathToLi group)
 
         return Html.ul [ prop.children archives ]
     }
 
-let generateArchives sourceDir =
+let generateArchives (metaPosts: Meta seq) (metaPages: Meta seq) =
     promise {
-        let! posts = generatePostArchives sourceDir "posts"
-        let! pages = generatePageArchives sourceDir "pages"
+        let! posts = generatePostArchives metaPosts "posts"
+        let! pages = generatePageArchives metaPages "pages"
 
         return
             Html.div [ prop.className [ "content" ]

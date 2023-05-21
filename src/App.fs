@@ -54,10 +54,10 @@ let renderTags navbar (meta: Meta seq) dist =
             |> Promise.map ignore
     }
 
-let renderArchives navbar sourceDir dist =
+let renderArchives navbar (metaPosts: Meta seq) (metaPages: Meta seq) dist =
     promise {
         printfn "Rendering archives..."
-        let! archives = generateArchives sourceDir
+        let! archives = generateArchives metaPosts metaPages
 
         let content =
             archives
@@ -122,11 +122,11 @@ let private render () =
     promise {
         let navbar = generateNavbar
 
-        let! fmPosts = renderPosts "contents/posts" "docs/posts" navbar
-        let! fmPages = renderMarkdowns "contents/pages" "docs/pages" navbar
-        let meta = Seq.concat [ fmPosts; fmPages ]
+        let! metaPosts = renderPosts "contents/posts" "docs/posts" navbar
+        let! metaPages = renderMarkdowns "contents/pages" "docs/pages" navbar
+        let meta = Seq.concat [ metaPosts; metaPages ]
 
-        do! renderArchives navbar "contents" "docs/archives.html"
+        do! renderArchives navbar metaPosts metaPages "docs/archives.html"
         do! renderTags navbar meta "docs/tags.html"
         do! IO.copy "contents/fable.ico" "docs/fable.ico"
 
