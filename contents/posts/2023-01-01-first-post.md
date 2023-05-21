@@ -1,6 +1,9 @@
 ---
 title: FIRST POST!
-tags: [diary, poem, fsharp]
+tags:
+  - diary
+  - poem
+  - fsharp
 ---
 
 THIS IS MY AWESOME FIST POST.

@@ -7,6 +7,7 @@ open Feliz
 open Node
 open Marked
 open HighlightJs
+open Yaml
 
 module IO =
     let resolve (path: string) = File.absolutePath path
@@ -68,28 +69,72 @@ module private Util =
 
     let parseMarkdown (content: string) : string = marked.parse $ (content)
 
+    let liAWithClass ref title classes =
+        Html.li [ prop.classes classes
+                  prop.children [ Html.a [ prop.href ref
+                                           prop.title title
+                                           prop.text title ] ] ]
+
     let liA ref title =
         Html.li [ Html.a [ prop.href ref
                            prop.title title
                            prop.text title ] ]
 
 module Parser =
-    let parseMarkdownFile path =
-        fs.readFileSync(path).ToString()
-        |> Util.parseMarkdown
+    type FrontMatter =
+        abstract title: string
+        abstract tags: string array option
+
+    let private pattern =
+        Regex(@"^---\s*\n(?<frontMatter>[\s\S]*?)\n?---\s*\n?(?<content>[\s\S]*)")
+
+    let private extractFrontMatter (str: string) =
+        match pattern.IsMatch str with
+        | true ->
+            let matches = pattern.Match str
+            let f: FrontMatter = Yaml.parse matches.Groups.["frontMatter"].Value
+            Some(f), matches.Groups.["content"].Value
+        | _ -> None, str
 
     /// Parses a markdown string
     let parseMarkdown str = Util.parseMarkdown str
 
     let parseMarkdownAsReactEl className content =
+        let (frontMatter, content) = extractFrontMatter content
+
+        let tagLi tag =
+            Util.liAWithClass (sprintf "/tags/%s.html" tag) tag [ "tag" ]
+
+        let el =
+            match frontMatter with
+            | Some fm ->
+                [ Html.h1 [ prop.className [ "title" ]
+                            prop.text fm.title ]
+                  Html.ul [ prop.className [ "tags" ]
+                            prop.children (
+                                match fm.tags with
+                                | Some tags -> tags
+                                | None -> [||]
+                                |> Seq.map tagLi
+                            ) ]
+                  Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ] ]
+            | None -> [ Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ] ]
+
+        frontMatter,
         Html.div [ prop.className [ className ]
-                   prop.dangerouslySetInnerHTML (parseMarkdown content) ]
+                   prop.children el ]
+
 
     /// Parses a React element invoking ReactDOMServer.renderToString
     let parseReact el = ReactDOMServer.renderToString el
 
     /// Parses a React element invoking ReactDOMServer.renderToStaticMarkup
     let parseReactStatic el = ReactDOMServer.renderToStaticMarkup el
+
+type Meta =
+    { frontMatter: Parser.FrontMatter option
+      source: string
+      dist: string }
 
 let frame (navbar: Fable.React.ReactElement) (titleText: string) content =
     let cssLink path =
@@ -131,31 +176,27 @@ let getMarkdownFiles dir =
     }
 
 let getLatestPost paths =
-    paths |> List.sortBy Directory.leaf |> Seq.last
+    paths |> List.sortBy Directory.leaf |> List.last
 
 let pathToLi group source =
     let leaf = Directory.leaf source
-    let title = leaf.Replace(".md", "")
+    let title = Regex.Replace(leaf, "\.(md|html)", "")
     let ref = Directory.join3 "/" group <| Util.mdToHtml leaf
 
     Util.liA ref title
 
-let generatePostArchives sourceDir group =
+let generatePostArchives (meta: Meta seq) group =
     promise {
-        let! files =
-            getMarkdownFiles
-            <| Directory.join2 sourceDir group
-
         let archives =
-            files
-            |> List.filter isMarkdwon
-            |> List.sortBy Directory.leaf
-            |> List.rev
-            |> List.groupBy (fun path ->
+            meta
+            |> Seq.map (fun m -> m.source)
+            |> Seq.sortBy Directory.leaf
+            |> Seq.rev
+            |> Seq.groupBy (fun path ->
                 let leaf = Directory.leaf path
                 leaf.Substring(0, 7))
-            |> List.map (fun (yearMonth, paths) ->
-                let lis = paths |> List.map (pathToLi group)
+            |> Seq.map (fun (yearMonth, paths) ->
+                let lis = paths |> Seq.map (pathToLi group)
 
                 [ Html.li [ Html.h3 yearMonth ]
                   Html.ul lis ])
@@ -163,25 +204,21 @@ let generatePostArchives sourceDir group =
         return Html.ul [ prop.children (List.concat archives) ]
     }
 
-let generatePageArchives sourceDir group =
+let generatePageArchives (meta: Meta seq) group =
     promise {
-        let! files =
-            getMarkdownFiles
-            <| Directory.join2 sourceDir group
-
         let archives =
-            files
-            |> List.filter isMarkdwon
-            |> List.sortBy Directory.leaf
-            |> List.map (pathToLi group)
+            meta
+            |> Seq.map (fun m -> m.source)
+            |> Seq.sortBy Directory.leaf
+            |> Seq.map (pathToLi group)
 
         return Html.ul [ prop.children archives ]
     }
 
-let generateArchives sourceDir =
+let generateArchives (metaPosts: Meta seq) (metaPages: Meta seq) =
     promise {
-        let! posts = generatePostArchives sourceDir "posts"
-        let! pages = generatePageArchives sourceDir "pages"
+        let! posts = generatePostArchives metaPosts "posts"
+        let! pages = generatePageArchives metaPages "pages"
 
         return
             Html.div [ prop.className [ "content" ]
@@ -190,6 +227,55 @@ let generateArchives sourceDir =
                                                                  Html.li [ Html.h2 "Pages" ]
                                                                  pages ] ] ] ]
     }
+
+let generateTagsContent (meta: Meta seq) =
+    let tagAndPage =
+        meta
+        |> Seq.map (fun x ->
+            match x.frontMatter with
+            | Some fm ->
+                match fm.tags with
+                | Some tags -> tags |> Seq.map (fun t -> (t, x.dist))
+                | None -> [||]
+            | None -> [||])
+        |> Seq.concat
+        |> Seq.fold
+            (fun acc (tag, page) ->
+                match Map.tryFind tag acc with
+                | Some pages -> Map.add tag (page :: pages) acc
+                | None -> Map.add tag [ page ] acc)
+            Map.empty
+
+    let tagsContent =
+        let tags =
+            tagAndPage
+            |> Map.toList
+            |> List.map (fun (tag, _) -> pathToLi "tags" <| sprintf "%s.html" tag)
+
+        Html.div [ prop.className [ "content" ]
+                   prop.children [ Html.ul [ prop.children [ Html.li [ Html.h2 "Tags" ]
+                                                             Html.ul [ prop.children tags ] ] ] ] ]
+
+    let tagPageContens =
+        tagAndPage
+        |> Map.toList
+        |> List.map (fun (tag, pages) ->
+            let lis =
+                pages
+                |> List.map (fun page ->
+                    let leaf = Directory.leaf page
+                    let title = leaf.Replace(".md", "")
+                    let ref = Directory.join3 "/" "posts" <| Util.mdToHtml leaf
+
+                    Util.liA ref title)
+
+            tag,
+            Html.div [ prop.className [ "content" ]
+                       prop.children [ Html.ul [ prop.children [ Html.li [ Html.h2 tag ]
+                                                                 Html.ul lis ] ] ] ])
+
+    tagsContent, tagPageContens
+
 
 let generateNavbar =
     Html.ul [ Html.h1 [ prop.text "Blog Title" ]

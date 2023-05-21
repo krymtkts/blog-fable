@@ -5,6 +5,7 @@
   <ItemGroup>
     <Compile Include="bindings/HighlightJs.fs" />
     <Compile Include="bindings/Marked.fs" />
+    <Compile Include="bindings/Yaml.fs" />
     <Compile Include="Node.Extra.fs" />
     <Compile Include="Helpers.fs" />
     <Compile Include="App.fs" />
