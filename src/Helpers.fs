@@ -189,7 +189,7 @@ let getMarkdownFiles dir =
     }
 
 let getLatestPost paths =
-    paths |> List.sortBy Directory.leaf |> List.last
+    paths |> Seq.sortBy Directory.leaf |> Seq.last
 
 let pathToLi group source =
     let leaf = Directory.leaf source

@@ -25,35 +25,7 @@ let private readAndWrite navbar title source dist =
         return frontMatter
     }
 
-let private renderPosts sourceDir distDir (navbar: Fable.React.ReactElement) title =
-    promise {
-        let! files = getMarkdownFiles sourceDir
-        let rw = readAndWrite navbar title
-
-        do!
-            getLatestPost files
-            |> fun source ->
-                let dist = IO.resolve "docs/index.html"
-
-                rw source dist |> Promise.map ignore
-
-        return!
-            files
-            |> List.map (fun source ->
-                let dist = getDistPath source distDir
-
-                promise {
-                    let! fm = rw source dist
-
-                    return
-                        { frontMatter = fm
-                          source = source
-                          dist = dist }
-                })
-            |> Promise.all
-    }
-
-let private renderPages sourceDir distDir navbar title =
+let private renderMarkdowns navbar title sourceDir distDir =
     promise {
         let! files = getMarkdownFiles sourceDir
         let rw = readAndWrite navbar title
@@ -74,7 +46,20 @@ let private renderPages sourceDir distDir navbar title =
             |> Promise.all
     }
 
-let renderArchives navbar title (metaPosts: Meta seq) (metaPages: Meta seq) dist =
+let private renderIndex navbar title metaPosts =
+    let latest =
+        metaPosts
+        |> Seq.map (fun m -> m.source)
+        |> getLatestPost
+
+    promise {
+        let rw = readAndWrite navbar title
+        let dist = IO.resolve "docs/index.html"
+
+        do! rw latest dist |> Promise.map ignore
+    }
+
+let renderArchives navbar title metaPosts metaPages dist =
     promise {
         printfn "Rendering archives..."
         let! archives = generateArchives metaPosts metaPages
@@ -89,7 +74,7 @@ let renderArchives navbar title (metaPosts: Meta seq) (metaPages: Meta seq) dist
         do! IO.writeFile dist content
     }
 
-let renderTags navbar title (meta: Meta seq) dist =
+let renderTags navbar title meta dist =
     let tagsContent, tagPageContents = generateTagsContent meta
     let frame = frame navbar
 
@@ -109,7 +94,12 @@ let renderTags navbar title (meta: Meta seq) dist =
         return!
             tagPageContents
             |> List.map (fun (tag, tagPageContent) ->
-                let dist = IO.resolve (sprintf "docs/tags/%s.html" tag)
+                let dist =
+                    IO.resolve (
+                        sprintf "%s/%s.html"
+                        <| dist.Replace(".html", "")
+                        <| tag
+                    )
 
                 printfn "Writing tag %s..." dist
 
@@ -128,9 +118,10 @@ let private render () =
         let title = "Blog Title"
         let navbar = generateNavbar title
 
-        let! metaPosts = renderPosts "contents/posts" "docs/posts" navbar title
-        let! metaPages = renderPages "contents/pages" "docs/pages" navbar title
+        let! metaPosts = renderMarkdowns navbar title "contents/posts" "docs/posts"
+        let! metaPages = renderMarkdowns navbar title "contents/pages" "docs/pages"
 
+        do! renderIndex navbar title metaPosts
         do! renderArchives navbar title metaPosts metaPages "docs/archives.html"
         let meta = Seq.concat [ metaPosts; metaPages ]
         do! renderTags navbar title meta "docs/tags.html"
