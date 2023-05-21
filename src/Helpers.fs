@@ -137,10 +137,13 @@ type Meta =
       dist: string }
 
 let frame (navbar: Fable.React.ReactElement) (titleText: string) content =
-    let cssLink path =
+    let cssLink path integrity =
         Html.link [ prop.rel "stylesheet"
                     prop.type' "text/css"
-                    prop.href path ]
+                    prop.href path
+                    prop.integrity integrity
+                    prop.crossOrigin.anonymous
+                    prop.referrerPolicy.noReferrer ]
 
     Html.html [ Html.head [ yield Html.title [ prop.title <| string titleText ]
                             yield
@@ -149,8 +152,18 @@ let frame (navbar: Fable.React.ReactElement) (titleText: string) content =
                             yield
                                 Html.meta [ prop.name "viewport"
                                             prop.content "width=device-width, initial-scale=1" ]
-                            yield cssLink "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-                            yield cssLink "https://cdnjs.cloudflare.com/ajax/libs/bulma/0.5.1/css/bulma.min.css" ]
+                            yield
+                                cssLink
+                                    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css"
+                                    "sha512-SgaqKKxJDQ/tAUAAXzvxZz33rmn7leYDYfBP+YoMRSENhf3zJyx3SBASt/OfeQwBHA1nxMis7mM3EV/oYT6Fdw=="
+                            yield
+                                cssLink
+                                    "https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css"
+                                    "sha512-HqxHUkJM0SYcbvxUw5P60SzdOTy/QVwA1JJrvaXJv4q7lmbDZCmZaqz01UPOaQveoxfYRv1tHozWGPMcuTBuvQ=="
+                            yield
+                                cssLink
+                                    "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/solarized-dark.min.css"
+                                    "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]
                 Html.body [ Html.nav [ navbar ]
                             Html.div [ prop.children [ content ] ] ] ]
 
