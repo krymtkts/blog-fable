@@ -25,6 +25,70 @@ let private readAndWrite navbar title source dist =
         return frontMatter
     }
 
+let private renderPosts sourceDir distDir (navbar: Fable.React.ReactElement) title =
+    promise {
+        let! files = getMarkdownFiles sourceDir
+        let rw = readAndWrite navbar title
+
+        do!
+            getLatestPost files
+            |> fun source ->
+                let dist = IO.resolve "docs/index.html"
+
+                rw source dist |> Promise.map ignore
+
+        return!
+            files
+            |> List.map (fun source ->
+                let dist = getDistPath source distDir
+
+                promise {
+                    let! fm = rw source dist
+
+                    return
+                        { frontMatter = fm
+                          source = source
+                          dist = dist }
+                })
+            |> Promise.all
+    }
+
+let private renderPages sourceDir distDir navbar title =
+    promise {
+        let! files = getMarkdownFiles sourceDir
+        let rw = readAndWrite navbar title
+
+        return!
+            files
+            |> List.map (fun source ->
+                let dist = getDistPath source distDir
+
+                promise {
+                    let! fm = rw source dist
+
+                    return
+                        { frontMatter = fm
+                          source = source
+                          dist = dist }
+                })
+            |> Promise.all
+    }
+
+let renderArchives navbar title (metaPosts: Meta seq) (metaPages: Meta seq) dist =
+    promise {
+        printfn "Rendering archives..."
+        let! archives = generateArchives metaPosts metaPages
+
+        let content =
+            archives
+            |> frame navbar (sprintf "%s - Archives" title)
+            |> Parser.parseReactStatic
+
+        printfn "Writing archives %s..." dist
+
+        do! IO.writeFile dist content
+    }
+
 let renderTags navbar title (meta: Meta seq) dist =
     let tagsContent, tagPageContents = generateTagsContent meta
     let frame = frame navbar
@@ -59,77 +123,13 @@ let renderTags navbar title (meta: Meta seq) dist =
             |> Promise.map ignore
     }
 
-let renderArchives navbar title (metaPosts: Meta seq) (metaPages: Meta seq) dist =
-    promise {
-        printfn "Rendering archives..."
-        let! archives = generateArchives metaPosts metaPages
-
-        let content =
-            archives
-            |> frame navbar (sprintf "%s - Archives" title)
-            |> Parser.parseReactStatic
-
-        printfn "Writing archives %s..." dist
-
-        do! IO.writeFile dist content
-    }
-
-let private renderPosts sourceDir distDir (navbar: Fable.React.ReactElement) title =
-    promise {
-        let! files = getMarkdownFiles sourceDir
-        let rw = readAndWrite navbar title
-
-        do!
-            getLatestPost files
-            |> fun source ->
-                let dist = IO.resolve "docs/index.html"
-
-                rw source dist |> Promise.map ignore
-
-        return!
-            files
-            |> List.map (fun source ->
-                let dist = getDistPath source distDir
-
-                promise {
-                    let! fm = rw source dist
-
-                    return
-                        { frontMatter = fm
-                          source = source
-                          dist = dist }
-                })
-            |> Promise.all
-    }
-
-let private renderMarkdowns sourceDir distDir navbar title =
-    promise {
-        let! files = getMarkdownFiles sourceDir
-        let rw = readAndWrite navbar title
-
-        return!
-            files
-            |> List.map (fun source ->
-                let dist = getDistPath source distDir
-
-                promise {
-                    let! fm = rw source dist
-
-                    return
-                        { frontMatter = fm
-                          source = source
-                          dist = dist }
-                })
-            |> Promise.all
-    }
-
 let private render () =
     promise {
         let title = "Blog Title"
         let navbar = generateNavbar title
 
         let! metaPosts = renderPosts "contents/posts" "docs/posts" navbar title
-        let! metaPages = renderMarkdowns "contents/pages" "docs/pages" navbar title
+        let! metaPages = renderPages "contents/pages" "docs/pages" navbar title
 
         do! renderArchives navbar title metaPosts metaPages "docs/archives.html"
         let meta = Seq.concat [ metaPosts; metaPages ]
