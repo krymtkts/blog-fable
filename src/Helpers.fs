@@ -290,8 +290,8 @@ let generateTagsContent (meta: Meta seq) =
     tagsContent, tagPageContens
 
 
-let generateNavbar =
-    Html.ul [ Html.h1 [ prop.text "Blog Title" ]
+let generateNavbar (title: string) =
+    Html.ul [ Html.h1 [ prop.text title ]
               Util.liA "/index.html" "Index"
               Util.liA "/archives.html" "Archives"
               Util.liA "/pages/about.html" "About Me"
