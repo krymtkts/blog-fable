@@ -40,6 +40,7 @@ let private renderMarkdowns navbar title sourceDir distDir =
 
                     return
                         { frontMatter = fm
+                          layout = discriminateLayout source
                           source = source
                           dist = dist }
                 })
