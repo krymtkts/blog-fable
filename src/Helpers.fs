@@ -80,6 +80,12 @@ module private Util =
                            prop.title title
                            prop.text title ] ]
 
+    let liSpanA (span: string) ref title =
+        Html.li [ Html.span [ prop.text span ]
+                  Html.a [ prop.href ref
+                           prop.title title
+                           prop.text title ] ]
+
 module Parser =
     type FrontMatter =
         abstract title: string
@@ -131,16 +137,39 @@ module Parser =
     /// Parses a React element invoking ReactDOMServer.renderToStaticMarkup
     let parseReactStatic el = ReactDOMServer.renderToStaticMarkup el
 
+type Layout =
+    | Post of string
+    | Page
+
+let discriminateLayout source =
+    let leaf = Directory.leaf source
+
+    match leaf.Split '-' |> List.ofArray with
+    | year :: month :: day :: xs ->
+        match [ year; month; day ]
+              |> List.map System.Int32.TryParse
+            with
+        | [ (true, year); (true, month); (true, day) ] ->
+            let date = sprintf "%04d-%02d-%02d" year month day
+            Post(date)
+        | _ -> Page
+    | _ -> Page
+
+
 type Meta =
     { frontMatter: Parser.FrontMatter option
+      layout: Layout
       source: string
       dist: string }
 
 let frame (navbar: Fable.React.ReactElement) (titleText: string) content =
-    let cssLink path =
+    let cssLink path integrity =
         Html.link [ prop.rel "stylesheet"
                     prop.type' "text/css"
-                    prop.href path ]
+                    prop.href path
+                    prop.integrity integrity
+                    prop.crossOrigin.anonymous
+                    prop.referrerPolicy.noReferrer ]
 
     Html.html [ Html.head [ yield Html.title [ prop.title <| string titleText ]
                             yield
@@ -149,8 +178,18 @@ let frame (navbar: Fable.React.ReactElement) (titleText: string) content =
                             yield
                                 Html.meta [ prop.name "viewport"
                                             prop.content "width=device-width, initial-scale=1" ]
-                            yield cssLink "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-                            yield cssLink "https://cdnjs.cloudflare.com/ajax/libs/bulma/0.5.1/css/bulma.min.css" ]
+                            yield
+                                cssLink
+                                    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css"
+                                    "sha512-SgaqKKxJDQ/tAUAAXzvxZz33rmn7leYDYfBP+YoMRSENhf3zJyx3SBASt/OfeQwBHA1nxMis7mM3EV/oYT6Fdw=="
+                            yield
+                                cssLink
+                                    "https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css"
+                                    "sha512-HqxHUkJM0SYcbvxUw5P60SzdOTy/QVwA1JJrvaXJv4q7lmbDZCmZaqz01UPOaQveoxfYRv1tHozWGPMcuTBuvQ=="
+                            yield
+                                cssLink
+                                    "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/solarized-dark.min.css"
+                                    "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]
                 Html.body [ Html.nav [ navbar ]
                             Html.div [ prop.children [ content ] ] ] ]
 
@@ -176,7 +215,7 @@ let getMarkdownFiles dir =
     }
 
 let getLatestPost paths =
-    paths |> List.sortBy Directory.leaf |> List.last
+    paths |> Seq.sortBy Directory.leaf |> Seq.last
 
 let pathToLi group source =
     let leaf = Directory.leaf source
@@ -185,18 +224,34 @@ let pathToLi group source =
 
     Util.liA ref title
 
+let metaToLi group meta =
+    let leaf = Directory.leaf meta.source
+
+    let prefix =
+        match meta.layout with
+        | Post (date) -> sprintf "%s - " date
+        | _ -> ""
+
+    let title =
+        match meta.frontMatter with
+        | Some fm -> sprintf "%s%s" prefix fm.title
+        | None -> leaf
+
+    let ref = Directory.join3 "/" group <| Util.mdToHtml leaf
+
+    Util.liA ref title
+
 let generatePostArchives (meta: Meta seq) group =
     promise {
         let archives =
             meta
-            |> Seq.map (fun m -> m.source)
-            |> Seq.sortBy Directory.leaf
+            |> Seq.sortBy (fun meta -> Directory.leaf meta.source)
             |> Seq.rev
-            |> Seq.groupBy (fun path ->
-                let leaf = Directory.leaf path
+            |> Seq.groupBy (fun meta ->
+                let leaf = Directory.leaf meta.source
                 leaf.Substring(0, 7))
-            |> Seq.map (fun (yearMonth, paths) ->
-                let lis = paths |> Seq.map (pathToLi group)
+            |> Seq.map (fun (yearMonth, metas) ->
+                let lis = metas |> Seq.map (fun meta -> metaToLi group meta)
 
                 [ Html.li [ Html.h3 yearMonth ]
                   Html.ul lis ])
@@ -208,9 +263,8 @@ let generatePageArchives (meta: Meta seq) group =
     promise {
         let archives =
             meta
-            |> Seq.map (fun m -> m.source)
-            |> Seq.sortBy Directory.leaf
-            |> Seq.map (pathToLi group)
+            |> Seq.sortBy (fun meta -> Directory.leaf meta.source)
+            |> Seq.map (metaToLi group)
 
         return Html.ul [ prop.children archives ]
     }
@@ -231,19 +285,19 @@ let generateArchives (metaPosts: Meta seq) (metaPages: Meta seq) =
 let generateTagsContent (meta: Meta seq) =
     let tagAndPage =
         meta
-        |> Seq.map (fun x ->
-            match x.frontMatter with
+        |> Seq.map (fun meta ->
+            match meta.frontMatter with
             | Some fm ->
                 match fm.tags with
-                | Some tags -> tags |> Seq.map (fun t -> (t, x.dist))
+                | Some tags -> tags |> Seq.map (fun t -> (t, meta))
                 | None -> [||]
             | None -> [||])
         |> Seq.concat
         |> Seq.fold
-            (fun acc (tag, page) ->
+            (fun acc (tag, meta) ->
                 match Map.tryFind tag acc with
-                | Some pages -> Map.add tag (page :: pages) acc
-                | None -> Map.add tag [ page ] acc)
+                | Some pages -> Map.add tag (meta :: pages) acc
+                | None -> Map.add tag [ meta ] acc)
             Map.empty
 
     let tagsContent =
@@ -259,15 +313,8 @@ let generateTagsContent (meta: Meta seq) =
     let tagPageContens =
         tagAndPage
         |> Map.toList
-        |> List.map (fun (tag, pages) ->
-            let lis =
-                pages
-                |> List.map (fun page ->
-                    let leaf = Directory.leaf page
-                    let title = leaf.Replace(".md", "")
-                    let ref = Directory.join3 "/" "posts" <| Util.mdToHtml leaf
-
-                    Util.liA ref title)
+        |> List.map (fun (tag, metas) ->
+            let lis = metas |> List.map (metaToLi "posts")
 
             tag,
             Html.div [ prop.className [ "content" ]
@@ -277,8 +324,8 @@ let generateTagsContent (meta: Meta seq) =
     tagsContent, tagPageContens
 
 
-let generateNavbar =
-    Html.ul [ Html.h1 [ prop.text "Blog Title" ]
+let generateNavbar (title: string) =
+    Html.ul [ Html.h1 [ prop.text title ]
               Util.liA "/index.html" "Index"
               Util.liA "/archives.html" "Archives"
               Util.liA "/pages/about.html" "About Me"
