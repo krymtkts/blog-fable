@@ -114,6 +114,20 @@ let renderTags navbar title meta dist =
             |> Promise.map ignore
     }
 
+let render404 navbar title dist =
+    promise {
+        printfn "Rendering 404..."
+
+        let content =
+            generate404
+            |> frame navbar (sprintf "%s - 404" title)
+            |> Parser.parseReactStatic
+
+        printfn "Writing 404 %s..." dist
+
+        do! IO.writeFile dist content
+    }
+
 let private render () =
     promise {
         let title = "Blog Title"
@@ -126,6 +140,8 @@ let private render () =
         do! renderArchives navbar title metaPosts metaPages "docs/archives.html"
         let meta = Seq.concat [ metaPosts; metaPages ]
         do! renderTags navbar title meta "docs/tags.html"
+        do! render404 navbar title "docs/404.html"
+
         do! IO.copy "contents/fable.ico" "docs/fable.ico"
 
         printfn "Render complete!"

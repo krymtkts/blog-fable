@@ -331,3 +331,8 @@ let generateNavbar (title: string) =
               Util.liA "/pages/about.html" "About Me"
               Util.liA "/atom.xml" "RSS"
               Util.liA "/tags.html" "Tags" ]
+
+let generate404 =
+    Html.div [ prop.className [ "content" ]
+               prop.children [ Html.h1 [ prop.text "404 Page not found" ]
+                               Html.p [ prop.text "Sorry! The page you're looking for does not exist." ] ] ]
