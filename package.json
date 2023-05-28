@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "postinstall": "dotnet tool restore",
-    "start-server": "live-server docs",
+    "start-server": "live-server docs --entry-file=404.html",
     "start-fable": "dotnet fable watch src --runScript",
     "start": "concurrently npm:start-*",
     "build": "dotnet fable src --runScript"
