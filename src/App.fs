@@ -142,7 +142,7 @@ let private render () =
         do! renderTags navbar title meta "docs/tags.html"
         do! render404 navbar title "docs/404.html"
 
-        do! IO.copy "contents/fable.ico" "docs/fable.ico"
+        do! IO.copy "contents/img/favicon.ico" "docs/img/favicon.ico"
 
         printfn "Render complete!"
     }

@@ -179,6 +179,9 @@ let frame (navbar: Fable.React.ReactElement) (titleText: string) content =
                                 Html.meta [ prop.name "viewport"
                                             prop.content "width=device-width, initial-scale=1" ]
                             yield
+                                Html.link [ prop.rel "icon"
+                                            prop.href "/img/favicon.ico" ]
+                            yield
                                 cssLink
                                     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css"
                                     "sha512-SgaqKKxJDQ/tAUAAXzvxZz33rmn7leYDYfBP+YoMRSENhf3zJyx3SBASt/OfeQwBHA1nxMis7mM3EV/oYT6Fdw=="
