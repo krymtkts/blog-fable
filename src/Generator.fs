@@ -91,11 +91,11 @@ module Generation =
                   <| Component.Element(title, Html.h1 [ prop.text title ])
                   Component.liA "/archives.html"
                   <| Component.Text "Archives"
+                  Component.liA "/tags.html"
+                  <| Component.Text "Tags"
                   Component.liA "/pages/about.html"
                   <| Component.Text "About Me"
-                  Component.liA "/atom.xml" <| Component.Text "RSS"
-                  Component.liA "/tags.html"
-                  <| Component.Text "Tags" ]
+                  Component.liA "/atom.xml" <| Component.Text "RSS" ]
 
     let generate404 =
         [ Html.h1 [ prop.text "404 Page not found" ]

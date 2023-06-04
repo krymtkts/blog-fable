@@ -186,28 +186,22 @@ module Misc =
                         prop.crossOrigin.anonymous
                         prop.referrerPolicy.noReferrer ]
 
-        Html.html [ Html.head [ yield Html.title [ prop.title <| string titleText ]
-                                yield
-                                    Html.meta [ prop.custom ("httpEquiv", "Content-Type")
-                                                prop.content "text/html; charset=utf-8" ]
-                                yield
-                                    Html.meta [ prop.name "viewport"
-                                                prop.content "width=device-width, initial-scale=1" ]
-                                yield
-                                    Html.link [ prop.rel "icon"
-                                                prop.href "/img/favicon.ico" ]
-                                yield
-                                    cssLink
-                                        "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css"
-                                        "sha512-SgaqKKxJDQ/tAUAAXzvxZz33rmn7leYDYfBP+YoMRSENhf3zJyx3SBASt/OfeQwBHA1nxMis7mM3EV/oYT6Fdw=="
-                                yield
-                                    cssLink
-                                        "https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css"
-                                        "sha512-HqxHUkJM0SYcbvxUw5P60SzdOTy/QVwA1JJrvaXJv4q7lmbDZCmZaqz01UPOaQveoxfYRv1tHozWGPMcuTBuvQ=="
-                                yield
-                                    cssLink
-                                        "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/solarized-dark.min.css"
-                                        "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]
+        Html.html [ Html.head [ Html.title [ prop.text titleText ]
+                                Html.meta [ prop.custom ("httpEquiv", "Content-Type")
+                                            prop.content "text/html; charset=utf-8" ]
+                                Html.meta [ prop.name "viewport"
+                                            prop.content "width=device-width, initial-scale=1" ]
+                                Html.link [ prop.rel "icon"
+                                            prop.href "/img/favicon.ico" ]
+                                cssLink
+                                    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css"
+                                    "sha512-SgaqKKxJDQ/tAUAAXzvxZz33rmn7leYDYfBP+YoMRSENhf3zJyx3SBASt/OfeQwBHA1nxMis7mM3EV/oYT6Fdw=="
+                                cssLink
+                                    "https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css"
+                                    "sha512-HqxHUkJM0SYcbvxUw5P60SzdOTy/QVwA1JJrvaXJv4q7lmbDZCmZaqz01UPOaQveoxfYRv1tHozWGPMcuTBuvQ=="
+                                cssLink
+                                    "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/solarized-dark.min.css"
+                                    "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]
                     Html.body [ Html.nav [ prop.className "tabs"
                                            prop.children navbar ]
                                 Html.div [ prop.className "content"
