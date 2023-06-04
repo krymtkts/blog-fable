@@ -77,10 +77,17 @@ module Component =
                                            prop.title title
                                            prop.text title ] ] ]
 
-    let liA ref title =
-        Html.li [ Html.a [ prop.href ref
-                           prop.title title
-                           prop.text title ] ]
+    type NavItem =
+        | Text of string
+        | Element of string * Fable.React.ReactElement
+
+    let liA ref (title: NavItem) =
+        let children =
+            match title with
+            | Element (s, el) -> [ prop.title s; prop.children [ el ] ]
+            | Text (s) -> [ prop.title s; prop.text s ]
+
+        Html.li [ Html.a <| prop.href ref :: children ]
 
     let liSpanA (span: string) ref title =
         Html.li [ Html.span [ prop.text span ]
@@ -93,7 +100,7 @@ module Component =
         let title = Regex.Replace(leaf, "\.(md|html)", "")
         let ref = Directory.join3 "/" group <| Util.mdToHtml leaf
 
-        liA ref title
+        liA ref <| Text title
 
 module Parser =
     type FrontMatter =
@@ -114,7 +121,7 @@ module Parser =
     /// Parses a markdown string
     let parseMarkdown str = Util.parseMarkdown str
 
-    let parseMarkdownAsReactEl className content =
+    let parseMarkdownAsReactEl content =
         let (frontMatter, content) = extractFrontMatter content
 
         let tagLi tag =
@@ -135,9 +142,7 @@ module Parser =
                   Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ] ]
             | None -> [ Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ] ]
 
-        frontMatter,
-        Html.div [ prop.className [ className ]
-                   prop.children el ]
+        frontMatter, el
 
 
     /// Parses a React element invoking ReactDOMServer.renderToString
@@ -172,7 +177,7 @@ module Misc =
           source: string
           dist: string }
 
-    let frame (navbar: Fable.React.ReactElement) (titleText: string) content =
+    let frame (navbar: Fable.React.ReactElement) (titleText: string) (content: Fable.React.ReactElement list) =
         let cssLink path integrity =
             Html.link [ prop.rel "stylesheet"
                         prop.type' "text/css"
@@ -203,8 +208,10 @@ module Misc =
                                     cssLink
                                         "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/solarized-dark.min.css"
                                         "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]
-                    Html.body [ Html.nav [ navbar ]
-                                Html.div [ prop.children [ content ] ] ] ]
+                    Html.body [ Html.nav [ prop.className "tabs"
+                                           prop.children navbar ]
+                                Html.div [ prop.className "content"
+                                           prop.children content ] ] ]
 
     let getDistPath (source: string) (dir: string) =
         Directory.leaf source
@@ -245,4 +252,4 @@ module Misc =
 
         let ref = Directory.join3 "/" group <| Util.mdToHtml leaf
 
-        Component.liA ref title
+        Component.liA ref <| Component.Text title

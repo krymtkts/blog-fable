@@ -40,11 +40,10 @@ module Generation =
             let! pages = generatePageArchives metaPages "pages"
 
             return
-                Html.div [ prop.className [ "content" ]
-                           prop.children [ Html.ul [ prop.children [ Html.li [ Html.h2 "Posts" ]
-                                                                     posts
-                                                                     Html.li [ Html.h2 "Pages" ]
-                                                                     pages ] ] ] ]
+                [ Html.ul [ prop.children [ Html.li [ Html.h2 "Posts" ]
+                                            posts
+                                            Html.li [ Html.h2 "Pages" ]
+                                            pages ] ] ]
         }
 
     let generateTagsContent (meta: Meta seq) =
@@ -71,9 +70,8 @@ module Generation =
                 |> Map.toList
                 |> List.map (fun (tag, _) -> Component.pathToLi "tags" <| sprintf "%s.html" tag)
 
-            Html.div [ prop.className [ "content" ]
-                       prop.children [ Html.ul [ prop.children [ Html.li [ Html.h2 "Tags" ]
-                                                                 Html.ul [ prop.children tags ] ] ] ] ]
+            [ Html.ul [ prop.children [ Html.li [ Html.h2 "Tags" ]
+                                        Html.ul [ prop.children tags ] ] ] ]
 
         let tagPageContens =
             tagAndPage
@@ -82,25 +80,26 @@ module Generation =
                 let lis = metas |> List.map (metaToLi "posts")
 
                 tag,
-                Html.div [ prop.className [ "content" ]
-                           prop.children [ Html.ul [ prop.children [ Html.li [ Html.h2 tag ]
-                                                                     Html.ul lis ] ] ] ])
+                [ Html.ul [ prop.children [ Html.li [ Html.h2 tag ]
+                                            Html.ul lis ] ] ])
 
         tagsContent, tagPageContens
 
 
     let generateNavbar (title: string) =
-        Html.ul [ Html.h1 [ prop.text title ]
-                  Component.liA "/index.html" "Index"
-                  Component.liA "/archives.html" "Archives"
-                  Component.liA "/pages/about.html" "About Me"
-                  Component.liA "/atom.xml" "RSS"
-                  Component.liA "/tags.html" "Tags" ]
+        Html.ul [ Component.liA "/index.html"
+                  <| Component.Element(title, Html.h1 [ prop.text title ])
+                  Component.liA "/archives.html"
+                  <| Component.Text "Archives"
+                  Component.liA "/pages/about.html"
+                  <| Component.Text "About Me"
+                  Component.liA "/atom.xml" <| Component.Text "RSS"
+                  Component.liA "/tags.html"
+                  <| Component.Text "Tags" ]
 
     let generate404 =
-        Html.div [ prop.className [ "content" ]
-                   prop.children [ Html.h1 [ prop.text "404 Page not found" ]
-                                   Html.p [ prop.text "Sorry! The page you're looking for does not exist." ] ] ]
+        [ Html.h1 [ prop.text "404 Page not found" ]
+          Html.p [ prop.text "Sorry! The page you're looking for does not exist." ] ]
 
 [<AutoOpen>]
 module Page =
@@ -111,7 +110,7 @@ module Page =
 
             let fm, content =
                 m
-                |> Parser.parseMarkdownAsReactEl "content"
+                |> Parser.parseMarkdownAsReactEl
                 |> fun (fm, c) ->
                     let title =
                         match fm with
@@ -167,7 +166,7 @@ module Page =
     let renderArchives navbar title metaPosts metaPages dist =
         promise {
             printfn "Rendering archives..."
-            let! archives = Generation.generateArchives metaPosts metaPages
+            let! archives = generateArchives metaPosts metaPages
 
             let content =
                 archives
@@ -223,7 +222,7 @@ module Page =
             printfn "Rendering 404..."
 
             let content =
-                Generation.generate404
+                generate404
                 |> frame navbar (sprintf "%s - 404" title)
                 |> Parser.parseReactStatic
 
