@@ -186,7 +186,7 @@ module Misc =
                         prop.crossOrigin.anonymous
                         prop.referrerPolicy.noReferrer ]
 
-        Html.html [ Html.head [ yield Html.title [ prop.title <| string titleText ]
+        Html.html [ Html.head [ yield Html.title [ prop.text titleText ]
                                 yield
                                     Html.meta [ prop.custom ("httpEquiv", "Content-Type")
                                                 prop.content "text/html; charset=utf-8" ]
