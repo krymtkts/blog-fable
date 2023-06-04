@@ -177,7 +177,12 @@ module Misc =
           source: string
           dist: string }
 
-    let frame (navbar: Fable.React.ReactElement) (titleText: string) (content: Fable.React.ReactElement list) =
+    let frame
+        (navbar: Fable.React.ReactElement)
+        (titleText: string)
+        (copyright: string)
+        (content: Fable.React.ReactElement list)
+        =
         let cssLink path integrity =
             Html.link [ prop.rel "stylesheet"
                         prop.type' "text/css"
@@ -205,7 +210,9 @@ module Misc =
                     Html.body [ Html.nav [ prop.className "tabs"
                                            prop.children navbar ]
                                 Html.div [ prop.className "content"
-                                           prop.children content ] ] ]
+                                           prop.children content ] ]
+                    Html.footer [ Html.div [ prop.className "footer"
+                                             prop.text (sprintf "Copyright © %s" copyright) ] ] ]
 
     let getDistPath (source: string) (dir: string) =
         Directory.leaf source
