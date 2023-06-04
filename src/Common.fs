@@ -203,7 +203,8 @@ module Misc =
                                     cssLink
                                         "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/solarized-dark.min.css"
                                         "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]
-                    Html.body [ Html.nav [ navbar ]
+                    Html.body [ Html.nav [ prop.className "tabs"
+                                           prop.children navbar ]
                                 Html.div [ prop.children [ content ] ] ] ]
 
     let getDistPath (source: string) (dir: string) =
