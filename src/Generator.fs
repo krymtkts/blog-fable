@@ -87,12 +87,15 @@ module Generation =
 
 
     let generateNavbar (title: string) =
-        Html.ul [ Html.h1 [ prop.text title ]
-                  Component.liA "/index.html" "Index"
-                  Component.liA "/archives.html" "Archives"
-                  Component.liA "/pages/about.html" "About Me"
-                  Component.liA "/atom.xml" "RSS"
-                  Component.liA "/tags.html" "Tags" ]
+        Html.ul [ Component.liA "/index.html"
+                  <| Component.Element(title, Html.h1 [ prop.text title ])
+                  Component.liA "/archives.html"
+                  <| Component.Text "Archives"
+                  Component.liA "/pages/about.html"
+                  <| Component.Text "About Me"
+                  Component.liA "/atom.xml" <| Component.Text "RSS"
+                  Component.liA "/tags.html"
+                  <| Component.Text "Tags" ]
 
     let generate404 =
         [ Html.h1 [ prop.text "404 Page not found" ]

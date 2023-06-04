@@ -77,10 +77,17 @@ module Component =
                                            prop.title title
                                            prop.text title ] ] ]
 
-    let liA ref title =
-        Html.li [ Html.a [ prop.href ref
-                           prop.title title
-                           prop.text title ] ]
+    type NavItem =
+        | Text of string
+        | Element of string * Fable.React.ReactElement
+
+    let liA ref (title: NavItem) =
+        let children =
+            match title with
+            | Element (s, el) -> [ prop.title s; prop.children [ el ] ]
+            | Text (s) -> [ prop.title s; prop.text s ]
+
+        Html.li [ Html.a <| prop.href ref :: children ]
 
     let liSpanA (span: string) ref title =
         Html.li [ Html.span [ prop.text span ]
@@ -93,7 +100,7 @@ module Component =
         let title = Regex.Replace(leaf, "\.(md|html)", "")
         let ref = Directory.join3 "/" group <| Util.mdToHtml leaf
 
-        liA ref title
+        liA ref <| Text title
 
 module Parser =
     type FrontMatter =
@@ -245,4 +252,4 @@ module Misc =
 
         let ref = Directory.join3 "/" group <| Util.mdToHtml leaf
 
-        Component.liA ref title
+        Component.liA ref <| Component.Text title
