@@ -114,7 +114,7 @@ module Parser =
     /// Parses a markdown string
     let parseMarkdown str = Util.parseMarkdown str
 
-    let parseMarkdownAsReactEl className content =
+    let parseMarkdownAsReactEl content =
         let (frontMatter, content) = extractFrontMatter content
 
         let tagLi tag =
@@ -135,9 +135,7 @@ module Parser =
                   Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ] ]
             | None -> [ Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ] ]
 
-        frontMatter,
-        Html.div [ prop.className [ className ]
-                   prop.children el ]
+        frontMatter, el
 
 
     /// Parses a React element invoking ReactDOMServer.renderToString
@@ -172,7 +170,7 @@ module Misc =
           source: string
           dist: string }
 
-    let frame (navbar: Fable.React.ReactElement) (titleText: string) content =
+    let frame (navbar: Fable.React.ReactElement) (titleText: string) (content: Fable.React.ReactElement list) =
         let cssLink path integrity =
             Html.link [ prop.rel "stylesheet"
                         prop.type' "text/css"
@@ -205,7 +203,8 @@ module Misc =
                                         "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]
                     Html.body [ Html.nav [ prop.className "tabs"
                                            prop.children navbar ]
-                                Html.div [ prop.children [ content ] ] ] ]
+                                Html.div [ prop.className "content"
+                                           prop.children content ] ] ]
 
     let getDistPath (source: string) (dir: string) =
         Directory.leaf source
