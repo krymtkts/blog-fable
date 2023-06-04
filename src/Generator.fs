@@ -103,7 +103,7 @@ module Generation =
 
 [<AutoOpen>]
 module Page =
-    let private readAndWrite navbar title source dist =
+    let private readAndWrite navbar title copyright source dist =
         promise {
             printfn "Rendering %s..." source
             let! m = IO.readFile source
@@ -117,7 +117,9 @@ module Page =
                         | Some fm -> sprintf "%s - %s" title fm.title
                         | None -> title
 
-                    fm, frame navbar title c |> Parser.parseReactStatic
+                    fm,
+                    frame navbar title copyright c
+                    |> Parser.parseReactStatic
 
 
             printfn "Writing %s..." dist
@@ -131,10 +133,10 @@ module Page =
                   dist = dist }
         }
 
-    let renderMarkdowns navbar title sourceDir distDir =
+    let renderMarkdowns navbar title copyright sourceDir distDir =
         promise {
             let! files = getMarkdownFiles sourceDir
-            let rw = readAndWrite navbar title
+            let rw = readAndWrite navbar title copyright
 
             return!
                 files
@@ -150,27 +152,27 @@ module Page =
                 |> Promise.all
         }
 
-    let renderIndex navbar title metaPosts =
+    let renderIndex navbar title copyright metaPosts =
         let latest =
             metaPosts
             |> Seq.map (fun m -> m.source)
             |> getLatestPost
 
         promise {
-            let rw = readAndWrite navbar title
+            let rw = readAndWrite navbar title copyright
             let dist = IO.resolve "docs/index.html"
 
             do! rw latest dist |> Promise.map ignore
         }
 
-    let renderArchives navbar title metaPosts metaPages dist =
+    let renderArchives navbar title copyright metaPosts metaPages dist =
         promise {
             printfn "Rendering archives..."
             let! archives = generateArchives metaPosts metaPages
 
             let content =
                 archives
-                |> frame navbar (sprintf "%s - Archives" title)
+                |> frame navbar (sprintf "%s - Archives" title) copyright
                 |> Parser.parseReactStatic
 
             printfn "Writing archives %s..." dist
@@ -178,7 +180,7 @@ module Page =
             do! IO.writeFile dist content
         }
 
-    let renderTags navbar title meta dist =
+    let renderTags navbar title copyright meta dist =
         let tagsContent, tagPageContents = generateTagsContent meta
         let frame = frame navbar
 
@@ -188,7 +190,7 @@ module Page =
 
             let content =
                 tagsContent
-                |> frame title
+                |> frame title copyright
                 |> Parser.parseReactStatic
 
             printfn "Writing tags %s..." dist
@@ -209,7 +211,7 @@ module Page =
 
                     let content =
                         tagPageContent
-                        |> frame (sprintf "%s - %s" title tag)
+                        |> frame (sprintf "%s - %s" title tag) copyright
                         |> Parser.parseReactStatic
 
                     IO.writeFile dist content |> Promise.map ignore)
@@ -217,13 +219,13 @@ module Page =
                 |> Promise.map ignore
         }
 
-    let render404 navbar title dist =
+    let render404 navbar title copyright dist =
         promise {
             printfn "Rendering 404..."
 
             let content =
                 generate404
-                |> frame navbar (sprintf "%s - 404" title)
+                |> frame navbar (sprintf "%s - 404" title) copyright
                 |> Parser.parseReactStatic
 
             printfn "Writing 404 %s..." dist
