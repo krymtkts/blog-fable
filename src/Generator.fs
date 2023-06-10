@@ -6,7 +6,7 @@ open Feliz
 [<AutoOpen>]
 module Generation =
 
-    let generatePostArchives (meta: Meta seq) group =
+    let generatePostArchives (meta: Meta seq) root =
         promise {
             let archives =
                 meta
@@ -16,7 +16,7 @@ module Generation =
                     let leaf = IO.leaf meta.source
                     leaf.Substring(0, 7))
                 |> Seq.map (fun (yearMonth, metas) ->
-                    let lis = metas |> Seq.map (fun meta -> metaToLi group meta)
+                    let lis = metas |> Seq.map (fun meta -> metaToLi root meta)
 
                     [ Html.li [ Html.h3 yearMonth ]
                       Html.ul lis ])
@@ -24,29 +24,36 @@ module Generation =
             return Html.ul [ prop.children (List.concat archives) ]
         }
 
-    let generatePageArchives (meta: Meta seq) group =
+    let generatePageArchives (meta: Meta seq) root =
         promise {
             let archives =
                 meta
                 |> Seq.sortBy (fun meta -> IO.leaf meta.source)
-                |> Seq.map (metaToLi group)
+                |> Seq.map (metaToLi root)
 
             return Html.ul [ prop.children archives ]
         }
 
-    let generateArchives (metaPosts: Meta seq) (metaPages: Meta seq) =
-        promise {
-            let! posts = generatePostArchives metaPosts "posts"
-            let! pages = generatePageArchives metaPages "pages"
+    type Archives =
+        { title: string
+          metas: Meta seq
+          root: string }
 
-            return
-                [ Html.ul [ prop.children [ Html.li [ Html.h2 "Posts" ]
-                                            posts
-                                            Html.li [ Html.h2 "Pages" ]
-                                            pages ] ] ]
+    let generateArchives (archives: Archives list) =
+        promise {
+            let! a =
+                archives
+                |> List.map (fun archives ->
+                    generatePostArchives archives.metas archives.root
+                    |> Promise.map (fun content ->
+                        [ Html.li [ Html.h2 archives.title ]
+                          content ]))
+                |> Promise.all
+
+            return [ Html.ul [ prop.children (List.concat a) ] ]
         }
 
-    let generateTagsContent (meta: Meta seq) =
+    let generateTagsContent (meta: Meta seq) tagRoot =
         let tagAndPage =
             meta
             |> Seq.map (fun meta ->
@@ -68,7 +75,9 @@ module Generation =
             let tags =
                 tagAndPage
                 |> Map.toList
-                |> List.map (fun (tag, _) -> Component.pathToLi "tags" <| sprintf "%s.html" tag)
+                |> List.map (fun (tag, _) ->
+                    Component.pathToLi tagRoot
+                    <| sprintf "%s.html" tag)
 
             [ Html.ul [ prop.children [ Html.li [ Html.h2 "Tags" ]
                                         Html.ul [ prop.children tags ] ] ] ]
@@ -77,7 +86,7 @@ module Generation =
             tagAndPage
             |> Map.toList
             |> List.map (fun (tag, metas) ->
-                let lis = metas |> List.map (metaToLi "posts")
+                let lis = metas |> List.map (metaToLi "blog-fable/posts")
 
                 tag,
                 [ Html.ul [ prop.children [ Html.li [ Html.h2 tag ]
@@ -86,16 +95,23 @@ module Generation =
         tagsContent, tagPageContens
 
 
-    let generateNavbar (title: string) =
-        Html.ul [ Component.liA "/index.html"
-                  <| Component.Element(title, Html.h1 [ prop.text title ])
-                  Component.liA "/archives.html"
-                  <| Component.Text "Archives"
-                  Component.liA "/tags.html"
-                  <| Component.Text "Tags"
-                  Component.liA "/pages/about.html"
-                  <| Component.Text "About Me"
-                  Component.liA "/atom.xml" <| Component.Text "RSS" ]
+    type NavItem = { text: string; path: string }
+
+    type Nav =
+        | Title of NavItem
+        | Link of NavItem
+
+    let generateNavbar (navs: Nav list) =
+        navs
+        |> List.map (fun nav ->
+            match nav with
+            | Title navi ->
+                Component.liA navi.path
+                <| Component.Element(navi.text, Html.h1 [ prop.text navi.text ])
+            | Link navi ->
+                Component.liA navi.path
+                <| Component.Text navi.text)
+        |> Html.ul
 
     let generate404 =
         [ Html.h1 [ prop.text "404 Page not found" ]
@@ -103,22 +119,30 @@ module Generation =
 
 [<AutoOpen>]
 module Page =
-    let private readAndWrite navbar title copyright source dist =
+    type FixedSiteContent =
+        { navbar: ReactElement
+          title: string
+          copyright: string }
+
+    let private readAndWrite site tagDist source dist =
         promise {
             printfn "Rendering %s..." source
             let! m = IO.readFile source
 
+            let tagToElement tag =
+                Component.liAWithClass (sprintf "%s/%s.html" tagDist tag) tag [ "tag" ]
+
             let fm, content =
                 m
-                |> Parser.parseMarkdownAsReactEl
+                |> Parser.parseMarkdownAsReactEl tagToElement
                 |> fun (fm, c) ->
                     let title =
                         match fm with
-                        | Some fm -> sprintf "%s - %s" title fm.title
-                        | None -> title
+                        | Some fm -> sprintf "%s - %s" site.title fm.title
+                        | None -> site.title
 
                     fm,
-                    frame navbar title copyright c
+                    frame site.navbar title site.copyright c
                     |> Parser.parseReactStatic
 
 
@@ -133,10 +157,10 @@ module Page =
                   dist = dist }
         }
 
-    let renderMarkdowns navbar title copyright sourceDir distDir =
+    let renderMarkdowns site tagDist sourceDir distDir =
         promise {
             let! files = getMarkdownFiles sourceDir
-            let rw = readAndWrite navbar title copyright
+            let rw = readAndWrite site tagDist
 
             return!
                 files
@@ -152,27 +176,27 @@ module Page =
                 |> Promise.all
         }
 
-    let renderIndex navbar title copyright metaPosts =
+    let renderIndex site tagDist metaPosts dist =
         let latest =
             metaPosts
             |> Seq.map (fun m -> m.source)
             |> getLatestPost
 
         promise {
-            let rw = readAndWrite navbar title copyright
-            let dist = IO.resolve "docs/index.html"
+            let rw = readAndWrite site tagDist
+            let dist = IO.resolve dist
 
             do! rw latest dist |> Promise.map ignore
         }
 
-    let renderArchives navbar title copyright metaPosts metaPages dist =
+    let renderArchives site archives dist =
         promise {
             printfn "Rendering archives..."
-            let! archives = generateArchives metaPosts metaPages
+            let! archives = generateArchives archives
 
             let content =
                 archives
-                |> frame navbar (sprintf "%s - Archives" title) copyright
+                |> frame site.navbar (sprintf "%s - Archives" site.title) site.copyright
                 |> Parser.parseReactStatic
 
             printfn "Writing archives %s..." dist
@@ -180,17 +204,17 @@ module Page =
             do! IO.writeFile dist content
         }
 
-    let renderTags navbar title copyright meta dist =
-        let tagsContent, tagPageContents = generateTagsContent meta
-        let frame = frame navbar
+    let renderTags site tagRoot meta dist =
+        let tagsContent, tagPageContents = generateTagsContent meta tagRoot
+        let frame = frame site.navbar
 
         promise {
             printfn "Rendering tags..."
-            let title = (sprintf "%s - Tags" title)
+            let title = (sprintf "%s - Tags" site.title)
 
             let content =
                 tagsContent
-                |> frame title copyright
+                |> frame title site.copyright
                 |> Parser.parseReactStatic
 
             printfn "Writing tags %s..." dist
@@ -211,7 +235,7 @@ module Page =
 
                     let content =
                         tagPageContent
-                        |> frame (sprintf "%s - %s" title tag) copyright
+                        |> frame (sprintf "%s - %s" title tag) site.copyright
                         |> Parser.parseReactStatic
 
                     IO.writeFile dist content |> Promise.map ignore)
@@ -219,13 +243,13 @@ module Page =
                 |> Promise.map ignore
         }
 
-    let render404 navbar title copyright dist =
+    let render404 site dist =
         promise {
             printfn "Rendering 404..."
 
             let content =
                 generate404
-                |> frame navbar (sprintf "%s - 404" title) copyright
+                |> frame site.navbar (sprintf "%s - 404" site.title) site.copyright
                 |> Parser.parseReactStatic
 
             printfn "Writing 404 %s..." dist

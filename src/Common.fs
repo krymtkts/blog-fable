@@ -16,6 +16,7 @@ module IO =
     let copy = File.copy
     let getFiles = Directory.getFiles true
     let leaf = Directory.leaf
+    let parent = Directory.dirname
 
 module private Util =
 
@@ -95,10 +96,10 @@ module Component =
                            prop.title title
                            prop.text title ] ]
 
-    let pathToLi group source =
+    let pathToLi root source =
         let leaf = Directory.leaf source
         let title = Regex.Replace(leaf, "\.(md|html)", "")
-        let ref = Directory.join3 "/" group <| Util.mdToHtml leaf
+        let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
 
         liA ref <| Text title
 
@@ -121,11 +122,8 @@ module Parser =
     /// Parses a markdown string
     let parseMarkdown str = Util.parseMarkdown str
 
-    let parseMarkdownAsReactEl content =
+    let parseMarkdownAsReactEl (tagToElement: string -> ReactElement) content =
         let (frontMatter, content) = extractFrontMatter content
-
-        let tagLi tag =
-            Component.liAWithClass (sprintf "/tags/%s.html" tag) tag [ "tag" ]
 
         let el =
             match frontMatter with
@@ -137,7 +135,7 @@ module Parser =
                                 match fm.tags with
                                 | Some tags -> tags
                                 | None -> [||]
-                                |> Seq.map tagLi
+                                |> Seq.map tagToElement
                             ) ]
                   Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ] ]
             | None -> [ Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ] ]
@@ -238,7 +236,7 @@ module Misc =
     let getLatestPost paths =
         paths |> Seq.sortBy Directory.leaf |> Seq.last
 
-    let metaToLi group meta =
+    let metaToLi root meta =
         let leaf = Directory.leaf meta.source
 
         let prefix =
@@ -251,6 +249,6 @@ module Misc =
             | Some fm -> sprintf "%s%s" prefix fm.title
             | None -> leaf
 
-        let ref = Directory.join3 "/" group <| Util.mdToHtml leaf
+        let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
 
         Component.liA ref <| Component.Text title
