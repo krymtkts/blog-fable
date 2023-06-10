@@ -16,6 +16,7 @@ module IO =
     let copy = File.copy
     let getFiles = Directory.getFiles true
     let leaf = Directory.leaf
+    let parent = Directory.dirname
 
 module private Util =
 
@@ -121,11 +122,8 @@ module Parser =
     /// Parses a markdown string
     let parseMarkdown str = Util.parseMarkdown str
 
-    let parseMarkdownAsReactEl content =
+    let parseMarkdownAsReactEl (tagToElement: string -> ReactElement) content =
         let (frontMatter, content) = extractFrontMatter content
-
-        let tagLi tag =
-            Component.liAWithClass (sprintf "/blog-fable/tags/%s.html" tag) tag [ "tag" ]
 
         let el =
             match frontMatter with
@@ -137,7 +135,7 @@ module Parser =
                                 match fm.tags with
                                 | Some tags -> tags
                                 | None -> [||]
-                                |> Seq.map tagLi
+                                |> Seq.map tagToElement
                             ) ]
                   Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ] ]
             | None -> [ Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ] ]
