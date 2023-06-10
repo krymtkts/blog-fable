@@ -95,10 +95,10 @@ module Component =
                            prop.title title
                            prop.text title ] ]
 
-    let pathToLi group source =
+    let pathToLi root source =
         let leaf = Directory.leaf source
         let title = Regex.Replace(leaf, "\.(md|html)", "")
-        let ref = Directory.join3 "/" group <| Util.mdToHtml leaf
+        let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
 
         liA ref <| Text title
 
@@ -125,7 +125,7 @@ module Parser =
         let (frontMatter, content) = extractFrontMatter content
 
         let tagLi tag =
-            Component.liAWithClass (sprintf "/tags/%s.html" tag) tag [ "tag" ]
+            Component.liAWithClass (sprintf "/blog-fable/tags/%s.html" tag) tag [ "tag" ]
 
         let el =
             match frontMatter with
@@ -238,7 +238,7 @@ module Misc =
     let getLatestPost paths =
         paths |> Seq.sortBy Directory.leaf |> Seq.last
 
-    let metaToLi group meta =
+    let metaToLi root meta =
         let leaf = Directory.leaf meta.source
 
         let prefix =
@@ -251,6 +251,6 @@ module Misc =
             | Some fm -> sprintf "%s%s" prefix fm.title
             | None -> leaf
 
-        let ref = Directory.join3 "/" group <| Util.mdToHtml leaf
+        let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
 
         Component.liA ref <| Component.Text title

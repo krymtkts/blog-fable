@@ -10,16 +10,16 @@ let private render () =
         let navbar = generateNavbar title
 
         let renderPostAndPages = renderMarkdowns navbar title copyright
-        let! metaPosts = renderPostAndPages "contents/posts" "docs/posts"
-        let! metaPages = renderPostAndPages "contents/pages" "docs/pages"
+        let! metaPosts = renderPostAndPages "contents/posts" "docs/blog-fable/posts"
+        let! metaPages = renderPostAndPages "contents/pages" "docs/blog-fable/pages"
 
-        do! renderIndex navbar title copyright metaPosts
-        do! renderArchives navbar title copyright metaPosts metaPages "docs/archives.html"
+        do! renderIndex navbar title copyright metaPosts "docs/blog-fable/index.html"
+        do! renderArchives navbar title copyright metaPosts metaPages "docs/blog-fable/archives.html"
         let meta = Seq.concat [ metaPosts; metaPages ]
-        do! renderTags navbar title copyright meta "docs/tags.html"
-        do! render404 navbar title copyright "docs/404.html"
+        do! renderTags navbar title copyright meta "docs/blog-fable/tags.html"
+        do! render404 navbar title copyright "docs/blog-fable/404.html"
 
-        do! copyResources [ ("contents/img/favicon.ico", "docs/img/favicon.ico") ]
+        do! copyResources [ ("contents/img/favicon.ico", "docs/blog-fable/img/favicon.ico") ]
 
         printfn "Render complete!"
     }

@@ -6,7 +6,7 @@ open Feliz
 [<AutoOpen>]
 module Generation =
 
-    let generatePostArchives (meta: Meta seq) group =
+    let generatePostArchives (meta: Meta seq) root =
         promise {
             let archives =
                 meta
@@ -16,7 +16,7 @@ module Generation =
                     let leaf = IO.leaf meta.source
                     leaf.Substring(0, 7))
                 |> Seq.map (fun (yearMonth, metas) ->
-                    let lis = metas |> Seq.map (fun meta -> metaToLi group meta)
+                    let lis = metas |> Seq.map (fun meta -> metaToLi root meta)
 
                     [ Html.li [ Html.h3 yearMonth ]
                       Html.ul lis ])
@@ -24,20 +24,20 @@ module Generation =
             return Html.ul [ prop.children (List.concat archives) ]
         }
 
-    let generatePageArchives (meta: Meta seq) group =
+    let generatePageArchives (meta: Meta seq) root =
         promise {
             let archives =
                 meta
                 |> Seq.sortBy (fun meta -> IO.leaf meta.source)
-                |> Seq.map (metaToLi group)
+                |> Seq.map (metaToLi root)
 
             return Html.ul [ prop.children archives ]
         }
 
     let generateArchives (metaPosts: Meta seq) (metaPages: Meta seq) =
         promise {
-            let! posts = generatePostArchives metaPosts "posts"
-            let! pages = generatePageArchives metaPages "pages"
+            let! posts = generatePostArchives metaPosts "blog-fable/posts"
+            let! pages = generatePageArchives metaPages "blog-fable/pages"
 
             return
                 [ Html.ul [ prop.children [ Html.li [ Html.h2 "Posts" ]
@@ -68,7 +68,9 @@ module Generation =
             let tags =
                 tagAndPage
                 |> Map.toList
-                |> List.map (fun (tag, _) -> Component.pathToLi "tags" <| sprintf "%s.html" tag)
+                |> List.map (fun (tag, _) ->
+                    Component.pathToLi "blog-fable/tags"
+                    <| sprintf "%s.html" tag)
 
             [ Html.ul [ prop.children [ Html.li [ Html.h2 "Tags" ]
                                         Html.ul [ prop.children tags ] ] ] ]
@@ -77,7 +79,7 @@ module Generation =
             tagAndPage
             |> Map.toList
             |> List.map (fun (tag, metas) ->
-                let lis = metas |> List.map (metaToLi "posts")
+                let lis = metas |> List.map (metaToLi "blog-fable/posts")
 
                 tag,
                 [ Html.ul [ prop.children [ Html.li [ Html.h2 tag ]
@@ -87,15 +89,16 @@ module Generation =
 
 
     let generateNavbar (title: string) =
-        Html.ul [ Component.liA "/index.html"
+        Html.ul [ Component.liA "/blog-fable/index.html"
                   <| Component.Element(title, Html.h1 [ prop.text title ])
-                  Component.liA "/archives.html"
+                  Component.liA "/blog-fable/archives.html"
                   <| Component.Text "Archives"
-                  Component.liA "/tags.html"
+                  Component.liA "/blog-fable/tags.html"
                   <| Component.Text "Tags"
-                  Component.liA "/pages/about.html"
+                  Component.liA "/blog-fable/pages/about.html"
                   <| Component.Text "About Me"
-                  Component.liA "/atom.xml" <| Component.Text "RSS" ]
+                  Component.liA "/blog-fable/atom.xml"
+                  <| Component.Text "RSS" ]
 
     let generate404 =
         [ Html.h1 [ prop.text "404 Page not found" ]
@@ -152,7 +155,7 @@ module Page =
                 |> Promise.all
         }
 
-    let renderIndex navbar title copyright metaPosts =
+    let renderIndex navbar title copyright metaPosts dist =
         let latest =
             metaPosts
             |> Seq.map (fun m -> m.source)
@@ -160,7 +163,7 @@ module Page =
 
         promise {
             let rw = readAndWrite navbar title copyright
-            let dist = IO.resolve "docs/index.html"
+            let dist = IO.resolve dist
 
             do! rw latest dist |> Promise.map ignore
         }
