@@ -119,7 +119,12 @@ module Generation =
 
 [<AutoOpen>]
 module Page =
-    let private readAndWrite navbar title copyright tagDist source dist =
+    type FixedSiteContent =
+        { navbar: ReactElement
+          title: string
+          copyright: string }
+
+    let private readAndWrite site tagDist source dist =
         promise {
             printfn "Rendering %s..." source
             let! m = IO.readFile source
@@ -133,11 +138,11 @@ module Page =
                 |> fun (fm, c) ->
                     let title =
                         match fm with
-                        | Some fm -> sprintf "%s - %s" title fm.title
-                        | None -> title
+                        | Some fm -> sprintf "%s - %s" site.title fm.title
+                        | None -> site.title
 
                     fm,
-                    frame navbar title copyright c
+                    frame site.navbar title site.copyright c
                     |> Parser.parseReactStatic
 
 
@@ -152,10 +157,10 @@ module Page =
                   dist = dist }
         }
 
-    let renderMarkdowns navbar title copyright tagDist sourceDir distDir =
+    let renderMarkdowns site tagDist sourceDir distDir =
         promise {
             let! files = getMarkdownFiles sourceDir
-            let rw = readAndWrite navbar title copyright tagDist
+            let rw = readAndWrite site tagDist
 
             return!
                 files
@@ -171,27 +176,27 @@ module Page =
                 |> Promise.all
         }
 
-    let renderIndex navbar title copyright tagDist metaPosts dist =
+    let renderIndex site tagDist metaPosts dist =
         let latest =
             metaPosts
             |> Seq.map (fun m -> m.source)
             |> getLatestPost
 
         promise {
-            let rw = readAndWrite navbar title copyright tagDist
+            let rw = readAndWrite site tagDist
             let dist = IO.resolve dist
 
             do! rw latest dist |> Promise.map ignore
         }
 
-    let renderArchives navbar title copyright archives dist =
+    let renderArchives site archives dist =
         promise {
             printfn "Rendering archives..."
             let! archives = generateArchives archives
 
             let content =
                 archives
-                |> frame navbar (sprintf "%s - Archives" title) copyright
+                |> frame site.navbar (sprintf "%s - Archives" site.title) site.copyright
                 |> Parser.parseReactStatic
 
             printfn "Writing archives %s..." dist
@@ -199,17 +204,17 @@ module Page =
             do! IO.writeFile dist content
         }
 
-    let renderTags navbar title copyright tagRoot meta dist =
+    let renderTags site tagRoot meta dist =
         let tagsContent, tagPageContents = generateTagsContent meta tagRoot
-        let frame = frame navbar
+        let frame = frame site.navbar
 
         promise {
             printfn "Rendering tags..."
-            let title = (sprintf "%s - Tags" title)
+            let title = (sprintf "%s - Tags" site.title)
 
             let content =
                 tagsContent
-                |> frame title copyright
+                |> frame title site.copyright
                 |> Parser.parseReactStatic
 
             printfn "Writing tags %s..." dist
@@ -230,7 +235,7 @@ module Page =
 
                     let content =
                         tagPageContent
-                        |> frame (sprintf "%s - %s" title tag) copyright
+                        |> frame (sprintf "%s - %s" title tag) site.copyright
                         |> Parser.parseReactStatic
 
                     IO.writeFile dist content |> Promise.map ignore)
@@ -238,13 +243,13 @@ module Page =
                 |> Promise.map ignore
         }
 
-    let render404 navbar title copyright dist =
+    let render404 site dist =
         promise {
             printfn "Rendering 404..."
 
             let content =
                 generate404
-                |> frame navbar (sprintf "%s - 404" title) copyright
+                |> frame site.navbar (sprintf "%s - 404" site.title) site.copyright
                 |> Parser.parseReactStatic
 
             printfn "Writing 404 %s..." dist

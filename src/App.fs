@@ -27,11 +27,16 @@ let private render () =
 
         let navbar = generateNavbar navi
 
-        let renderPostAndPages = renderMarkdowns navbar title copyright "/blog-fable/tags"
+        let site =
+            { navbar = navbar
+              title = title
+              copyright = copyright }
+
+        let renderPostAndPages = renderMarkdowns site "/blog-fable/tags"
         let! metaPosts = renderPostAndPages "contents/posts" "docs/blog-fable/posts"
         let! metaPages = renderPostAndPages "contents/pages" "docs/blog-fable/pages"
 
-        do! renderIndex navbar title copyright "/blog-fable/tags" metaPosts "docs/blog-fable/index.html"
+        do! renderIndex site "/blog-fable/tags" metaPosts "docs/blog-fable/index.html"
 
         let arcives =
             [ { title = "Posts"
@@ -41,10 +46,10 @@ let private render () =
                 metas = metaPages
                 root = "/blog-fable/pages" } ]
 
-        do! renderArchives navbar title copyright arcives "docs/blog-fable/archives.html"
+        do! renderArchives site arcives "docs/blog-fable/archives.html"
         let meta = Seq.concat [ metaPosts; metaPages ]
-        do! renderTags navbar title copyright "/blog-fable/tags" meta "docs/blog-fable/tags.html"
-        do! render404 navbar title copyright "docs/blog-fable/404.html"
+        do! renderTags site "/blog-fable/tags" meta "docs/blog-fable/tags.html"
+        do! render404 site "docs/blog-fable/404.html"
 
         do! copyResources [ ("contents/img/favicon.ico", "docs/blog-fable/img/favicon.ico") ]
 
