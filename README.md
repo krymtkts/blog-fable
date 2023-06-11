@@ -1,14 +1,24 @@
-# Fable Static Site Generator
+# [Blog Fable](https://krymtkts.github.io/blog-fable/index.html)
 
-This is a small Fable app project to generate static pages.
+This is a small [Fable](https://fable.io/) app project to generate static pages.
 Use React with [Feliz](https://zaid-ajaj.github.io/Feliz/#/).
 
 This repository re-creates a subset of [fable-compiler/static-web-generator](https://github.com/fable-compiler/static-web-generator) with the latest dependencies.
+
+GitHub Pages deployment is [here](https://krymtkts.github.io/blog-fable/index.html).
 
 ## Motivation
 
 - Learn how to write app with Fable
 - Rebuild [My personal blog](https://github.com/krymtkts/krymtkts.github.io) with F#
+
+## Supported features
+
+- [x] Post
+- [x] Page
+- [ ] RSS feed
+- [ ] Sitemap
+- [ ] Dev server
 
 ## Building and running the app
 
