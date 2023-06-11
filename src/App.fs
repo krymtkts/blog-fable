@@ -30,7 +30,8 @@ let private render () =
         let site =
             { navbar = navbar
               title = title
-              copyright = copyright }
+              copyright = copyright
+              favicon = "/blog-fable/img/favicon.ico" }
 
         let renderPostAndPages = renderMarkdowns site "/blog-fable/tags"
         let! metaPosts = renderPostAndPages "contents/posts" "docs/blog-fable/posts"

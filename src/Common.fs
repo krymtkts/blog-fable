@@ -178,7 +178,8 @@ module Misc =
     let frame
         (navbar: Fable.React.ReactElement)
         (titleText: string)
-        (copyright: string)
+        copyright
+        favicon
         (content: Fable.React.ReactElement list)
         =
         let cssLink path integrity =
@@ -195,7 +196,7 @@ module Misc =
                                 Html.meta [ prop.name "viewport"
                                             prop.content "width=device-width, initial-scale=1" ]
                                 Html.link [ prop.rel "icon"
-                                            prop.href "/img/favicon.ico" ]
+                                            prop.href favicon ]
                                 cssLink
                                     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css"
                                     "sha512-SgaqKKxJDQ/tAUAAXzvxZz33rmn7leYDYfBP+YoMRSENhf3zJyx3SBASt/OfeQwBHA1nxMis7mM3EV/oYT6Fdw=="

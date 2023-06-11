@@ -122,7 +122,8 @@ module Page =
     type FixedSiteContent =
         { navbar: ReactElement
           title: string
-          copyright: string }
+          copyright: string
+          favicon: string }
 
     let private readAndWrite site tagDist source dist =
         promise {
@@ -142,7 +143,7 @@ module Page =
                         | None -> site.title
 
                     fm,
-                    frame site.navbar title site.copyright c
+                    frame site.navbar title site.copyright site.favicon c
                     |> Parser.parseReactStatic
 
 
@@ -196,7 +197,7 @@ module Page =
 
             let content =
                 archives
-                |> frame site.navbar (sprintf "%s - Archives" site.title) site.copyright
+                |> frame site.navbar (sprintf "%s - Archives" site.title) site.copyright site.favicon
                 |> Parser.parseReactStatic
 
             printfn "Writing archives %s..." dist
@@ -214,7 +215,7 @@ module Page =
 
             let content =
                 tagsContent
-                |> frame title site.copyright
+                |> frame title site.copyright site.favicon
                 |> Parser.parseReactStatic
 
             printfn "Writing tags %s..." dist
@@ -235,7 +236,7 @@ module Page =
 
                     let content =
                         tagPageContent
-                        |> frame (sprintf "%s - %s" title tag) site.copyright
+                        |> frame (sprintf "%s - %s" title tag) site.copyright site.favicon
                         |> Parser.parseReactStatic
 
                     IO.writeFile dist content |> Promise.map ignore)
@@ -249,7 +250,7 @@ module Page =
 
             let content =
                 generate404
-                |> frame site.navbar (sprintf "%s - 404" site.title) site.copyright
+                |> frame site.navbar (sprintf "%s - 404" site.title) site.copyright site.favicon
                 |> Parser.parseReactStatic
 
             printfn "Writing 404 %s..." dist
