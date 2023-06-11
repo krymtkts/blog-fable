@@ -207,10 +207,12 @@ module Misc =
                                     "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]
                     Html.body [ Html.nav [ prop.className "tabs"
                                            prop.children navbar ]
-                                Html.div [ prop.className "content"
-                                           prop.children content ] ]
-                    Html.footer [ Html.div [ prop.className "footer"
-                                             prop.text (sprintf "Copyright © %s" copyright) ] ] ]
+                                Html.main [ prop.className "container"
+                                            prop.children [ Html.div [ prop.className "content"
+                                                                       prop.children content ] ] ] ]
+                    Html.footer [ prop.className "footer"
+                                  prop.children [ Html.div [ prop.className "container"
+                                                             prop.text (sprintf "Copyright © %s" copyright) ] ] ] ]
 
     let getDistPath (source: string) (dir: string) =
         Directory.leaf source
