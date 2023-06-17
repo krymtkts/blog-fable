@@ -1,0 +1,125 @@
+#r "nuget: Fake.Core.Trace"
+#r "nuget: Fake.IO.FileSystem"
+#r "nuget: Suave"
+
+open Fake.Core
+open Fake.IO
+open Fake.IO.Globbing.Operators
+open Suave
+open Suave.Operators
+open Suave.Sockets
+open Suave.Sockets.Control
+open Suave.WebSocket
+open Suave.Utils
+open Suave.Files
+open Suave.Filters
+open System
+open System.Net
+
+
+let port =
+    let rec findPort port =
+        let portIsTaken =
+            System
+                .Net
+                .NetworkInformation
+                .IPGlobalProperties
+                .GetIPGlobalProperties()
+                .GetActiveTcpListeners()
+            |> Seq.exists (fun x -> x.Port = int (port))
+
+        if portIsTaken then
+            findPort (port + 1us)
+        else
+            port
+
+    findPort 8080us
+
+let handleWatcherEvents, socketHandler =
+    let refreshEvent = new Event<_>()
+
+    let handleWatcherEvents (events: FileChange seq) =
+        for e in events do
+            let fi = FileInfo.ofPath e.FullPath
+
+            Trace.traceImportant
+            <| sprintf "%s was changed." fi.FullName
+
+        // TODO: recompile.
+
+        refreshEvent.Trigger()
+
+    let socketHandler (webSocket: WebSocket) =
+        fun _ ->
+            socket {
+                while true do
+                    do!
+                        Async.AwaitEvent(refreshEvent.Publish)
+                        |> SocketOp.ofAsync
+
+                    let seg = ASCII.bytes "refreshed" |> ByteSegment
+                    do! webSocket.send Text seg true
+            }
+
+    handleWatcherEvents, socketHandler
+
+let home =
+    IO.Path.Join [| __SOURCE_DIRECTORY__
+                    "docs" |]
+
+printfn "watch '%s'" home
+
+let cfg =
+    { defaultConfig with
+        homeFolder = Some(home)
+        compressedFilesFolder = Some(home)
+        bindings = [ HttpBinding.create HTTP IPAddress.Loopback port ]
+        listenTimeout = TimeSpan.FromMilliseconds 3000. }
+
+let app: WebPart =
+    let logger = Logging.Log.create "dev-server"
+
+    choose [ log logger logFormat >=> never
+             path "/websocket" >=> handShake socketHandler
+
+             GET
+             >=> path ""
+             >=> browseFileHome "blog-fable/index.html"
+             GET
+             >=> path "/"
+             >=> browseFileHome "blog-fable/index.html"
+             GET
+             >=> path "/blog-fable"
+             >=> browseFileHome "blog-fable/index.html"
+             GET
+             >=> path "/blog-fable/"
+             >=> browseFileHome "blog-fable/index.html"
+
+             GET
+             >=> Writers.setHeader "Cache-Control" "no-cache, no-store, must-revalidate"
+             >=> Writers.setHeader "Pragma" "no-cache"
+             >=> Writers.setHeader "Expires" "0"
+             >=> browseHome
+
+             RequestErrors.NOT_FOUND "Page not found." ]
+
+let openIndex url =
+    let p = new Diagnostics.ProcessStartInfo(url)
+
+    p.UseShellExecute <- true
+    Diagnostics.Process.Start(p) |> ignore
+
+try
+    use _ =
+        !! "src/**/*.fs" ++ "contents/**/*.md"
+        |> ChangeWatcher.run handleWatcherEvents
+
+    let index = sprintf "http://localhost:%d/blog-fable/index.html" port
+    printfn "Open %s ..." index
+    openIndex index
+
+    printfn "Starting dev server..."
+    startWebServer cfg app
+
+finally
+    printfn "Shutting down..."
