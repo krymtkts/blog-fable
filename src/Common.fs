@@ -151,6 +151,8 @@ module Parser =
 
 [<AutoOpen>]
 module Misc =
+    let argv = Process.argv
+
     type Layout =
         | Post of string
         | Page
@@ -175,13 +177,14 @@ module Misc =
           source: string
           dist: string }
 
-    let frame
-        (navbar: Fable.React.ReactElement)
-        (titleText: string)
-        copyright
-        favicon
-        (content: Fable.React.ReactElement list)
-        =
+    type FixedSiteContent =
+        { navbar: ReactElement
+          title: string
+          copyright: string
+          favicon: string
+          devInjection: string option }
+
+    let frame site (content: Fable.React.ReactElement list) =
         let cssLink path integrity =
             Html.link [ prop.rel "stylesheet"
                         prop.type' "text/css"
@@ -190,13 +193,13 @@ module Misc =
                         prop.crossOrigin.anonymous
                         prop.referrerPolicy.noReferrer ]
 
-        Html.html [ Html.head [ Html.title [ prop.text titleText ]
+        Html.html [ Html.head [ Html.title [ prop.text site.title ]
                                 Html.meta [ prop.custom ("httpEquiv", "Content-Type")
                                             prop.content "text/html; charset=utf-8" ]
                                 Html.meta [ prop.name "viewport"
                                             prop.content "width=device-width, initial-scale=1" ]
                                 Html.link [ prop.rel "icon"
-                                            prop.href favicon ]
+                                            prop.href site.favicon ]
                                 cssLink
                                     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css"
                                     "sha512-SgaqKKxJDQ/tAUAAXzvxZz33rmn7leYDYfBP+YoMRSENhf3zJyx3SBASt/OfeQwBHA1nxMis7mM3EV/oYT6Fdw=="
@@ -207,13 +210,19 @@ module Misc =
                                     "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/solarized-dark.min.css"
                                     "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]
                     Html.body [ Html.nav [ prop.className "tabs"
-                                           prop.children navbar ]
+                                           prop.children site.navbar ]
                                 Html.main [ prop.className "container"
                                             prop.children [ Html.div [ prop.className "content"
                                                                        prop.children content ] ] ] ]
                     Html.footer [ prop.className "footer"
                                   prop.children [ Html.div [ prop.className "container"
-                                                             prop.text (sprintf "Copyright © %s" copyright) ] ] ] ]
+                                                             prop.text (sprintf "Copyright © %s" site.copyright) ] ] ]
+                    match site.devInjection with
+                    | Some src ->
+                        Html.script [ prop.lang "javascript"
+                                      prop.type' "text/javascript"
+                                      prop.src src ]
+                    | None -> null ]
 
     let getDistPath (source: string) (dir: string) =
         Directory.leaf source

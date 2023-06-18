@@ -2,8 +2,11 @@ module App
 
 open StaticWebGenerator
 
+type Mode =
+    | Development
+    | Production
 
-let private render () =
+let private render stage =
     promise {
         let title = "Blog Title"
         let copyright = "2023 krymtkts"
@@ -27,11 +30,18 @@ let private render () =
 
         let navbar = generateNavbar navi
 
-        let site =
+        let devInjection, devScript =
+            match stage with
+            | Development ->
+                Some("/blog-fable/live-reload.js"), [ ("js/live-reload.js", "docs/blog-fable/live-reload.js") ]
+            | Production -> None, []
+
+        let site: FixedSiteContent =
             { navbar = navbar
               title = title
               copyright = copyright
-              favicon = "/blog-fable/img/favicon.ico" }
+              favicon = "/blog-fable/img/favicon.ico"
+              devInjection = devInjection }
 
         let renderPostAndPages = renderMarkdowns site "/blog-fable/tags"
         let! metaPosts = renderPostAndPages "contents/posts" "docs/blog-fable/posts"
@@ -52,10 +62,18 @@ let private render () =
         do! renderTags site "/blog-fable/tags" meta "docs/blog-fable/tags.html"
         do! render404 site "docs/blog-fable/404.html"
 
-        do! copyResources [ ("contents/img/favicon.ico", "docs/blog-fable/img/favicon.ico") ]
+        do!
+            copyResources
+            <| [ ("contents/img/favicon.ico", "docs/blog-fable/img/favicon.ico") ]
+               @ devScript
 
         printfn "Render complete!"
     }
     |> ignore
 
-render ()
+let dev =
+    match List.ofSeq argv with
+    | [ _; _; mode ] when mode = "dev" -> Development
+    | _ -> Production
+
+render dev
