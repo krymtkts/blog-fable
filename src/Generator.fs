@@ -119,13 +119,10 @@ module Generation =
 
 [<AutoOpen>]
 module Page =
-    type FixedSiteContent =
-        { navbar: ReactElement
-          title: string
-          copyright: string
-          favicon: string }
+    let argv = Misc.argv
+    type FixedSiteContent = Misc.FixedSiteContent
 
-    let private readAndWrite site tagDist source dist =
+    let private readAndWrite (site: FixedSiteContent) tagDist source dist =
         promise {
             printfn "Rendering %s..." source
             let! m = IO.readFile source
@@ -143,7 +140,7 @@ module Page =
                         | None -> site.title
 
                     fm,
-                    frame site.navbar title site.copyright site.favicon c
+                    frame { site with title = title } c
                     |> Parser.parseReactStatic
 
 
@@ -197,7 +194,7 @@ module Page =
 
             let content =
                 archives
-                |> frame site.navbar (sprintf "%s - Archives" site.title) site.copyright site.favicon
+                |> frame { site with title = sprintf "%s - Archives" site.title }
                 |> Parser.parseReactStatic
 
             printfn "Writing archives %s..." dist
@@ -205,9 +202,8 @@ module Page =
             do! IO.writeFile dist content
         }
 
-    let renderTags site tagRoot meta dist =
+    let renderTags (site: FixedSiteContent) tagRoot meta dist =
         let tagsContent, tagPageContents = generateTagsContent meta tagRoot
-        let frame = frame site.navbar
 
         promise {
             printfn "Rendering tags..."
@@ -215,7 +211,7 @@ module Page =
 
             let content =
                 tagsContent
-                |> frame title site.copyright site.favicon
+                |> frame { site with title = title }
                 |> Parser.parseReactStatic
 
             printfn "Writing tags %s..." dist
@@ -236,7 +232,7 @@ module Page =
 
                     let content =
                         tagPageContent
-                        |> frame (sprintf "%s - %s" title tag) site.copyright site.favicon
+                        |> frame { site with title = sprintf "%s - %s" title tag }
                         |> Parser.parseReactStatic
 
                     IO.writeFile dist content |> Promise.map ignore)
@@ -250,7 +246,7 @@ module Page =
 
             let content =
                 generate404
-                |> frame site.navbar (sprintf "%s - 404" site.title) site.copyright site.favicon
+                |> frame { site with title = sprintf "%s - 404" site.title }
                 |> Parser.parseReactStatic
 
             printfn "Writing 404 %s..." dist

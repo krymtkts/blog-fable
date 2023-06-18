@@ -1,8 +1,10 @@
 #r "nuget: Fake.Core.Trace"
+#r "nuget: Fake.DotNet.Cli"
 #r "nuget: Fake.IO.FileSystem"
 #r "nuget: Suave"
 
 open Fake.Core
+open Fake.DotNet
 open Fake.IO
 open Fake.IO.Globbing.Operators
 open Suave
@@ -45,9 +47,14 @@ let handleWatcherEvents, socketHandler =
             Trace.traceImportant
             <| sprintf "%s was changed." fi.FullName
 
-        // TODO: recompile.
+        let cmd = "fable src"
+        let args = "--runScript dev" // NOTE: run script with development mode.
+        let result = DotNet.exec (fun x -> { x with DotNetCliPath = "dotnet" }) cmd args
 
-        refreshEvent.Trigger()
+        if result.OK then
+            refreshEvent.Trigger()
+        else
+            printfn "`dotnet %s %s` failed" cmd args
 
     let socketHandler (webSocket: WebSocket) =
         fun _ ->
@@ -83,12 +90,6 @@ let app: WebPart =
              path "/websocket" >=> handShake socketHandler
 
              GET
-             >=> path ""
-             >=> browseFileHome "blog-fable/index.html"
-             GET
-             >=> path "/"
-             >=> browseFileHome "blog-fable/index.html"
-             GET
              >=> path "/blog-fable"
              >=> browseFileHome "blog-fable/index.html"
              GET
@@ -122,4 +123,4 @@ try
     startWebServer cfg app
 
 finally
-    printfn "Shutting down..."
+    ()

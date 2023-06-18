@@ -3,18 +3,14 @@
   "type": "module",
   "scripts": {
     "postinstall": "dotnet tool restore",
-    "start-server": "live-server docs --open=blog-fable/index.html --entry-file=blog-fable/404.html",
-    "start-fable": "dotnet fable watch src --runScript",
-    "start": "concurrently npm:start-*",
+    "dev": "dotnet fsi ./dev-server.fsx",
     "build": "dotnet fable src --runScript"
   },
   "version": "1.0.0",
   "devDependencies": {
     "@types/highlightjs": "^9.12.2",
     "@types/marked": "^4.3.0",
-    "concurrently": "^8.0.1",
     "highlight.js": "^11.7.0",
-    "live-server": "^1.1.0",
     "marked": "^4.3.0",
     "marked-highlight": "^1.0.1",
     "react": "^18.2.0",

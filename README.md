@@ -18,7 +18,7 @@ GitHub Pages deployment is [here](https://krymtkts.github.io/blog-fable/index.ht
 - [x] Page
 - [ ] RSS feed
 - [ ] Sitemap
-- [ ] Dev server
+- [x] Dev server
 
 ## Building and running the app
 
@@ -33,3 +33,4 @@ This repository incorporates parts of the following open source software:
 
 - project based on [fable-compiler/static-web-generator: Simple Fable Node.js app to generate static pages](https://github.com/fable-compiler/static-web-generator)
 - `Node.Extra.fs` is originally written in [MangelMaxime/Nacara](https://github.com/MangelMaxime/Nacara)
+- `dev-server.fsx` based on [sergey-tihon/suave-angular2-demo: Demo site for Suave 1.0 + Angular 2.0.0-beta.0](https://github.com/sergey-tihon/suave-angular2-demo)
