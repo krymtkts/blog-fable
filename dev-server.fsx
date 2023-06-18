@@ -8,13 +8,13 @@ open Fake.DotNet
 open Fake.IO
 open Fake.IO.Globbing.Operators
 open Suave
+open Suave.Files
+open Suave.Filters
 open Suave.Operators
 open Suave.Sockets
 open Suave.Sockets.Control
-open Suave.WebSocket
 open Suave.Utils
-open Suave.Files
-open Suave.Filters
+open Suave.WebSocket
 open System
 open System.Net
 
@@ -102,7 +102,8 @@ let app: WebPart =
              >=> Writers.setHeader "Expires" "0"
              >=> browseHome
 
-             RequestErrors.NOT_FOUND "Page not found." ]
+             Writers.setStatus HTTP_404
+             >=> browseFileHome "/blog-fable/404.html" ]
 
 let openIndex url =
     let p = new Diagnostics.ProcessStartInfo(url)
