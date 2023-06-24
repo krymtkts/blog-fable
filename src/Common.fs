@@ -107,6 +107,7 @@ module Parser =
     type FrontMatter =
         abstract title: string
         abstract tags: string array option
+        abstract date: string option
 
     let private pattern =
         Regex(@"^---\s*\n(?<frontMatter>[\s\S]*?)\n?---\s*\n?(?<content>[\s\S]*)")

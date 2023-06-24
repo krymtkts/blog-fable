@@ -6,6 +6,10 @@ open Fable.SimpleXml.Generator
 
 [<AutoOpen>]
 module Generation =
+    type SiteLocation =
+        { loc: string
+          lastmod: string
+          priority: string }
 
     let generatePostArchives (meta: Meta seq) root =
         promise {
@@ -27,7 +31,10 @@ module Generation =
 
             let ref =
                 meta
-                |> Seq.map (fun meta -> sourceToSitemap root meta.source)
+                |> Seq.map (fun meta ->
+                    { loc = sourceToSitemap root meta.source
+                      lastmod = meta.date
+                      priority = "0.8" })
 
             return Html.ul [ prop.children (List.concat archives) ], ref
         }
@@ -47,11 +54,6 @@ module Generation =
           metas: Meta seq
           root: string }
 
-    type SiteLocation =
-        { loc: string
-          lastmod: string
-          priority: string }
-
     let generateArchives (archives: Archives list) =
         promise {
             let! a =
@@ -65,14 +67,7 @@ module Generation =
                 |> Promise.all
 
             let a, refs = a |> List.ofSeq |> List.unzip
-
-            let locs =
-                refs
-                |> Seq.concat
-                |> Seq.map (fun ref ->
-                    { loc = ref
-                      lastmod = now.ToString("yyyy-MM-dd")
-                      priority = "0.8" })
+            let locs = refs |> Seq.concat
 
             return [ Html.ul [ prop.children (List.concat a) ] ], locs
         }
@@ -228,10 +223,18 @@ module Page =
 
             let layout = discriminateLayout source
 
+            let chooseDate (fm: Parser.FrontMatter option) alt =
+                match fm with
+                | Some fm ->
+                    match fm.date with
+                    | None -> alt
+                    | Some x -> x
+                | None -> alt
+
             let date =
                 match layout with
-                | Post _ -> (IO.leaf source).Substring(0, 10)
-                | Page -> "" // TODO: add date to frontmatter of page.
+                | Post d -> chooseDate fm d
+                | Page -> chooseDate fm <| now.ToString("yyyy-MM-dd")
 
             return
                 { frontMatter = fm
