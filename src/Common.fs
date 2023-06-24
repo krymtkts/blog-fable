@@ -84,11 +84,11 @@ module Component =
 
     let liA ref (title: NavItem) =
         let children =
-            match title with
+            function
             | Element (s, el) -> [ prop.title s; prop.children [ el ] ]
             | Text (s) -> [ prop.title s; prop.text s ]
 
-        Html.li [ Html.a <| prop.href ref :: children ]
+        Html.li [ Html.a <| prop.href ref :: children title ]
 
     let liSpanA (span: string) ref title =
         Html.li [ Html.span [ prop.text span ]
@@ -163,7 +163,7 @@ module Misc =
         let leaf = Directory.leaf source
 
         match leaf.Split '-' |> List.ofArray with
-        | year :: month :: day :: xs ->
+        | year :: month :: day :: _ ->
             match [ year; month; day ]
                   |> List.map System.Int32.TryParse
                 with

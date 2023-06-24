@@ -147,8 +147,7 @@ module Generation =
                   priority = "0.9" }
 
         navs
-        |> List.map (fun nav ->
-            match nav with
+        |> List.map (function
             | Title navi ->
                 Component.liA navi.path
                 <| Component.Element(navi.text, Html.h1 [ prop.text navi.text ])
