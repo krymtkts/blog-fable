@@ -107,6 +107,7 @@ module Parser =
     type FrontMatter =
         abstract title: string
         abstract tags: string array option
+        abstract date: string option
 
     let private pattern =
         Regex(@"^---\s*\n(?<frontMatter>[\s\S]*?)\n?---\s*\n?(?<content>[\s\S]*)")
@@ -151,6 +152,7 @@ module Parser =
 
 [<AutoOpen>]
 module Misc =
+    open System
     let argv = Process.argv
 
     type Layout =
@@ -175,7 +177,8 @@ module Misc =
         { frontMatter: Parser.FrontMatter option
           layout: Layout
           source: string
-          dist: string }
+          dist: string
+          date: string }
 
     type FixedSiteContent =
         { navbar: ReactElement
@@ -248,6 +251,11 @@ module Misc =
     let getLatestPost paths =
         paths |> Seq.sortBy Directory.leaf |> Seq.last
 
+    let sourceToSitemap root source =
+        let leaf: string = Directory.leaf source
+        let path = Directory.join3 "/" root <| Util.mdToHtml leaf
+        path.Replace("\\", "/")
+
     let metaToLi root meta =
         let leaf = Directory.leaf meta.source
 
@@ -264,3 +272,5 @@ module Misc =
         let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
 
         Component.liA ref <| Component.Text title
+
+    let now = DateTime.Now

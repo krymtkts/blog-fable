@@ -2,9 +2,14 @@ module StaticWebGenerator
 
 open Common
 open Feliz
+open Fable.SimpleXml.Generator
 
 [<AutoOpen>]
 module Generation =
+    type SiteLocation =
+        { loc: string
+          lastmod: string
+          priority: string }
 
     let generatePostArchives (meta: Meta seq) root =
         promise {
@@ -16,12 +21,22 @@ module Generation =
                     let leaf = IO.leaf meta.source
                     leaf.Substring(0, 7))
                 |> Seq.map (fun (yearMonth, metas) ->
-                    let lis = metas |> Seq.map (fun meta -> metaToLi root meta)
+                    let lis =
+                        metas
+                        |> Seq.map (fun meta -> metaToLi root meta)
+                        |> List.ofSeq
 
                     [ Html.li [ Html.h3 yearMonth ]
                       Html.ul lis ])
 
-            return Html.ul [ prop.children (List.concat archives) ]
+            let ref =
+                meta
+                |> Seq.map (fun meta ->
+                    { loc = sourceToSitemap root meta.source
+                      lastmod = meta.date
+                      priority = "0.8" })
+
+            return Html.ul [ prop.children (List.concat archives) ], ref
         }
 
     let generatePageArchives (meta: Meta seq) root =
@@ -43,14 +58,18 @@ module Generation =
         promise {
             let! a =
                 archives
-                |> List.map (fun archives ->
-                    generatePostArchives archives.metas archives.root
-                    |> Promise.map (fun content ->
-                        [ Html.li [ Html.h2 archives.title ]
-                          content ]))
+                |> List.map (fun archive ->
+                    generatePostArchives archive.metas archive.root
+                    |> Promise.map (fun (content, refs) ->
+                        [ Html.li [ Html.h2 archive.title ]
+                          content ],
+                        refs))
                 |> Promise.all
 
-            return [ Html.ul [ prop.children (List.concat a) ] ]
+            let a, refs = a |> List.ofSeq |> List.unzip
+            let locs = refs |> Seq.concat
+
+            return [ Html.ul [ prop.children (List.concat a) ] ], locs
         }
 
     let generateTagsContent (meta: Meta seq) tagRoot =
@@ -92,16 +111,41 @@ module Generation =
                 [ Html.ul [ prop.children [ Html.li [ Html.h2 tag ]
                                             Html.ul lis ] ] ])
 
-        tagsContent, tagPageContens
+        let locs =
+            tagAndPage
+            |> Map.toList
+            |> Seq.map (fun (tag, _) ->
+                { loc = sourceToSitemap tagRoot <| sprintf "%s.html" tag
+                  lastmod = now.ToString("yyyy-MM-dd")
+                  priority = "0.9" })
+
+        tagsContent, tagPageContens, locs
 
 
-    type NavItem = { text: string; path: string }
+    type NavItem =
+        { text: string
+          path: string
+          useSitemap: bool }
 
     type Nav =
         | Title of NavItem
         | Link of NavItem
 
+
     let generateNavbar (navs: Nav list) =
+        let toSitemap =
+            let d = now.ToString("yyyy-MM-dd")
+
+            function
+            | Title navi ->
+                { loc = navi.path
+                  lastmod = d
+                  priority = "1.0" }
+            | Link navi ->
+                { loc = navi.path
+                  lastmod = d
+                  priority = "0.9" }
+
         navs
         |> List.map (fun nav ->
             match nav with
@@ -111,11 +155,40 @@ module Generation =
             | Link navi ->
                 Component.liA navi.path
                 <| Component.Text navi.text)
-        |> Html.ul
+        |> Html.ul,
+        navs
+        |> Seq.filter (function
+            | Title ni -> ni.useSitemap
+            | Link ni -> ni.useSitemap)
+        |> Seq.map toSitemap
 
     let generate404 =
         [ Html.h1 [ prop.text "404 Page not found" ]
           Html.p [ prop.text "Sorry! The page you're looking for does not exist." ] ]
+
+    let generateSitemap root locs =
+        let urls =
+            locs
+            |> Seq.map (fun loc ->
+                node
+                    "url"
+                    []
+                    [ node "loc" [] [ text $"{root}{loc.loc}" ]
+                      node "lastmod" [] [ text loc.lastmod ]
+                      //   node "changefreq" [] [ text "monthly" ]
+                      node "priority" [] [ text loc.priority ] ])
+            |> List.ofSeq
+
+        let urlSet =
+            node
+                "urlset"
+                [ attr.value ("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9")
+                  attr.value ("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance") ]
+                urls
+
+        urlSet
+        |> serializeXml
+        |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
 
 [<AutoOpen>]
 module Page =
@@ -148,11 +221,27 @@ module Page =
 
             do! IO.writeFile dist content
 
+            let layout = discriminateLayout source
+
+            let chooseDate (fm: Parser.FrontMatter option) alt =
+                match fm with
+                | Some fm ->
+                    match fm.date with
+                    | None -> alt
+                    | Some x -> x
+                | None -> alt
+
+            let date =
+                match layout with
+                | Post d -> chooseDate fm d
+                | Page -> chooseDate fm <| now.ToString("yyyy-MM-dd")
+
             return
                 { frontMatter = fm
-                  layout = discriminateLayout source
+                  layout = layout
                   source = source
-                  dist = dist }
+                  dist = dist
+                  date = date }
         }
 
     let renderMarkdowns site tagDist sourceDir distDir =
@@ -190,7 +279,7 @@ module Page =
     let renderArchives site archives dist =
         promise {
             printfn "Rendering archives..."
-            let! archives = generateArchives archives
+            let! archives, locs = generateArchives archives
 
             let content =
                 archives
@@ -200,10 +289,11 @@ module Page =
             printfn "Writing archives %s..." dist
 
             do! IO.writeFile dist content
+            return locs
         }
 
     let renderTags (site: FixedSiteContent) tagRoot meta dist =
-        let tagsContent, tagPageContents = generateTagsContent meta tagRoot
+        let tagsContent, tagPageContents, locs = generateTagsContent meta tagRoot
 
         promise {
             printfn "Rendering tags..."
@@ -218,7 +308,7 @@ module Page =
 
             do! IO.writeFile dist content
 
-            return!
+            do!
                 tagPageContents
                 |> List.map (fun (tag, tagPageContent) ->
                     let dist =
@@ -238,6 +328,8 @@ module Page =
                     IO.writeFile dist content |> Promise.map ignore)
                 |> Promise.all
                 |> Promise.map ignore
+
+            return locs
         }
 
     let render404 site dist =
@@ -252,6 +344,15 @@ module Page =
             printfn "Writing 404 %s..." dist
 
             do! IO.writeFile dist content
+        }
+
+    let renderSitemap root dist (locs: SiteLocation seq) =
+        promise {
+            printfn "Rendering sitemap..."
+            let sitemap = generateSitemap root locs
+
+            printfn "Writing archives %s..." dist
+            do! IO.writeFile dist sitemap
         }
 
     let copyResources resources =
