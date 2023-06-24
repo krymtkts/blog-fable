@@ -179,5 +179,7 @@ module Module =
     let inline __dirname<'T> = path.dirname (__filename)
 
 module Process =
-    // TODO: avoid to use `process` the F# reserved keyword.
-    let argv = process.argv
+    [<Import("*", "process")>]
+    let process': Process.Process = jsNative
+
+    let argv = process'.argv
