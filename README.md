@@ -17,7 +17,7 @@ GitHub Pages deployment is [here](https://krymtkts.github.io/blog-fable/index.ht
 - [x] Post
 - [x] Page
 - [ ] RSS feed
-- [ ] Sitemap
+- [x] Sitemap
 - [x] Dev server
 
 ## Building and running the app
