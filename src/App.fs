@@ -14,21 +14,26 @@ let private render stage =
         let navi =
             [ Title
                   { text = title
-                    path = "/blog-fable/index.html" }
+                    path = "/blog-fable/index.html"
+                    useSitemap = true }
               Link
                   { text = "Archives"
-                    path = "/blog-fable/archives.html" }
+                    path = "/blog-fable/archives.html"
+                    useSitemap = true }
               Link
                   { text = "Tags"
-                    path = "/blog-fable/tags.html" }
+                    path = "/blog-fable/tags.html"
+                    useSitemap = true }
               Link
                   { text = "About Me"
-                    path = "/blog-fable/pages/about.html" }
+                    path = "/blog-fable/pages/about.html"
+                    useSitemap = false }
               Link
                   { text = "RSS"
-                    path = "/blog-fable/atom.xml" } ]
+                    path = "/blog-fable/atom.xml"
+                    useSitemap = false } ]
 
-        let navbar = generateNavbar navi
+        let navbar, navSitemap = generateNavbar navi
 
         let devInjection, devScript =
             match stage with
@@ -49,7 +54,7 @@ let private render stage =
 
         do! renderIndex site "/blog-fable/tags" metaPosts "docs/blog-fable/index.html"
 
-        let arcives =
+        let archives =
             [ { title = "Posts"
                 metas = metaPosts
                 root = "/blog-fable/posts" }
@@ -57,10 +62,18 @@ let private render stage =
                 metas = metaPages
                 root = "/blog-fable/pages" } ]
 
-        do! renderArchives site arcives "docs/blog-fable/archives.html"
+        let! archiveLocs = renderArchives site archives "docs/blog-fable/archives.html"
         let meta = Seq.concat [ metaPosts; metaPages ]
-        do! renderTags site "/blog-fable/tags" meta "docs/blog-fable/tags.html"
+        let! tagLocs = renderTags site "/blog-fable/tags" meta "docs/blog-fable/tags.html"
         do! render404 site "docs/blog-fable/404.html"
+
+        do!
+            renderSitemap
+                "https://krymtkts.github.io"
+                "docs/blog-fable/sitemap.xml"
+                (Seq.concat [ navSitemap
+                              tagLocs
+                              archiveLocs ])
 
         do!
             copyResources
