@@ -29,14 +29,7 @@ module Generation =
                     [ Html.li [ Html.h3 yearMonth ]
                       Html.ul lis ])
 
-            let ref =
-                meta
-                |> Seq.map (fun meta ->
-                    { loc = sourceToSitemap root meta.source
-                      lastmod = meta.date
-                      priority = "0.8" })
-
-            return Html.ul [ prop.children (List.concat archives) ], ref
+            return Html.ul [ prop.children (List.concat archives) ]
         }
 
     let generatePageArchives (meta: Meta seq) root =
@@ -49,19 +42,36 @@ module Generation =
             return Html.ul [ prop.children archives ]
         }
 
-    type Archives =
+    type ArchiveDef =
         { title: string
           metas: Meta seq
-          root: string }
+          root: string
+          priority: string }
 
-    let generateArchives (archives: Archives list) =
+    type Archive =
+        | Posts of ArchiveDef
+        | Pages of ArchiveDef
+
+    let generateArchives (archives: Archive list) =
         promise {
             let! a =
                 archives
                 |> List.map (fun archive ->
-                    generatePostArchives archive.metas archive.root
-                    |> Promise.map (fun (content, refs) ->
-                        [ Html.li [ Html.h2 archive.title ]
+                    let generate, def =
+                        match archive with
+                        | Posts d -> generatePostArchives, d
+                        | Pages d -> generatePageArchives, d
+
+                    let refs =
+                        def.metas
+                        |> Seq.map (fun meta ->
+                            { loc = sourceToSitemap def.root meta.source
+                              lastmod = meta.date
+                              priority = def.priority })
+
+                    generate def.metas def.root
+                    |> Promise.map (fun content ->
+                        [ Html.li [ Html.h2 def.title ]
                           content ],
                         refs))
                 |> Promise.all
@@ -72,9 +82,16 @@ module Generation =
             return [ Html.ul [ prop.children (List.concat a) ] ], locs
         }
 
-    let generateTagsContent (meta: Meta seq) tagRoot =
+    type TagDef =
+        { title: string
+          metas: Meta seq
+          root: string
+          postRoot: string
+          priority: string }
+
+    let generateTagsContent def =
         let tagAndPage =
-            meta
+            def.metas
             |> Seq.map (fun meta ->
                 match meta.frontMatter with
                 | Some fm ->
@@ -95,17 +112,17 @@ module Generation =
                 tagAndPage
                 |> Map.toList
                 |> List.map (fun (tag, _) ->
-                    Component.pathToLi tagRoot
+                    Component.pathToLi def.root
                     <| sprintf "%s.html" tag)
 
-            [ Html.ul [ prop.children [ Html.li [ Html.h2 "Tags" ]
+            [ Html.ul [ prop.children [ Html.li [ Html.h2 def.title ]
                                         Html.ul [ prop.children tags ] ] ] ]
 
         let tagPageContens =
             tagAndPage
             |> Map.toList
             |> List.map (fun (tag, metas) ->
-                let lis = metas |> List.map (metaToLi "blog-fable/posts")
+                let lis = metas |> List.map (metaToLi def.postRoot)
 
                 tag,
                 [ Html.ul [ prop.children [ Html.li [ Html.h2 tag ]
@@ -115,17 +132,20 @@ module Generation =
             tagAndPage
             |> Map.toList
             |> Seq.map (fun (tag, _) ->
-                { loc = sourceToSitemap tagRoot <| sprintf "%s.html" tag
+                { loc = sourceToSitemap def.root <| sprintf "%s.html" tag
                   lastmod = now.ToString("yyyy-MM-dd")
-                  priority = "0.9" })
+                  priority = def.priority })
 
         tagsContent, tagPageContens, locs
 
+    type UseSitemap =
+        | Yes of string
+        | No
 
     type NavItem =
         { text: string
           path: string
-          useSitemap: bool }
+          sitemap: UseSitemap }
 
     type Nav =
         | Title of NavItem
@@ -134,17 +154,16 @@ module Generation =
 
     let generateNavbar (navs: Nav list) =
         let toSitemap =
-            let d = now.ToString("yyyy-MM-dd")
-
             function
-            | Title navi ->
-                { loc = navi.path
-                  lastmod = d
-                  priority = "1.0" }
+            | Title navi
             | Link navi ->
-                { loc = navi.path
-                  lastmod = d
-                  priority = "0.9" }
+                match navi.sitemap with
+                | Yes n ->
+                    Some
+                        { loc = navi.path
+                          lastmod = now.ToString("yyyy-MM-dd")
+                          priority = n }
+                | No -> None
 
         navs
         |> List.map (function
@@ -156,10 +175,11 @@ module Generation =
                 <| Component.Text navi.text)
         |> Html.ul,
         navs
-        |> Seq.filter (function
-            | Title ni -> ni.useSitemap
-            | Link ni -> ni.useSitemap)
         |> Seq.map toSitemap
+        |> Seq.filter (function
+            | Some _ -> true
+            | None -> false)
+        |> Seq.map Option.get
 
     let generate404 =
         [ Html.h1 [ prop.text "404 Page not found" ]
@@ -291,8 +311,8 @@ module Page =
             return locs
         }
 
-    let renderTags (site: FixedSiteContent) tagRoot meta dist =
-        let tagsContent, tagPageContents, locs = generateTagsContent meta tagRoot
+    let renderTags (site: FixedSiteContent) def dist =
+        let tagsContent, tagPageContents, locs = generateTagsContent def
 
         promise {
             printfn "Rendering tags..."

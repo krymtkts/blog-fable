@@ -15,23 +15,23 @@ let private render stage =
             [ Title
                   { text = title
                     path = "/blog-fable/index.html"
-                    useSitemap = true }
+                    sitemap = Yes "1.0" }
               Link
                   { text = "Archives"
                     path = "/blog-fable/archives.html"
-                    useSitemap = true }
+                    sitemap = Yes "0.9" }
               Link
                   { text = "Tags"
                     path = "/blog-fable/tags.html"
-                    useSitemap = true }
+                    sitemap = Yes "0.9" }
               Link
                   { text = "About Me"
                     path = "/blog-fable/pages/about.html"
-                    useSitemap = false }
+                    sitemap = No }
               Link
                   { text = "RSS"
                     path = "/blog-fable/atom.xml"
-                    useSitemap = false } ]
+                    sitemap = No } ]
 
         let navbar, navSitemap = generateNavbar navi
 
@@ -54,17 +54,28 @@ let private render stage =
 
         do! renderIndex site "/blog-fable/tags" metaPosts "docs/blog-fable/index.html"
 
-        let archives =
-            [ { title = "Posts"
-                metas = metaPosts
-                root = "/blog-fable/posts" }
-              { title = "Pages"
-                metas = metaPages
-                root = "/blog-fable/pages" } ]
+        let archiveDefs =
+            [ Posts
+                  { title = "Posts"
+                    metas = metaPosts
+                    root = "/blog-fable/posts"
+                    priority = "0.8" }
+              Pages
+                  { title = "Pages"
+                    metas = metaPages
+                    root = "/blog-fable/pages"
+                    priority = "0.8" } ]
 
-        let! archiveLocs = renderArchives site archives "docs/blog-fable/archives.html"
-        let meta = Seq.concat [ metaPosts; metaPages ]
-        let! tagLocs = renderTags site "/blog-fable/tags" meta "docs/blog-fable/tags.html"
+        let! archiveLocs = renderArchives site archiveDefs "docs/blog-fable/archives.html"
+
+        let tagDef =
+            { title = "Tags"
+              metas = Seq.concat [ metaPosts; metaPages ]
+              root = "/blog-fable/tags"
+              postRoot = "/blog-fable/posts"
+              priority = "0.9" }
+
+        let! tagLocs = renderTags site tagDef "docs/blog-fable/tags.html"
         do! render404 site "docs/blog-fable/404.html"
 
         do!
