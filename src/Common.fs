@@ -31,13 +31,7 @@ module private Util =
                     let escapedText = Regex.Replace(string text, @"[^\w]+", "-")
                     let l = level.ToString()
 
-                    sprintf
-                        """<h%s><a name="%s" class="anchor" href="#%s">%s</a></h%s>"""
-                        l
-                        escapedText
-                        escapedText
-                        text
-                        l
+                    $"""<h{l}><a name="{escapedText}" class="anchor" href="#{escapedText}">{text}</a></h{l}>"""
 
             let link =
                 fun href title text ->
@@ -46,7 +40,7 @@ module private Util =
                         | Some s -> mdToHtml s
                         | None -> ""
 
-                    sprintf """<a href="%s">%s</a>""" ref text
+                    $"""<a href="{ref}">{text}</a>"""
 
             let mops = !!{| heading = heading; link = link |}
 
@@ -168,7 +162,7 @@ module Misc =
                   |> List.map System.Int32.TryParse
                 with
             | [ (true, year); (true, month); (true, day) ] ->
-                let date = sprintf "%04d-%02d-%02d" year month day
+                let date = $"%04d{year}-%02d{month}-%02d{day}"
                 Post(date)
             | _ -> Page
         | _ -> Page
@@ -219,7 +213,7 @@ module Misc =
                                                                        prop.children content ] ] ] ]
                     Html.footer [ prop.className "footer"
                                   prop.children [ Html.div [ prop.className "container"
-                                                             prop.text (sprintf "Copyright © %s" site.copyright) ] ] ]
+                                                             prop.text ($"Copyright © {site.copyright}") ] ] ]
                     match site.devInjection with
                     | Some src ->
                         Html.script [ prop.lang "javascript"
@@ -261,12 +255,12 @@ module Misc =
 
         let prefix =
             match meta.layout with
-            | Post (date) -> sprintf "%s - " date
+            | Post (date) -> $"{date} - "
             | _ -> ""
 
         let title =
             match meta.frontMatter with
-            | Some fm -> sprintf "%s%s" prefix fm.title
+            | Some fm -> $"{prefix}{fm.title}"
             | None -> leaf
 
         let ref = Directory.join3 "/" root <| Util.mdToHtml leaf

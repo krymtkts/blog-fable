@@ -111,9 +111,7 @@ module Generation =
             let tags =
                 tagAndPage
                 |> Map.toList
-                |> List.map (fun (tag, _) ->
-                    Component.pathToLi def.root
-                    <| sprintf "%s.html" tag)
+                |> List.map (fun (tag, _) -> Component.pathToLi def.root $"{tag}.html")
 
             [ Html.ul [ prop.children [ Html.li [ Html.h2 def.title ]
                                         Html.ul [ prop.children tags ] ] ] ]
@@ -132,7 +130,7 @@ module Generation =
             tagAndPage
             |> Map.toList
             |> Seq.map (fun (tag, _) ->
-                { loc = sourceToSitemap def.root <| sprintf "%s.html" tag
+                { loc = sourceToSitemap def.root $"{tag}.html"
                   lastmod = now.ToString("yyyy-MM-dd")
                   priority = def.priority })
 
@@ -216,11 +214,11 @@ module Page =
 
     let private readAndWrite (site: FixedSiteContent) tagDist source dist =
         promise {
-            printfn "Rendering %s..." source
+            printfn $"Rendering {source}..."
             let! m = IO.readFile source
 
             let tagToElement tag =
-                Component.liAWithClass (sprintf "%s/%s.html" tagDist tag) tag [ "tag" ]
+                Component.liAWithClass $"{tagDist}/{tag}.html" tag [ "tag" ]
 
             let fm, content =
                 m
@@ -228,7 +226,7 @@ module Page =
                 |> fun (fm, c) ->
                     let title =
                         match fm with
-                        | Some fm -> sprintf "%s - %s" site.title fm.title
+                        | Some fm -> $"{site.title} - {fm.title}"
                         | None -> site.title
 
                     fm,
@@ -236,7 +234,7 @@ module Page =
                     |> Parser.parseReactStatic
 
 
-            printfn "Writing %s..." dist
+            printfn $"Writing {dist}..."
 
             do! IO.writeFile dist content
 
@@ -302,10 +300,10 @@ module Page =
 
             let content =
                 archives
-                |> frame { site with title = sprintf "%s - Archives" site.title }
+                |> frame { site with title = $"{site.title} - Archives" }
                 |> Parser.parseReactStatic
 
-            printfn "Writing archives %s..." dist
+            printfn $"Writing archives {dist}..."
 
             do! IO.writeFile dist content
             return locs
@@ -316,32 +314,27 @@ module Page =
 
         promise {
             printfn "Rendering tags..."
-            let title = (sprintf "%s - Tags" site.title)
+            let title = $"{site.title} - Tags"
 
             let content =
                 tagsContent
                 |> frame { site with title = title }
                 |> Parser.parseReactStatic
 
-            printfn "Writing tags %s..." dist
+            printfn $"Writing tags {dist}..."
 
             do! IO.writeFile dist content
 
             do!
                 tagPageContents
                 |> List.map (fun (tag, tagPageContent) ->
-                    let dist =
-                        IO.resolve (
-                            sprintf "%s/%s.html"
-                            <| dist.Replace(".html", "")
-                            <| tag
-                        )
+                    let dist = IO.resolve ($"""{dist.Replace(".html", "")}/{tag}.html""")
 
-                    printfn "Writing tag %s..." dist
+                    printfn $"Writing tag {dist}..."
 
                     let content =
                         tagPageContent
-                        |> frame { site with title = sprintf "%s - %s" title tag }
+                        |> frame { site with title = $"{title} - {tag}" }
                         |> Parser.parseReactStatic
 
                     IO.writeFile dist content |> Promise.map ignore)
@@ -357,10 +350,10 @@ module Page =
 
             let content =
                 generate404
-                |> frame { site with title = sprintf "%s - 404" site.title }
+                |> frame { site with title = $"{site.title} - 404" }
                 |> Parser.parseReactStatic
 
-            printfn "Writing 404 %s..." dist
+            printfn $"Writing 404 {dist}..."
 
             do! IO.writeFile dist content
         }
@@ -370,7 +363,7 @@ module Page =
             printfn "Rendering sitemap..."
             let sitemap = generateSitemap root locs
 
-            printfn "Writing archives %s..." dist
+            printfn $"Writing archives {dist}..."
             do! IO.writeFile dist sitemap
         }
 
@@ -382,7 +375,7 @@ module Page =
                 resources
                 |> List.map (fun (source, dist) ->
                     promise {
-                        printfn "Copying %s..." source
+                        printfn $"Copying {source}..."
                         do! IO.copy source dist
                     })
                 |> Promise.all
