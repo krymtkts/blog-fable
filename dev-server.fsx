@@ -44,8 +44,7 @@ let handleWatcherEvents, socketHandler =
         for e in events do
             let fi = FileInfo.ofPath e.FullPath
 
-            Trace.traceImportant
-            <| sprintf "%s was changed." fi.FullName
+            Trace.traceImportant $"{fi.FullName} was changed."
 
         let cmd = "fable src"
         let args = "--runScript dev" // NOTE: run script with development mode.
@@ -54,7 +53,7 @@ let handleWatcherEvents, socketHandler =
         if result.OK then
             refreshEvent.Trigger()
         else
-            printfn "`dotnet %s %s` failed" cmd args
+            printfn $"`dotnet {cmd} {args}` failed"
 
     let socketHandler (webSocket: WebSocket) =
         fun _ ->
@@ -74,7 +73,7 @@ let home =
     IO.Path.Join [| __SOURCE_DIRECTORY__
                     "docs" |]
 
-printfn "watch '%s'" home
+printfn $"watch '{home}'"
 
 let cfg =
     { defaultConfig with
@@ -116,8 +115,8 @@ try
         !! "src/**/*.fs" ++ "contents/**/*.md"
         |> ChangeWatcher.run handleWatcherEvents
 
-    let index = sprintf "http://localhost:%d/blog-fable/index.html" port
-    printfn "Open %s ..." index
+    let index: string = $"http://localhost:{port}/blog-fable/index.html"
+    printfn $"Open {index} ..."
     openIndex index
 
     printfn "Starting dev server..."
