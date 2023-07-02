@@ -171,7 +171,7 @@ module Misc =
         { frontMatter: Parser.FrontMatter option
           layout: Layout
           source: string
-          dist: string
+          leaf: string
           date: string }
 
     type FixedSiteContent =

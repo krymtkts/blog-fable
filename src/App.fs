@@ -30,7 +30,7 @@ let private render stage =
                     sitemap = No }
               Link
                   { text = "RSS"
-                    path = "/blog-fable/atom.xml"
+                    path = "/blog-fable/feed.xml"
                     sitemap = No } ]
 
         let navbar, navSitemap = generateNavbar navi
@@ -85,6 +85,17 @@ let private render stage =
                 (Seq.concat [ navSitemap
                               tagLocs
                               archiveLocs ])
+
+        do!
+            renderFeed
+                { title = title
+                  description = "Blog Description"
+                  link = "https://krymtkts.github.io/blog-fable"
+                  generator = "blog-fable"
+                  postRoot = "/posts"
+                  posts = metaPosts }
+                "docs/blog-fable/feed.xml"
+
 
         do!
             copyResources
