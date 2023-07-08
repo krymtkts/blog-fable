@@ -266,8 +266,10 @@ let generateFeed (conf: FeedConf) =
     let items =
         conf.posts
         |> Seq.map (fun meta ->
-            { guid = $"{conf.link}{conf.postRoot}/{meta.leaf}"
-              link = $"{conf.link}{conf.postRoot}/{meta.leaf}"
+            let link = $"{conf.link}{conf.postRoot}/{meta.leaf}"
+
+            { guid = link
+              link = link
               title =
                 match meta.frontMatter with
                 | Some fm -> fm.title
@@ -451,7 +453,7 @@ module Page =
             printfn "Rendering sitemap..."
             let sitemap = generateSitemap root locs
 
-            printfn $"Writing archives {dist}..."
+            printfn $"Writing sitemap {dist}..."
             do! IO.writeFile dist sitemap
         }
 
@@ -460,7 +462,7 @@ module Page =
             printfn "Rendering feed..."
             let feed = generateFeed conf
 
-            printfn $"Writing archives {dist}..."
+            printfn $"Writing feed {dist}..."
             do! IO.writeFile dist feed
         }
 
