@@ -207,6 +207,95 @@ module Generation =
         |> serializeXml
         |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
 
+type RssItem =
+    { guid: string
+      link: string
+      title: string
+      description: string
+      pubDate: string }
+
+type RssChannel =
+    { title: string
+      description: string
+      link: string
+      lastBuildDate: string
+      generator: string }
+
+type FeedConf =
+    { title: string
+      description: string
+      link: string
+      generator: string
+      postRoot: string
+      posts: Meta seq }
+
+let createRss (channel: RssChannel) (items: RssItem seq) =
+    let itemNodes =
+        items
+        |> Seq.map (fun item ->
+            node
+                "item"
+                []
+                [ node "guid" [] [ text item.guid ]
+                  node "link" [] [ text item.link ]
+                  node "title" [] [ text item.title ]
+                  node "description" [] [ text item.description ]
+                  node "pubDate" [] [ text item.pubDate ] ])
+        |> List.ofSeq
+
+    node
+        "rss"
+        [ attr.value ("version", "2.0")
+          attr.value ("xmlns:atom", "http://www.w3.org/2005/Atom") ]
+        [ node "channel" []
+          <| [ node
+                   "atom:link"
+                   [ attr.value ("href", channel.link)
+                     attr.value ("rel", "self")
+                     attr.value ("type", "application/rss+xml") ]
+                   []
+               node "title" [] [ text channel.title ]
+
+               node "description" [] [ text channel.description ]
+               node "link" [] [ text channel.link ]
+               node "lastBuildDate" [] [ text channel.lastBuildDate ]
+               node "generator" [] [ text channel.generator ] ]
+             @ itemNodes ]
+
+let generateFeed (conf: FeedConf) =
+    let items =
+        conf.posts
+        |> Seq.map (fun meta ->
+            let link = $"{conf.link}{conf.postRoot}/{meta.leaf}"
+
+            { guid = link
+              link = link
+              title =
+                match meta.frontMatter with
+                | Some fm -> fm.title
+                | None -> meta.leaf
+              description = meta.content |> simpleEscape
+              pubDate =
+                match meta.frontMatter with
+                | Some fm ->
+                    match fm.date with
+                    | Some d -> d
+                    | None -> meta.date
+                | None -> meta.date })
+
+    let rss =
+        createRss
+            { title = conf.title
+              description = conf.description
+              link = conf.link
+              lastBuildDate = now.ToString("yyyy-MM-dd")
+              generator = conf.generator }
+            items
+
+    rss
+    |> serializeXml
+    |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
+
 [<AutoOpen>]
 module Page =
     let argv = Misc.argv
@@ -255,9 +344,10 @@ module Page =
 
             return
                 { frontMatter = fm
+                  content = content
                   layout = layout
                   source = source
-                  dist = dist
+                  leaf = IO.leaf dist
                   date = date }
         }
 
@@ -363,8 +453,17 @@ module Page =
             printfn "Rendering sitemap..."
             let sitemap = generateSitemap root locs
 
-            printfn $"Writing archives {dist}..."
+            printfn $"Writing sitemap {dist}..."
             do! IO.writeFile dist sitemap
+        }
+
+    let renderFeed (conf: FeedConf) dist =
+        promise {
+            printfn "Rendering feed..."
+            let feed = generateFeed conf
+
+            printfn $"Writing feed {dist}..."
+            do! IO.writeFile dist feed
         }
 
     let copyResources resources =
