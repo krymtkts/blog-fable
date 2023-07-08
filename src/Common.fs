@@ -169,6 +169,7 @@ module Misc =
 
     type Meta =
         { frontMatter: Parser.FrontMatter option
+          content: string
           layout: Layout
           source: string
           leaf: string
@@ -268,3 +269,17 @@ module Misc =
         Component.liA ref <| Component.Text title
 
     let now = DateTime.Now
+
+    let simpleEscape (s: string) =
+        Regex.Replace(
+            s,
+            """[&<>'"]""",
+            (fun s ->
+                match s.Value with
+                | "&" -> "&amp;"
+                | "<" -> "&lt;"
+                | ">" -> "&gt;"
+                | "'" -> "&apos;"
+                | "\"" -> "&quot;"
+                | x -> x)
+        )

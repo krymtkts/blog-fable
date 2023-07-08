@@ -272,7 +272,7 @@ let generateFeed (conf: FeedConf) =
                 match meta.frontMatter with
                 | Some fm -> fm.title
                 | None -> meta.leaf
-              description = "" // TODO: fill this.
+              description = meta.content |> simpleEscape
               pubDate =
                 match meta.frontMatter with
                 | Some fm ->
@@ -342,6 +342,7 @@ module Page =
 
             return
                 { frontMatter = fm
+                  content = content
                   layout = layout
                   source = source
                   leaf = IO.leaf dist
