@@ -40,7 +40,12 @@ module private Util =
                         | Some s -> mdToHtml s
                         | None -> ""
 
-                    $"""<a href="{ref}">{text}</a>"""
+                    let title =
+                        match title with
+                        | null -> text
+                        | _ -> title
+
+                    $"""<a href="{ref}" title="{title}">{text}</a>"""
 
             let mops = !!{| heading = heading; link = link |}
 
