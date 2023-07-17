@@ -182,7 +182,11 @@ module Misc =
           favicon: string
           devInjection: string option }
 
-    let frame site (content: Fable.React.ReactElement list) =
+    let wrapContent (elm: Fable.React.ReactElement list) =
+        Html.div [ prop.className "content"
+                   prop.children elm ]
+
+    let frame site (content: Fable.React.ReactElement) =
         let cssLink path integrity =
             Html.link [ prop.rel "stylesheet"
                         prop.type' "text/css"
@@ -210,8 +214,7 @@ module Misc =
                     Html.body [ Html.nav [ prop.className "tabs"
                                            prop.children site.navbar ]
                                 Html.main [ prop.className "container"
-                                            prop.children [ Html.div [ prop.className "content"
-                                                                       prop.children content ] ] ] ]
+                                            prop.children [ content ] ] ]
                     Html.footer [ prop.className "footer"
                                   prop.children [ Html.div [ prop.className "container"
                                                              prop.text ($"Copyright © {site.copyright}") ] ] ]

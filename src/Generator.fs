@@ -309,7 +309,7 @@ module Page =
             let tagToElement tag =
                 Component.liAWithClass $"{tagDist}/{tag}.html" tag [ "tag" ]
 
-            let fm, content =
+            let fm, content, page =
                 m
                 |> Parser.parseMarkdownAsReactEl tagToElement
                 |> fun (fm, c) ->
@@ -318,14 +318,17 @@ module Page =
                         | Some fm -> $"{site.title} - {fm.title}"
                         | None -> site.title
 
+                    let content = wrapContent c
+
                     fm,
-                    frame { site with title = title } c
+                    content |> Parser.parseReactStatic,
+                    frame { site with title = title } content
                     |> Parser.parseReactStatic
 
 
             printfn $"Writing {dist}..."
 
-            do! IO.writeFile dist content
+            do! IO.writeFile dist page
 
             let layout = discriminateLayout source
 
@@ -390,6 +393,7 @@ module Page =
 
             let content =
                 archives
+                |> wrapContent
                 |> frame { site with title = $"{site.title} - Archives" }
                 |> Parser.parseReactStatic
 
@@ -408,6 +412,7 @@ module Page =
 
             let content =
                 tagsContent
+                |> wrapContent
                 |> frame { site with title = title }
                 |> Parser.parseReactStatic
 
@@ -424,6 +429,7 @@ module Page =
 
                     let content =
                         tagPageContent
+                        |> wrapContent
                         |> frame { site with title = $"{title} - {tag}" }
                         |> Parser.parseReactStatic
 
@@ -440,6 +446,7 @@ module Page =
 
             let content =
                 generate404
+                |> wrapContent
                 |> frame { site with title = $"{site.title} - 404" }
                 |> Parser.parseReactStatic
 
