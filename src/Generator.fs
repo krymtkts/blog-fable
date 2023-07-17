@@ -329,13 +329,13 @@ module Page =
                     let content = wrapContent c
 
                     fm,
-                    content |> Parser.parseReactStatic,
+                    content |> Parser.parseReactStaticMarkup,
                     frame
                         { site with
                             title = title
                             url = $"{site.url}/{path}" }
                         content
-                    |> Parser.parseReactStatic
+                    |> Parser.parseReactStaticHtml
 
 
             printfn $"Writing {dist}..."
@@ -410,7 +410,7 @@ module Page =
                     { site with
                         title = $"{site.title} - Archives"
                         url = $"{site.url}/{IO.leaf dist}" }
-                |> Parser.parseReactStatic
+                |> Parser.parseReactStaticHtml
 
             printfn $"Writing archives {dist}..."
 
@@ -432,7 +432,7 @@ module Page =
                     { site with
                         title = title
                         url = $"{site.url}/{IO.leaf dist}" }
-                |> Parser.parseReactStatic
+                |> Parser.parseReactStaticHtml
 
             printfn $"Writing tags {dist}..."
 
@@ -452,7 +452,7 @@ module Page =
                             { site with
                                 title = $"{title} - {tag}"
                                 url = $"{site.url}/{parent}/{IO.leaf dist}" }
-                        |> Parser.parseReactStatic
+                        |> Parser.parseReactStaticHtml
 
                     IO.writeFile dist content |> Promise.map ignore)
                 |> Promise.all
@@ -472,7 +472,7 @@ module Page =
                     { site with
                         title = $"{site.title} - 404"
                         url = $"{site.url}/{IO.leaf dist}" }
-                |> Parser.parseReactStatic
+                |> Parser.parseReactStaticHtml
 
             printfn $"Writing 404 {dist}..."
 

@@ -147,7 +147,11 @@ module Parser =
     let parseReact el = ReactDOMServer.renderToString el
 
     /// Parses a React element invoking ReactDOMServer.renderToStaticMarkup
-    let parseReactStatic el = ReactDOMServer.renderToStaticMarkup el
+    let parseReactStaticMarkup el = ReactDOMServer.renderToStaticMarkup el
+
+    let parseReactStaticHtml el =
+        @"<!DOCTYPE html>"
+        + ReactDOMServer.renderToStaticMarkup el
 
 [<AutoOpen>]
 module Misc =
