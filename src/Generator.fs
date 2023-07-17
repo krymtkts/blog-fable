@@ -309,6 +309,14 @@ module Page =
             let tagToElement tag =
                 Component.liAWithClass $"{tagDist}/{tag}.html" tag [ "tag" ]
 
+            let leaf = IO.leaf dist
+
+            // TODO: add root path to fixed site content for removing this condition.
+            let path =
+                match leaf with
+                | "index.html" -> leaf
+                | _ -> $"{dist |> IO.parent |> IO.leaf}/{leaf}"
+
             let fm, content, page =
                 m
                 |> Parser.parseMarkdownAsReactEl tagToElement
@@ -321,9 +329,13 @@ module Page =
                     let content = wrapContent c
 
                     fm,
-                    content |> Parser.parseReactStatic,
-                    frame { site with title = title } content
-                    |> Parser.parseReactStatic
+                    content |> Parser.parseReactStaticMarkup,
+                    frame
+                        { site with
+                            title = title
+                            url = $"{site.url}/{path}" }
+                        content
+                    |> Parser.parseReactStaticHtml
 
 
             printfn $"Writing {dist}..."
@@ -350,7 +362,7 @@ module Page =
                   content = content
                   layout = layout
                   source = source
-                  leaf = IO.leaf dist
+                  leaf = leaf
                   date = date }
         }
 
@@ -394,8 +406,11 @@ module Page =
             let content =
                 archives
                 |> wrapContent
-                |> frame { site with title = $"{site.title} - Archives" }
-                |> Parser.parseReactStatic
+                |> frame
+                    { site with
+                        title = $"{site.title} - Archives"
+                        url = $"{site.url}/{IO.leaf dist}" }
+                |> Parser.parseReactStaticHtml
 
             printfn $"Writing archives {dist}..."
 
@@ -413,8 +428,11 @@ module Page =
             let content =
                 tagsContent
                 |> wrapContent
-                |> frame { site with title = title }
-                |> Parser.parseReactStatic
+                |> frame
+                    { site with
+                        title = title
+                        url = $"{site.url}/{IO.leaf dist}" }
+                |> Parser.parseReactStaticHtml
 
             printfn $"Writing tags {dist}..."
 
@@ -424,14 +442,17 @@ module Page =
                 tagPageContents
                 |> List.map (fun (tag, tagPageContent) ->
                     let dist = IO.resolve ($"""{dist.Replace(".html", "")}/{tag}.html""")
-
+                    let parent = dist |> IO.parent |> IO.leaf
                     printfn $"Writing tag {dist}..."
 
                     let content =
                         tagPageContent
                         |> wrapContent
-                        |> frame { site with title = $"{title} - {tag}" }
-                        |> Parser.parseReactStatic
+                        |> frame
+                            { site with
+                                title = $"{title} - {tag}"
+                                url = $"{site.url}/{parent}/{IO.leaf dist}" }
+                        |> Parser.parseReactStaticHtml
 
                     IO.writeFile dist content |> Promise.map ignore)
                 |> Promise.all
@@ -447,8 +468,11 @@ module Page =
             let content =
                 generate404
                 |> wrapContent
-                |> frame { site with title = $"{site.title} - 404" }
-                |> Parser.parseReactStatic
+                |> frame
+                    { site with
+                        title = $"{site.title} - 404"
+                        url = $"{site.url}/{IO.leaf dist}" }
+                |> Parser.parseReactStaticHtml
 
             printfn $"Writing 404 {dist}..."
 

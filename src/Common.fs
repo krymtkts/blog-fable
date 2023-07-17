@@ -40,7 +40,12 @@ module private Util =
                         | Some s -> mdToHtml s
                         | None -> ""
 
-                    $"""<a href="{ref}">{text}</a>"""
+                    let title =
+                        match title with
+                        | null -> text
+                        | _ -> title
+
+                    $"""<a href="{ref}" title="{title}">{text}</a>"""
 
             let mops = !!{| heading = heading; link = link |}
 
@@ -142,7 +147,11 @@ module Parser =
     let parseReact el = ReactDOMServer.renderToString el
 
     /// Parses a React element invoking ReactDOMServer.renderToStaticMarkup
-    let parseReactStatic el = ReactDOMServer.renderToStaticMarkup el
+    let parseReactStaticMarkup el = ReactDOMServer.renderToStaticMarkup el
+
+    let parseReactStaticHtml el =
+        @"<!DOCTYPE html>"
+        + ReactDOMServer.renderToStaticMarkup el
 
 [<AutoOpen>]
 module Misc =
@@ -176,8 +185,12 @@ module Misc =
           date: string }
 
     type FixedSiteContent =
-        { navbar: ReactElement
+        { lang: string
+          navbar: ReactElement
+          name: string
           title: string
+          description: string
+          url: string
           copyright: string
           favicon: string
           devInjection: string option }
@@ -195,35 +208,44 @@ module Misc =
                         prop.crossOrigin.anonymous
                         prop.referrerPolicy.noReferrer ]
 
-        Html.html [ Html.head [ Html.title [ prop.text site.title ]
-                                Html.meta [ prop.custom ("httpEquiv", "Content-Type")
-                                            prop.content "text/html; charset=utf-8" ]
-                                Html.meta [ prop.name "viewport"
-                                            prop.content "width=device-width, initial-scale=1" ]
-                                Html.link [ prop.rel "icon"
-                                            prop.href site.favicon ]
-                                cssLink
-                                    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css"
-                                    "sha512-SgaqKKxJDQ/tAUAAXzvxZz33rmn7leYDYfBP+YoMRSENhf3zJyx3SBASt/OfeQwBHA1nxMis7mM3EV/oYT6Fdw=="
-                                cssLink
-                                    "https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css"
-                                    "sha512-HqxHUkJM0SYcbvxUw5P60SzdOTy/QVwA1JJrvaXJv4q7lmbDZCmZaqz01UPOaQveoxfYRv1tHozWGPMcuTBuvQ=="
-                                cssLink
-                                    "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/solarized-dark.min.css"
-                                    "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]
-                    Html.body [ Html.nav [ prop.className "tabs"
-                                           prop.children site.navbar ]
-                                Html.main [ prop.className "container"
-                                            prop.children [ content ] ] ]
-                    Html.footer [ prop.className "footer"
-                                  prop.children [ Html.div [ prop.className "container"
-                                                             prop.text ($"Copyright © {site.copyright}") ] ] ]
-                    match site.devInjection with
-                    | Some src ->
-                        Html.script [ prop.lang "javascript"
-                                      prop.type' "text/javascript"
-                                      prop.src src ]
-                    | None -> null ]
+        Html.html [ prop.lang site.lang
+                    prop.children [ Html.head [ Html.title [ prop.text site.title ]
+                                                Html.meta [ prop.charset "utf-8" ]
+                                                Html.meta [ prop.name "description"
+                                                            prop.content site.description ]
+                                                Html.meta [ prop.name "viewport"
+                                                            prop.content "width=device-width, initial-scale=1" ]
+                                                Html.meta [ prop.custom ("property", "og:site_name")
+                                                            prop.content site.name ]
+                                                Html.meta [ prop.custom ("property", "og:title")
+                                                            prop.content site.title ]
+                                                Html.meta [ prop.custom ("property", "og:description")
+                                                            prop.content site.description ]
+                                                Html.meta [ prop.custom ("property", "og:url")
+                                                            prop.content site.url ]
+                                                Html.link [ prop.rel "canonical"
+                                                            prop.href site.url ]
+                                                Html.link [ prop.rel "icon"
+                                                            prop.href site.favicon ]
+                                                cssLink
+                                                    "https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css"
+                                                    "sha512-HqxHUkJM0SYcbvxUw5P60SzdOTy/QVwA1JJrvaXJv4q7lmbDZCmZaqz01UPOaQveoxfYRv1tHozWGPMcuTBuvQ=="
+                                                cssLink
+                                                    "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/solarized-dark.min.css"
+                                                    "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]
+                                    Html.body [ Html.nav [ prop.className "tabs"
+                                                           prop.children site.navbar ]
+                                                Html.main [ prop.className "container"
+                                                            prop.children [ content ] ] ]
+                                    Html.footer [ prop.className "footer"
+                                                  prop.children [ Html.div [ prop.className "container"
+                                                                             prop.text ($"Copyright © {site.copyright}") ] ] ]
+                                    match site.devInjection with
+                                    | Some src ->
+                                        Html.script [ prop.lang "javascript"
+                                                      prop.type' "text/javascript"
+                                                      prop.src src ]
+                                    | None -> null ] ]
 
     let getDistPath (source: string) (dir: string) =
         Directory.leaf source

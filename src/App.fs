@@ -8,12 +8,13 @@ type Mode =
 
 let private render stage =
     promise {
-        let title = "Blog Title"
+        let siteName = "Blog Title"
+        let description = "Blog Description"
         let copyright = "2023 krymtkts"
 
         let navi =
             [ Title
-                  { text = title
+                  { text = siteName
                     path = "/blog-fable/index.html"
                     sitemap = Yes "1.0" }
               Link
@@ -42,8 +43,12 @@ let private render stage =
             | Production -> None, []
 
         let site: FixedSiteContent =
-            { navbar = navbar
-              title = title
+            { lang = "ja"
+              navbar = navbar
+              name = siteName
+              title = siteName
+              description = description
+              url = "https://krymtkts.github.io/blog-fable"
               copyright = copyright
               favicon = "/blog-fable/img/favicon.ico"
               devInjection = devInjection }
@@ -88,14 +93,13 @@ let private render stage =
 
         do!
             renderFeed
-                { title = title
-                  description = "Blog Description"
+                { title = siteName
+                  description = description
                   link = "https://krymtkts.github.io/blog-fable"
                   generator = "blog-fable"
                   postRoot = "/posts"
                   posts = metaPosts }
                 "docs/blog-fable/feed.xml"
-
 
         do!
             copyResources
