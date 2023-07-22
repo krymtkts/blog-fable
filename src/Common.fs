@@ -125,7 +125,7 @@ module Parser =
     let parseMarkdownAsReactEl (tagToElement: string -> ReactElement) content =
         let (frontMatter, content) = extractFrontMatter content
 
-        let el =
+        let header =
             match frontMatter with
             | Some fm ->
                 [ Html.h1 [ prop.className [ "title" ]
@@ -136,11 +136,12 @@ module Parser =
                                 | Some tags -> tags
                                 | None -> [||]
                                 |> Seq.map tagToElement
-                            ) ]
-                  Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ] ]
-            | None -> [ Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ] ]
+                            ) ] ]
+            | None -> []
 
-        frontMatter, el
+        let content = Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ]
+
+        frontMatter, header, content
 
 
     /// Parses a React element invoking ReactDOMServer.renderToString

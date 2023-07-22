@@ -320,21 +320,21 @@ module Page =
             let fm, content, page =
                 m
                 |> Parser.parseMarkdownAsReactEl tagToElement
-                |> fun (fm, c) ->
+                |> fun (fm, h, c) ->
                     let title =
                         match fm with
                         | Some fm -> $"{site.title} - {fm.title}"
                         | None -> site.title
 
-                    let content = wrapContent c
-
                     fm,
-                    content |> Parser.parseReactStaticMarkup,
-                    frame
+                    c |> Parser.parseReactStaticMarkup,
+                    List.append h [ c ]
+                    |> wrapContent
+                    |> frame
                         { site with
                             title = title
                             url = $"{site.url}/{path}" }
-                        content
+
                     |> Parser.parseReactStaticHtml
 
 
