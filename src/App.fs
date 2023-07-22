@@ -11,35 +11,35 @@ let private render stage =
         let siteName = "Blog Title"
         let description = "Blog Description"
         let copyright = "2023 krymtkts"
+        let pathRoot = "/blog-fable"
 
-        let navi =
+        let navs =
             [ Title
                   { text = siteName
-                    path = "/blog-fable/index.html"
+                    path = "/index.html"
                     sitemap = Yes "1.0" }
               Link
                   { text = "Archives"
-                    path = "/blog-fable/archives.html"
+                    path = "/archives.html"
                     sitemap = Yes "0.9" }
               Link
                   { text = "Tags"
-                    path = "/blog-fable/tags.html"
+                    path = "/tags.html"
                     sitemap = Yes "0.9" }
               Link
                   { text = "About Me"
-                    path = "/blog-fable/pages/about.html"
+                    path = "/pages/about.html"
                     sitemap = No }
               Link
                   { text = "RSS"
-                    path = "/blog-fable/feed.xml"
+                    path = "/feed.xml"
                     sitemap = No } ]
 
-        let navbar, navSitemap = generateNavbar navi
+        let navbar, navSitemap = generateNavbar pathRoot navs
 
         let devInjection, devScript =
             match stage with
-            | Development ->
-                Some("/blog-fable/live-reload.js"), [ ("js/live-reload.js", "docs/blog-fable/live-reload.js") ]
+            | Development -> Some("/live-reload.js"), [ ("js/live-reload.js", "docs/blog-fable/live-reload.js") ]
             | Production -> None, []
 
         let site: FixedSiteContent =
@@ -48,27 +48,28 @@ let private render stage =
               name = siteName
               title = siteName
               description = description
-              url = "https://krymtkts.github.io/blog-fable"
+              url = "https://krymtkts.github.io"
+              parthRoot = pathRoot
               copyright = copyright
-              favicon = "/blog-fable/img/favicon.ico"
+              favicon = "/img/favicon.ico"
               devInjection = devInjection }
 
-        let renderPostAndPages = renderMarkdowns site "/blog-fable/tags"
+        let renderPostAndPages = renderMarkdowns site "/tags"
         let! metaPosts = renderPostAndPages "contents/posts" "docs/blog-fable/posts"
         let! metaPages = renderPostAndPages "contents/pages" "docs/blog-fable/pages"
 
-        do! renderIndex site "/blog-fable/tags" metaPosts "docs/blog-fable/index.html"
+        do! renderIndex site "/tags" metaPosts "docs/blog-fable/index.html"
 
         let archiveDefs =
             [ Posts
                   { title = "Posts"
                     metas = metaPosts
-                    root = "/blog-fable/posts"
+                    root = "/posts"
                     priority = "0.8" }
               Pages
                   { title = "Pages"
                     metas = metaPages
-                    root = "/blog-fable/pages"
+                    root = "/pages"
                     priority = "0.8" } ]
 
         let! archiveLocs = renderArchives site archiveDefs "docs/blog-fable/archives.html"
@@ -76,8 +77,8 @@ let private render stage =
         let tagDef =
             { title = "Tags"
               metas = Seq.concat [ metaPosts; metaPages ]
-              root = "/blog-fable/tags"
-              postRoot = "/blog-fable/posts"
+              tagRoot = "/tags"
+              postRoot = "/posts"
               priority = "0.9" }
 
         let! tagLocs = renderTags site tagDef "docs/blog-fable/tags.html"

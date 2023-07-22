@@ -52,7 +52,7 @@ module Generation =
         | Posts of ArchiveDef
         | Pages of ArchiveDef
 
-    let generateArchives (archives: Archive list) =
+    let generateArchives pathRoot (archives: Archive list) =
         promise {
             let! a =
                 archives
@@ -65,11 +65,11 @@ module Generation =
                     let refs =
                         def.metas
                         |> Seq.map (fun meta ->
-                            { loc = sourceToSitemap def.root meta.source
+                            { loc = sourceToSitemap $"{pathRoot}{def.root}" meta.source
                               lastmod = meta.date
                               priority = def.priority })
 
-                    generate def.metas def.root
+                    generate def.metas $"{pathRoot}{def.root}"
                     |> Promise.map (fun content ->
                         [ Html.li [ Html.h2 def.title ]
                           content ],
@@ -85,11 +85,11 @@ module Generation =
     type TagDef =
         { title: string
           metas: Meta seq
-          root: string
+          tagRoot: string
           postRoot: string
           priority: string }
 
-    let generateTagsContent def =
+    let generateTagsContent pathRoot def =
         let tagAndPage =
             def.metas
             |> Seq.map (fun meta ->
@@ -111,7 +111,7 @@ module Generation =
             let tags =
                 tagAndPage
                 |> Map.toList
-                |> List.map (fun (tag, _) -> Component.pathToLi def.root $"{tag}.html")
+                |> List.map (fun (tag, _) -> Component.pathToLi $"{pathRoot}{def.tagRoot}" $"{tag}.html")
 
             [ Html.ul [ prop.children [ Html.li [ Html.h2 def.title ]
                                         Html.ul [ prop.children tags ] ] ] ]
@@ -120,7 +120,9 @@ module Generation =
             tagAndPage
             |> Map.toList
             |> List.map (fun (tag, metas) ->
-                let lis = metas |> List.map (metaToLi def.postRoot)
+                let lis =
+                    metas
+                    |> List.map (metaToLi $"{pathRoot}{def.postRoot}")
 
                 tag,
                 [ Html.ul [ prop.children [ Html.li [ Html.h2 tag ]
@@ -130,7 +132,7 @@ module Generation =
             tagAndPage
             |> Map.toList
             |> Seq.map (fun (tag, _) ->
-                { loc = sourceToSitemap def.root $"{tag}.html"
+                { loc = sourceToSitemap $"{pathRoot}{def.tagRoot}" $"{tag}.html"
                   lastmod = now.ToString("yyyy-MM-dd")
                   priority = def.priority })
 
@@ -150,7 +152,7 @@ module Generation =
         | Link of NavItem
 
 
-    let generateNavbar (navs: Nav list) =
+    let generateNavbar pathRoot (navs: Nav list) =
         let toSitemap =
             function
             | Title navi
@@ -158,7 +160,7 @@ module Generation =
                 match navi.sitemap with
                 | Yes n ->
                     Some
-                        { loc = navi.path
+                        { loc = $"{pathRoot}{navi.path}"
                           lastmod = now.ToString("yyyy-MM-dd")
                           priority = n }
                 | No -> None
@@ -166,10 +168,10 @@ module Generation =
         navs
         |> List.map (function
             | Title navi ->
-                Component.liA navi.path
+                Component.liA $"{pathRoot}{navi.path}"
                 <| Component.Element(navi.text, Html.h1 [ prop.text navi.text ])
             | Link navi ->
-                Component.liA navi.path
+                Component.liA $"{pathRoot}{navi.path}"
                 <| Component.Text navi.text)
         |> Html.ul,
         navs
@@ -315,7 +317,7 @@ module Page =
             let! m = IO.readFile source
 
             let tagToElement tag =
-                Component.liAWithClass $"{tagDist}/{tag}.html" tag [ "tag" ]
+                Component.liAWithClass $"{site.parthRoot}{tagDist}/{tag}.html" tag [ "tag" ]
 
             let leaf = IO.leaf dist
 
@@ -409,7 +411,7 @@ module Page =
     let renderArchives site archives dist =
         promise {
             printfn "Rendering archives..."
-            let! archives, locs = generateArchives archives
+            let! archives, locs = generateArchives site.parthRoot archives
 
             let content =
                 archives
@@ -417,7 +419,7 @@ module Page =
                 |> frame
                     { site with
                         title = $"{site.title} - Archives"
-                        url = $"{site.url}/{IO.leaf dist}" }
+                        url = $"{site.url}{site.parthRoot}/{IO.leaf dist}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing archives {dist}..."
@@ -427,7 +429,7 @@ module Page =
         }
 
     let renderTags (site: FixedSiteContent) def dist =
-        let tagsContent, tagPageContents, locs = generateTagsContent def
+        let tagsContent, tagPageContents, locs = generateTagsContent site.parthRoot def
 
         promise {
             printfn "Rendering tags..."
@@ -439,7 +441,7 @@ module Page =
                 |> frame
                     { site with
                         title = title
-                        url = $"{site.url}/{IO.leaf dist}" }
+                        url = $"{site.url}{site.parthRoot}/{IO.leaf dist}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing tags {dist}..."
@@ -459,7 +461,7 @@ module Page =
                         |> frame
                             { site with
                                 title = $"{title} - {tag}"
-                                url = $"{site.url}/{parent}/{IO.leaf dist}" }
+                                url = $"{site.url}{site.parthRoot}/{parent}/{IO.leaf dist}" }
                         |> Parser.parseReactStaticHtml
 
                     IO.writeFile dist content |> Promise.map ignore)
@@ -479,7 +481,7 @@ module Page =
                 |> frame
                     { site with
                         title = $"{site.title} - 404"
-                        url = $"{site.url}/{IO.leaf dist}" }
+                        url = $"{site.url}{site.parthRoot}/{IO.leaf dist}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing 404 {dist}..."
