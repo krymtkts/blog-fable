@@ -37,7 +37,7 @@ let private render stage =
 
         let devInjection, devScript =
             match stage with
-            | Development -> Some("/live-reload.js"), [ ("js/live-reload.js", "docs/blog-fable/live-reload.js") ]
+            | Development -> Some("/js/live-reload.js"), [ ("js/live-reload.js", "docs/blog-fable/js/live-reload.js") ]
             | Production -> None, []
 
         let site: FixedSiteContent =
