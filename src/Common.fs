@@ -191,7 +191,7 @@ module Misc =
           name: string
           title: string
           description: string
-          parthRoot: string
+          pathRoot: string
           url: string
           copyright: string
           favicon: string
@@ -246,7 +246,7 @@ module Misc =
                                     | Some src ->
                                         Html.script [ prop.lang "javascript"
                                                       prop.type' "text/javascript"
-                                                      prop.src $"{site.parthRoot}{src}" ]
+                                                      prop.src $"{site.pathRoot}{src}" ]
                                     | None -> null ] ]
 
     let getDistPath (source: string) (dir: string) =

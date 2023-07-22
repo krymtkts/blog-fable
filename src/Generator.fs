@@ -317,7 +317,7 @@ module Page =
             let! m = IO.readFile source
 
             let tagToElement tag =
-                Component.liAWithClass $"{site.parthRoot}{tagDist}/{tag}.html" tag [ "tag" ]
+                Component.liAWithClass $"{site.pathRoot}{tagDist}/{tag}.html" tag [ "tag" ]
 
             let leaf = IO.leaf dist
 
@@ -411,7 +411,7 @@ module Page =
     let renderArchives site archives dist =
         promise {
             printfn "Rendering archives..."
-            let! archives, locs = generateArchives site.parthRoot archives
+            let! archives, locs = generateArchives site.pathRoot archives
 
             let content =
                 archives
@@ -419,7 +419,7 @@ module Page =
                 |> frame
                     { site with
                         title = $"{site.title} - Archives"
-                        url = $"{site.url}{site.parthRoot}/{IO.leaf dist}" }
+                        url = $"{site.url}{site.pathRoot}/{IO.leaf dist}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing archives {dist}..."
@@ -429,7 +429,7 @@ module Page =
         }
 
     let renderTags (site: FixedSiteContent) def dist =
-        let tagsContent, tagPageContents, locs = generateTagsContent site.parthRoot def
+        let tagsContent, tagPageContents, locs = generateTagsContent site.pathRoot def
 
         promise {
             printfn "Rendering tags..."
@@ -441,7 +441,7 @@ module Page =
                 |> frame
                     { site with
                         title = title
-                        url = $"{site.url}{site.parthRoot}/{IO.leaf dist}" }
+                        url = $"{site.url}{site.pathRoot}/{IO.leaf dist}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing tags {dist}..."
@@ -461,7 +461,7 @@ module Page =
                         |> frame
                             { site with
                                 title = $"{title} - {tag}"
-                                url = $"{site.url}{site.parthRoot}/{parent}/{IO.leaf dist}" }
+                                url = $"{site.url}{site.pathRoot}/{parent}/{IO.leaf dist}" }
                         |> Parser.parseReactStaticHtml
 
                     IO.writeFile dist content |> Promise.map ignore)
@@ -481,7 +481,7 @@ module Page =
                 |> frame
                     { site with
                         title = $"{site.title} - 404"
-                        url = $"{site.url}{site.parthRoot}/{IO.leaf dist}" }
+                        url = $"{site.url}{site.pathRoot}/{IO.leaf dist}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing 404 {dist}..."

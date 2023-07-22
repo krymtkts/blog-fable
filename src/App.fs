@@ -9,8 +9,6 @@ type Mode =
 let private render stage =
     promise {
         let siteName = "Blog Title"
-        let description = "Blog Description"
-        let copyright = "2023 krymtkts"
         let pathRoot = "/blog-fable"
 
         let navs =
@@ -47,10 +45,10 @@ let private render stage =
               navbar = navbar
               name = siteName
               title = siteName
-              description = description
+              description = "Blog Description"
               url = "https://krymtkts.github.io"
-              parthRoot = pathRoot
-              copyright = copyright
+              pathRoot = pathRoot
+              copyright = "2023 krymtkts"
               favicon = "/img/favicon.ico"
               devInjection = devInjection }
 
@@ -86,7 +84,7 @@ let private render stage =
 
         do!
             renderSitemap
-                "https://krymtkts.github.io"
+                site.url
                 "docs/blog-fable/sitemap.xml"
                 (Seq.concat [ navSitemap
                               tagLocs
@@ -95,8 +93,8 @@ let private render stage =
         do!
             renderFeed
                 { title = siteName
-                  description = description
-                  link = "https://krymtkts.github.io/blog-fable"
+                  description = site.description
+                  link = $"{site.url}/{site.pathRoot}"
                   feed = "/feed.xml"
                   generator = "blog-fable"
                   postRoot = "/posts"
