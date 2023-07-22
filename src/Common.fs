@@ -309,3 +309,48 @@ module Misc =
                 | "\"" -> "&quot;"
                 | x -> x)
         )
+
+
+module DateTime =
+    open System
+
+    let options: obj =
+        !!{| weekday = "short"
+             year = "numeric"
+             month = "short"
+             day = "2-digit"
+             hour = "numeric"
+             minute = "numeric"
+             second = "numeric"
+             hourCycle = "h23"
+             timeZone = "Asia/Tokyo" // TODO: parametarize it.
+             timeZoneName = "short" |}
+
+    // TODO: write binding.
+    let formatter: obj = Intl.DateTimeFormat "en-US" options
+    let zonePattern = new Regex(@"GMT([+-])(\d+)")
+
+    let toRFC322DateTime (d: DateTime) =
+        let parts: obj [] = formatter?formatToParts (d)
+        let p: string [] = parts |> Array.map (fun x -> x?value)
+        let d = $"{p.[0]}{p.[1]}{p.[4]} {p.[2]} {p.[6]}"
+        let t = (p.[8..12] |> String.concat "")
+
+        let z =
+            match p.[14] with
+            | "UTC" -> "+0000"
+            | z ->
+                let item = zonePattern.Matches(z)
+                let group = item.Item 0
+                let op = (group.Groups.Item 1).Value
+                let offset = int (group.Groups.Item 2).Value
+
+                $"{op}%02d{offset}00"
+
+        $"{d} {t} {z}"
+
+module String =
+    open System
+
+    let toRFC322DateTime (s: string) =
+        DateTime.Parse(s) |> DateTime.toRFC322DateTime

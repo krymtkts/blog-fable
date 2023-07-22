@@ -268,6 +268,17 @@ let generateFeed (conf: FeedConf) =
         |> Seq.map (fun meta ->
             let link = $"{conf.link}{conf.postRoot}/{meta.leaf}"
 
+            let pubDate =
+                let d =
+                    match meta.frontMatter with
+                    | Some fm ->
+                        match fm.date with
+                        | Some d -> d
+                        | None -> meta.date
+                    | None -> meta.date
+
+                d |> String.toRFC322DateTime
+
             { guid = link
               link = link
               title =
@@ -275,20 +286,15 @@ let generateFeed (conf: FeedConf) =
                 | Some fm -> fm.title
                 | None -> meta.leaf
               description = meta.content |> simpleEscape
-              pubDate =
-                match meta.frontMatter with
-                | Some fm ->
-                    match fm.date with
-                    | Some d -> d
-                    | None -> meta.date
-                | None -> meta.date })
+              pubDate = pubDate })
+
 
     let rss =
         createRss
             { title = conf.title
               description = conf.description
               link = conf.link
-              lastBuildDate = now.ToString("yyyy-MM-dd")
+              lastBuildDate = now |> DateTime.toRFC322DateTime
               generator = conf.generator }
             items
 

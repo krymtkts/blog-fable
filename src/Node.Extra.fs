@@ -183,3 +183,8 @@ module Process =
     let process': Process.Process = jsNative
 
     let argv = process'.argv
+
+
+module Intl =
+    [<Emit "new Intl.DateTimeFormat([$0], $1)">]
+    let DateTimeFormat lang options = jsNative
