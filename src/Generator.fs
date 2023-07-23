@@ -218,6 +218,7 @@ type RssChannel =
     { title: string
       description: string
       link: string
+      xml: string
       lastBuildDate: string
       generator: string }
 
@@ -225,6 +226,7 @@ type FeedConf =
     { title: string
       description: string
       link: string
+      feed: string
       generator: string
       postRoot: string
       posts: Meta seq }
@@ -250,7 +252,7 @@ let createRss (channel: RssChannel) (items: RssItem seq) =
         [ node "channel" []
           <| [ node
                    "atom:link"
-                   [ attr.value ("href", channel.link)
+                   [ attr.value ("href", $"{channel.link}{channel.xml}")
                      attr.value ("rel", "self")
                      attr.value ("type", "application/rss+xml") ]
                    []
@@ -265,8 +267,18 @@ let createRss (channel: RssChannel) (items: RssItem seq) =
 let generateFeed (conf: FeedConf) =
     let items =
         conf.posts
+        |> Seq.rev
         |> Seq.map (fun meta ->
             let link = $"{conf.link}{conf.postRoot}/{meta.leaf}"
+
+            let pubDate =
+                match meta.frontMatter with
+                | Some fm ->
+                    match fm.date with
+                    | Some d -> d
+                    | None -> meta.date
+                | None -> meta.date
+                |> String.toRFC322DateTime
 
             { guid = link
               link = link
@@ -275,20 +287,16 @@ let generateFeed (conf: FeedConf) =
                 | Some fm -> fm.title
                 | None -> meta.leaf
               description = meta.content |> simpleEscape
-              pubDate =
-                match meta.frontMatter with
-                | Some fm ->
-                    match fm.date with
-                    | Some d -> d
-                    | None -> meta.date
-                | None -> meta.date })
+              pubDate = pubDate })
+
 
     let rss =
         createRss
             { title = conf.title
               description = conf.description
               link = conf.link
-              lastBuildDate = now.ToString("yyyy-MM-dd")
+              xml = conf.feed
+              lastBuildDate = now |> DateTime.toRFC322DateTime
               generator = conf.generator }
             items
 
