@@ -269,15 +269,13 @@ let generateFeed (conf: FeedConf) =
             let link = $"{conf.link}{conf.postRoot}/{meta.leaf}"
 
             let pubDate =
-                let d =
-                    match meta.frontMatter with
-                    | Some fm ->
-                        match fm.date with
-                        | Some d -> d
-                        | None -> meta.date
+                match meta.frontMatter with
+                | Some fm ->
+                    match fm.date with
+                    | Some d -> d
                     | None -> meta.date
-
-                d |> String.toRFC322DateTime
+                | None -> meta.date
+                |> String.toRFC322DateTime
 
             { guid = link
               link = link
