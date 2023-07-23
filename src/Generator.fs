@@ -265,6 +265,7 @@ let createRss (channel: RssChannel) (items: RssItem seq) =
 let generateFeed (conf: FeedConf) =
     let items =
         conf.posts
+        |> Seq.rev
         |> Seq.map (fun meta ->
             let link = $"{conf.link}{conf.postRoot}/{meta.leaf}"
 
