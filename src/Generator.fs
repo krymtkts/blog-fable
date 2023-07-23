@@ -218,6 +218,7 @@ type RssChannel =
     { title: string
       description: string
       link: string
+      xml: string
       lastBuildDate: string
       generator: string }
 
@@ -225,6 +226,7 @@ type FeedConf =
     { title: string
       description: string
       link: string
+      feed: string
       generator: string
       postRoot: string
       posts: Meta seq }
@@ -250,7 +252,7 @@ let createRss (channel: RssChannel) (items: RssItem seq) =
         [ node "channel" []
           <| [ node
                    "atom:link"
-                   [ attr.value ("href", channel.link)
+                   [ attr.value ("href", $"{channel.link}{channel.xml}")
                      attr.value ("rel", "self")
                      attr.value ("type", "application/rss+xml") ]
                    []
@@ -293,6 +295,7 @@ let generateFeed (conf: FeedConf) =
             { title = conf.title
               description = conf.description
               link = conf.link
+              xml = conf.feed
               lastBuildDate = now |> DateTime.toRFC322DateTime
               generator = conf.generator }
             items

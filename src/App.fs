@@ -96,6 +96,7 @@ let private render stage =
                 { title = siteName
                   description = description
                   link = "https://krymtkts.github.io/blog-fable"
+                  feed = "/feed.xml"
                   generator = "blog-fable"
                   postRoot = "/posts"
                   posts = metaPosts }
