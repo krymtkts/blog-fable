@@ -330,7 +330,7 @@ module DateTime =
     let formatter: obj = Intl.DateTimeFormat "en-US" options
     let zonePattern = new Regex(@"GMT([+-])(\d+)")
 
-    let toRFC322DateTime (d: DateTime) =
+    let toRFC822DateTime (d: DateTime) =
         let parts: obj [] = formatter?formatToParts (d)
         let p: string [] = parts |> Array.map (fun x -> x?value)
         let d = $"{p.[0]}{p.[1]}{p.[4]} {p.[2]} {p.[6]}"
@@ -352,5 +352,5 @@ module DateTime =
 module String =
     open System
 
-    let toRFC322DateTime (s: string) =
-        DateTime.Parse(s) |> DateTime.toRFC322DateTime
+    let toRFC822DateTime (s: string) =
+        DateTime.Parse(s) |> DateTime.toRFC822DateTime

@@ -278,7 +278,7 @@ let generateFeed (conf: FeedConf) =
                     | Some d -> d
                     | None -> meta.date
                 | None -> meta.date
-                |> String.toRFC322DateTime
+                |> String.toRFC822DateTime
 
             { guid = link
               link = link
@@ -296,7 +296,7 @@ let generateFeed (conf: FeedConf) =
               description = conf.description
               link = conf.link
               xml = conf.feed
-              lastBuildDate = now |> DateTime.toRFC322DateTime
+              lastBuildDate = now |> DateTime.toRFC822DateTime
               generator = conf.generator }
             items
 
