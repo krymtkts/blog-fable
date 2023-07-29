@@ -211,101 +211,101 @@ module Generation =
         |> serializeXml
         |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
 
-type RssItem =
-    { guid: string
-      link: string
-      title: string
-      description: string
-      pubDate: string }
+    type RssItem =
+        { guid: string
+          link: string
+          title: string
+          description: string
+          pubDate: string }
 
-type RssChannel =
-    { title: string
-      description: string
-      link: string
-      xml: string
-      lastBuildDate: string
-      generator: string }
+    type RssChannel =
+        { title: string
+          description: string
+          link: string
+          xml: string
+          lastBuildDate: string
+          generator: string }
 
-type FeedConf =
-    { title: string
-      description: string
-      link: string
-      feed: string
-      postRoot: string
-      posts: Meta seq }
+    type FeedConf =
+        { title: string
+          description: string
+          link: string
+          feed: string
+          postRoot: string
+          posts: Meta seq }
 
-let createRss (channel: RssChannel) (items: RssItem seq) =
-    let itemNodes =
-        items
-        |> Seq.map (fun item ->
-            node
-                "item"
-                []
-                [ node "guid" [] [ text item.guid ]
-                  node "link" [] [ text item.link ]
-                  node "title" [] [ text item.title ]
-                  node "description" [] [ text item.description ]
-                  node "pubDate" [] [ text item.pubDate ] ])
-        |> List.ofSeq
-
-    node
-        "rss"
-        [ attr.value ("version", "2.0")
-          attr.value ("xmlns:atom", "http://www.w3.org/2005/Atom") ]
-        [ node "channel" []
-          <| [ node
-                   "atom:link"
-                   [ attr.value ("href", $"{channel.link}{channel.xml}")
-                     attr.value ("rel", "self")
-                     attr.value ("type", "application/rss+xml") ]
-                   []
-               node "title" [] [ text channel.title ]
-
-               node "description" [] [ text channel.description ]
-               node "link" [] [ text channel.link ]
-               node "lastBuildDate" [] [ text channel.lastBuildDate ]
-               node "generator" [] [ text channel.generator ] ]
-             @ itemNodes ]
-
-let generateFeed (conf: FeedConf) =
-    let items =
-        conf.posts
-        |> Seq.rev
-        |> Seq.map (fun meta ->
-            let link = $"{conf.link}{conf.postRoot}/{meta.leaf}"
-
-            let pubDate =
-                match meta.frontMatter with
-                | Some fm ->
-                    match fm.date with
-                    | Some d -> d
-                    | None -> meta.date
-                | None -> meta.date
-                |> String.toRFC822DateTime
-
-            { guid = link
-              link = link
-              title =
-                match meta.frontMatter with
-                | Some fm -> fm.title
-                | None -> meta.leaf
-              description = meta.content |> simpleEscape
-              pubDate = pubDate })
-
-
-    let rss =
-        createRss
-            { title = conf.title
-              description = conf.description
-              link = conf.link
-              xml = conf.feed
-              lastBuildDate = now |> DateTime.toRFC822DateTime
-              generator = generatorName }
+    let createRss (channel: RssChannel) (items: RssItem seq) =
+        let itemNodes =
             items
+            |> Seq.map (fun item ->
+                node
+                    "item"
+                    []
+                    [ node "guid" [] [ text item.guid ]
+                      node "link" [] [ text item.link ]
+                      node "title" [] [ text item.title ]
+                      node "description" [] [ text item.description ]
+                      node "pubDate" [] [ text item.pubDate ] ])
+            |> List.ofSeq
 
-    rss
-    |> serializeXml
-    |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
+        node
+            "rss"
+            [ attr.value ("version", "2.0")
+              attr.value ("xmlns:atom", "http://www.w3.org/2005/Atom") ]
+            [ node "channel" []
+              <| [ node
+                       "atom:link"
+                       [ attr.value ("href", $"{channel.link}{channel.xml}")
+                         attr.value ("rel", "self")
+                         attr.value ("type", "application/rss+xml") ]
+                       []
+                   node "title" [] [ text channel.title ]
+
+                   node "description" [] [ text channel.description ]
+                   node "link" [] [ text channel.link ]
+                   node "lastBuildDate" [] [ text channel.lastBuildDate ]
+                   node "generator" [] [ text channel.generator ] ]
+                 @ itemNodes ]
+
+    let generateFeed (conf: FeedConf) =
+        let items =
+            conf.posts
+            |> Seq.rev
+            |> Seq.map (fun meta ->
+                let link = $"{conf.link}{conf.postRoot}/{meta.leaf}"
+
+                let pubDate =
+                    match meta.frontMatter with
+                    | Some fm ->
+                        match fm.date with
+                        | Some d -> d
+                        | None -> meta.date
+                    | None -> meta.date
+                    |> String.toRFC822DateTime
+
+                { guid = link
+                  link = link
+                  title =
+                    match meta.frontMatter with
+                    | Some fm -> fm.title
+                    | None -> meta.leaf
+                  description = meta.content |> simpleEscape
+                  pubDate = pubDate })
+
+
+        let rss =
+            createRss
+                { title = conf.title
+                  description = conf.description
+                  link = conf.link
+                  xml = conf.feed
+                  lastBuildDate = now |> DateTime.toRFC822DateTime
+                  generator = generatorName }
+                items
+
+        rss
+        |> serializeXml
+        |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
 
 [<AutoOpen>]
 module Rndering =
@@ -522,3 +522,142 @@ module Rndering =
                 |> Promise.all
                 |> Promise.map ignore
         }
+
+type Mode =
+    | Development
+    | Production
+
+type RnderOptions =
+    { stage: Mode
+      siteName: string
+      description: string
+      siteUrl: string
+      pathRoot: string
+      lang: string
+      copyright: string
+      favicon: string
+
+      src: string
+      dst: string
+
+      postsRoot: string
+      postsTitle: string
+      pagesRoot: string
+      paesTitle: string
+      tagsRoot: string
+      tagsTitle: string
+      archivesRoot: string
+      archivesTitle: string
+
+      additionalNavs: Nav list
+
+      feed: string
+
+     }
+
+let render (opts: RnderOptions) =
+    promise {
+        let index = "/index.html"
+        let feed = $"/{opts.feed}.xml"
+
+        let navs =
+            [ Title
+                  { text = opts.siteName
+                    path = index
+                    sitemap = Yes "1.0" }
+              Link
+                  { text = opts.archivesTitle
+                    path = $"{opts.archivesRoot}.html"
+                    sitemap = Yes "0.9" }
+              Link
+                  { text = opts.tagsTitle
+                    path = $"{opts.tagsRoot}.html"
+                    sitemap = Yes "0.9" } ]
+            @ opts.additionalNavs
+              @ [ Link
+                      { text = "RSS"
+                        path = feed
+                        sitemap = No } ]
+
+        let navbar, navSitemap = generateNavbar opts.pathRoot navs
+
+        let devInjection, devScript =
+            match opts.stage with
+            | Development ->
+                Some("/js/live-reload.js"), [ ("js/live-reload.js", $"{opts.dst}{opts.pathRoot}/js/live-reload.js") ]
+            | Production -> None, []
+
+        let site: FixedSiteContent =
+            { lang = opts.lang
+              navbar = navbar
+              name = opts.siteName
+              title = opts.siteName
+              description = opts.description
+              url = opts.siteUrl
+              pathRoot = opts.pathRoot
+              copyright = opts.copyright
+              favicon = opts.favicon
+              devInjection = devInjection }
+
+        let renderPostAndPages = renderMarkdowns site opts.tagsRoot
+        let! metaPosts = renderPostAndPages $"{opts.src}{opts.postsRoot}" $"{opts.dst}{opts.pathRoot}{opts.postsRoot}"
+        let! metaPages = renderPostAndPages $"{opts.src}{opts.pagesRoot}" $"{opts.dst}{opts.pathRoot}{opts.pagesRoot}"
+
+        do! renderIndex site opts.tagsRoot metaPosts $"{opts.dst}{opts.pathRoot}{index}"
+
+        let archiveDefs =
+            [ Posts
+                  { title = opts.postsTitle
+                    metas = metaPosts
+                    root = opts.postsRoot
+                    priority = "0.8" }
+              Pages
+                  { title = opts.paesTitle
+                    metas = metaPages
+                    root = opts.pagesRoot
+                    priority = "0.8" } ]
+
+        let! archiveLocs = renderArchives site archiveDefs $"{opts.dst}{site.pathRoot}{opts.archivesRoot}.html"
+
+        let tagDef =
+            { title = opts.tagsTitle
+              metas = Seq.concat [ metaPosts; metaPages ]
+              tagRoot = opts.tagsRoot
+              postRoot = opts.postsRoot
+              priority = "0.9" }
+
+        let! tagLocs = renderTags site tagDef $"{opts.dst}{site.pathRoot}{opts.tagsRoot}.html"
+        do! render404 site $"{opts.dst}{opts.pathRoot}/404.html"
+
+        do!
+            renderSitemap
+                site.url
+                $"{opts.dst}{opts.pathRoot}/sitemap.xml"
+                (Seq.concat [ navSitemap
+                              tagLocs
+                              archiveLocs ])
+
+
+        do!
+            renderFeed
+                { title = opts.siteName
+                  description = opts.description
+                  link = $"{opts.siteUrl}{opts.pathRoot}"
+                  feed = feed
+                  postRoot = opts.postsRoot
+                  posts = metaPosts }
+                $"{opts.dst}{opts.pathRoot}{feed}"
+
+        do!
+            copyResources
+            <| [ ($"{opts.src}{opts.favicon}", $"{opts.dst}{opts.pathRoot}{opts.favicon}") ]
+               @ devScript
+
+        printfn "Render complete!"
+    }
+    |> ignore
+
+let dev =
+    match List.ofSeq argv with
+    | [ _; _; mode ] when mode = "dev" -> Development
+    | _ -> Production
