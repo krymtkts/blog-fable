@@ -322,11 +322,9 @@ module Rndering =
 
             let leaf = IO.leaf dest
 
-            // TODO: add root path to fixed site content for removing this condition.
             let path =
-                match leaf with
-                | "index.html" -> leaf
-                | _ -> $"{dest |> IO.parent |> IO.leaf}/{leaf}"
+                dest.Replace("\\", "/").Split($"{site.pathRoot}/")
+                |> Seq.last
 
             let fm, content, page =
                 m
