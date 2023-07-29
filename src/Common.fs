@@ -249,7 +249,7 @@ module Misc =
                                                       prop.src $"{site.pathRoot}{src}" ]
                                     | None -> null ] ]
 
-    let getDistPath (source: string) (dir: string) =
+    let getDestinationPath (source: string) (dir: string) =
         Directory.leaf source
         |> Util.mdToHtml
         |> Directory.join2 dir

@@ -6,6 +6,8 @@ open Fable.SimpleXml.Generator
 
 [<AutoOpen>]
 module Generation =
+    let generatorName = "blog-fable"
+
     type SiteLocation =
         { loc: string
           lastmod: string
@@ -229,7 +231,6 @@ type FeedConf =
       description: string
       link: string
       feed: string
-      generator: string
       postRoot: string
       posts: Meta seq }
 
@@ -299,7 +300,7 @@ let generateFeed (conf: FeedConf) =
               link = conf.link
               xml = conf.feed
               lastBuildDate = now |> DateTime.toRFC822DateTime
-              generator = conf.generator }
+              generator = generatorName }
             items
 
     rss
@@ -307,25 +308,25 @@ let generateFeed (conf: FeedConf) =
     |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
 
 [<AutoOpen>]
-module Page =
+module Rndering =
     let argv = Misc.argv
     type FixedSiteContent = Misc.FixedSiteContent
 
-    let private readAndWrite (site: FixedSiteContent) tagDist source dist =
+    let private readAndWrite (site: FixedSiteContent) tagDest source dest =
         promise {
             printfn $"Rendering {source}..."
             let! m = IO.readFile source
 
             let tagToElement tag =
-                Component.liAWithClass $"{site.pathRoot}{tagDist}/{tag}.html" tag [ "tag" ]
+                Component.liAWithClass $"{site.pathRoot}{tagDest}/{tag}.html" tag [ "tag" ]
 
-            let leaf = IO.leaf dist
+            let leaf = IO.leaf dest
 
             // TODO: add root path to fixed site content for removing this condition.
             let path =
                 match leaf with
                 | "index.html" -> leaf
-                | _ -> $"{dist |> IO.parent |> IO.leaf}/{leaf}"
+                | _ -> $"{dest |> IO.parent |> IO.leaf}/{leaf}"
 
             let fm, content, page =
                 m
@@ -348,9 +349,9 @@ module Page =
                     |> Parser.parseReactStaticHtml
 
 
-            printfn $"Writing {dist}..."
+            printfn $"Writing {dest}..."
 
-            do! IO.writeFile dist page
+            do! IO.writeFile dest page
 
             let layout = discriminateLayout source
 
@@ -376,18 +377,18 @@ module Page =
                   date = date }
         }
 
-    let renderMarkdowns site tagDist sourceDir distDir =
+    let renderMarkdowns site tagDest sourceDir destDir =
         promise {
             let! files = getMarkdownFiles sourceDir
-            let rw = readAndWrite site tagDist
+            let rw = readAndWrite site tagDest
 
             return!
                 files
                 |> List.map (fun source ->
-                    let dist = getDistPath source distDir
+                    let dest = getDestinationPath source destDir
 
                     promise {
-                        let! meta = rw source dist
+                        let! meta = rw source dest
 
                         return meta
 
@@ -395,20 +396,20 @@ module Page =
                 |> Promise.all
         }
 
-    let renderIndex site tagDist metaPosts dist =
+    let renderIndex site tagDest metaPosts dest =
         let latest =
             metaPosts
             |> Seq.map (fun m -> m.source)
             |> getLatestPost
 
         promise {
-            let rw = readAndWrite site tagDist
-            let dist = IO.resolve dist
+            let rw = readAndWrite site tagDest
+            let dest = IO.resolve dest
 
-            do! rw latest dist |> Promise.map ignore
+            do! rw latest dest |> Promise.map ignore
         }
 
-    let renderArchives site archives dist =
+    let renderArchives site archives dest =
         promise {
             printfn "Rendering archives..."
             let! archives, locs = generateArchives site.pathRoot archives
@@ -419,16 +420,16 @@ module Page =
                 |> frame
                     { site with
                         title = $"{site.title} - Archives"
-                        url = $"{site.url}{site.pathRoot}/{IO.leaf dist}" }
+                        url = $"{site.url}{site.pathRoot}/{IO.leaf dest}" }
                 |> Parser.parseReactStaticHtml
 
-            printfn $"Writing archives {dist}..."
+            printfn $"Writing archives {dest}..."
 
-            do! IO.writeFile dist content
+            do! IO.writeFile dest content
             return locs
         }
 
-    let renderTags (site: FixedSiteContent) def dist =
+    let renderTags (site: FixedSiteContent) def dest =
         let tagsContent, tagPageContents, locs = generateTagsContent site.pathRoot def
 
         promise {
@@ -441,19 +442,19 @@ module Page =
                 |> frame
                     { site with
                         title = title
-                        url = $"{site.url}{site.pathRoot}/{IO.leaf dist}" }
+                        url = $"{site.url}{site.pathRoot}/{IO.leaf dest}" }
                 |> Parser.parseReactStaticHtml
 
-            printfn $"Writing tags {dist}..."
+            printfn $"Writing tags {dest}..."
 
-            do! IO.writeFile dist content
+            do! IO.writeFile dest content
 
             do!
                 tagPageContents
                 |> List.map (fun (tag, tagPageContent) ->
-                    let dist = IO.resolve ($"""{dist.Replace(".html", "")}/{tag}.html""")
-                    let parent = dist |> IO.parent |> IO.leaf
-                    printfn $"Writing tag {dist}..."
+                    let dest = IO.resolve ($"""{dest.Replace(".html", "")}/{tag}.html""")
+                    let parent = dest |> IO.parent |> IO.leaf
+                    printfn $"Writing tag {dest}..."
 
                     let content =
                         tagPageContent
@@ -461,17 +462,17 @@ module Page =
                         |> frame
                             { site with
                                 title = $"{title} - {tag}"
-                                url = $"{site.url}{site.pathRoot}/{parent}/{IO.leaf dist}" }
+                                url = $"{site.url}{site.pathRoot}/{parent}/{IO.leaf dest}" }
                         |> Parser.parseReactStaticHtml
 
-                    IO.writeFile dist content |> Promise.map ignore)
+                    IO.writeFile dest content |> Promise.map ignore)
                 |> Promise.all
                 |> Promise.map ignore
 
             return locs
         }
 
-    let render404 site dist =
+    let render404 site dest =
         promise {
             printfn "Rendering 404..."
 
@@ -481,30 +482,30 @@ module Page =
                 |> frame
                     { site with
                         title = $"{site.title} - 404"
-                        url = $"{site.url}{site.pathRoot}/{IO.leaf dist}" }
+                        url = $"{site.url}{site.pathRoot}/{IO.leaf dest}" }
                 |> Parser.parseReactStaticHtml
 
-            printfn $"Writing 404 {dist}..."
+            printfn $"Writing 404 {dest}..."
 
-            do! IO.writeFile dist content
+            do! IO.writeFile dest content
         }
 
-    let renderSitemap root dist (locs: SiteLocation seq) =
+    let renderSitemap root dest (locs: SiteLocation seq) =
         promise {
             printfn "Rendering sitemap..."
             let sitemap = generateSitemap root locs
 
-            printfn $"Writing sitemap {dist}..."
-            do! IO.writeFile dist sitemap
+            printfn $"Writing sitemap {dest}..."
+            do! IO.writeFile dest sitemap
         }
 
-    let renderFeed (conf: FeedConf) dist =
+    let renderFeed (conf: FeedConf) dest =
         promise {
             printfn "Rendering feed..."
             let feed = generateFeed conf
 
-            printfn $"Writing feed {dist}..."
-            do! IO.writeFile dist feed
+            printfn $"Writing feed {dest}..."
+            do! IO.writeFile dest feed
         }
 
     let copyResources resources =
@@ -513,10 +514,10 @@ module Page =
 
             return!
                 resources
-                |> List.map (fun (source, dist) ->
+                |> List.map (fun (source, dest) ->
                     promise {
                         printfn $"Copying {source}..."
-                        do! IO.copy source dist
+                        do! IO.copy source dest
                     })
                 |> Promise.all
                 |> Promise.map ignore
