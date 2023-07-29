@@ -581,8 +581,7 @@ let render (opts: RnderOptions) =
 
         let devInjection, devScript =
             match opts.stage with
-            | Development ->
-                Some("/js/live-reload.js"), [ ("js/live-reload.js", $"{opts.dst}{opts.pathRoot}/js/live-reload.js") ]
+            | Development -> Some("/js/dev.js"), [ ("src/Dev.fs.js", $"{opts.dst}{opts.pathRoot}/js/dev.js") ]
             | Production -> None, []
 
         let site: FixedSiteContent =
