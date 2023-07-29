@@ -2,118 +2,34 @@ module App
 
 open StaticWebGenerator
 
-type Mode =
-    | Development
-    | Production
+render
+    { stage = dev
+      lang = "ja"
+      siteName = "Blog Title"
+      description = "Blog Description"
+      siteUrl = "https://krymtkts.github.io"
+      pathRoot = "/blog-fable"
+      copyright = "2023 krymtkts"
+      favicon = "/img/favicon.ico"
 
-let private render stage =
-    promise {
-        let siteName = "Blog Title"
-        let description = "Blog Description"
-        let copyright = "2023 krymtkts"
+      src = "contents"
+      dst = "docs"
 
-        let navi =
-            [ Title
-                  { text = siteName
-                    path = "/blog-fable/index.html"
-                    sitemap = Yes "1.0" }
-              Link
-                  { text = "Archives"
-                    path = "/blog-fable/archives.html"
-                    sitemap = Yes "0.9" }
-              Link
-                  { text = "Tags"
-                    path = "/blog-fable/tags.html"
-                    sitemap = Yes "0.9" }
-              Link
-                  { text = "About Me"
-                    path = "/blog-fable/pages/about.html"
-                    sitemap = No }
-              Link
-                  { text = "RSS"
-                    path = "/blog-fable/feed.xml"
-                    sitemap = No } ]
+      postsRoot = "/posts"
+      postsTitle = "Posts"
+      pagesRoot = "/pages"
+      paesTitle = "Pages"
+      tagsRoot = "/tags"
+      tagsTitle = "Tags"
+      archivesRoot = "/archives"
+      archivesTitle = "Archives"
 
-        let navbar, navSitemap = generateNavbar navi
+      feed = "feed"
 
-        let devInjection, devScript =
-            match stage with
-            | Development ->
-                Some("/blog-fable/live-reload.js"), [ ("js/live-reload.js", "docs/blog-fable/live-reload.js") ]
-            | Production -> None, []
+      additionalNavs =
+          [ Link
+                { text = "About Me"
+                  path = "/pages/about.html"
+                  sitemap = No } ]
 
-        let site: FixedSiteContent =
-            { lang = "ja"
-              navbar = navbar
-              name = siteName
-              title = siteName
-              description = description
-              url = "https://krymtkts.github.io/blog-fable"
-              copyright = copyright
-              favicon = "/blog-fable/img/favicon.ico"
-              devInjection = devInjection }
-
-        let renderPostAndPages = renderMarkdowns site "/blog-fable/tags"
-        let! metaPosts = renderPostAndPages "contents/posts" "docs/blog-fable/posts"
-        let! metaPages = renderPostAndPages "contents/pages" "docs/blog-fable/pages"
-
-        do! renderIndex site "/blog-fable/tags" metaPosts "docs/blog-fable/index.html"
-
-        let archiveDefs =
-            [ Posts
-                  { title = "Posts"
-                    metas = metaPosts
-                    root = "/blog-fable/posts"
-                    priority = "0.8" }
-              Pages
-                  { title = "Pages"
-                    metas = metaPages
-                    root = "/blog-fable/pages"
-                    priority = "0.8" } ]
-
-        let! archiveLocs = renderArchives site archiveDefs "docs/blog-fable/archives.html"
-
-        let tagDef =
-            { title = "Tags"
-              metas = Seq.concat [ metaPosts; metaPages ]
-              root = "/blog-fable/tags"
-              postRoot = "/blog-fable/posts"
-              priority = "0.9" }
-
-        let! tagLocs = renderTags site tagDef "docs/blog-fable/tags.html"
-        do! render404 site "docs/blog-fable/404.html"
-
-        do!
-            renderSitemap
-                "https://krymtkts.github.io"
-                "docs/blog-fable/sitemap.xml"
-                (Seq.concat [ navSitemap
-                              tagLocs
-                              archiveLocs ])
-
-        do!
-            renderFeed
-                { title = siteName
-                  description = description
-                  link = "https://krymtkts.github.io/blog-fable"
-                  feed = "/feed.xml"
-                  generator = "blog-fable"
-                  postRoot = "/posts"
-                  posts = metaPosts }
-                "docs/blog-fable/feed.xml"
-
-        do!
-            copyResources
-            <| [ ("contents/img/favicon.ico", "docs/blog-fable/img/favicon.ico") ]
-               @ devScript
-
-        printfn "Render complete!"
     }
-    |> ignore
-
-let dev =
-    match List.ofSeq argv with
-    | [ _; _; mode ] when mode = "dev" -> Development
-    | _ -> Production
-
-render dev

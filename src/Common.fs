@@ -191,6 +191,7 @@ module Misc =
           name: string
           title: string
           description: string
+          pathRoot: string
           url: string
           copyright: string
           favicon: string
@@ -245,10 +246,10 @@ module Misc =
                                     | Some src ->
                                         Html.script [ prop.lang "javascript"
                                                       prop.type' "text/javascript"
-                                                      prop.src src ]
+                                                      prop.src $"{site.pathRoot}{src}" ]
                                     | None -> null ] ]
 
-    let getDistPath (source: string) (dir: string) =
+    let getDestinationPath (source: string) (dir: string) =
         Directory.leaf source
         |> Util.mdToHtml
         |> Directory.join2 dir

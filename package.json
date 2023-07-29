@@ -3,8 +3,9 @@
   "type": "module",
   "scripts": {
     "postinstall": "dotnet tool restore",
-    "dev": "dotnet fsi ./dev-server.fsx",
-    "build": "dotnet fable src --runScript"
+    "serve": "dotnet fsi ./dev-server.fsx",
+    "build": "dotnet fable src --runScript",
+    "dev": "npm run build dev && npm run serve"
   },
   "version": "1.0.0",
   "devDependencies": {
