@@ -1,13 +1,10 @@
 module Common
 
 open System.Text.RegularExpressions
-open Fable.Core.JsInterop
 open Fable.Core
+open Fable.Core.JsInterop
 open Feliz
 open Node
-open Marked
-open HighlightJs
-open Yaml
 
 module IO =
     let resolve (path: string) = File.absolutePath path
@@ -19,6 +16,8 @@ module IO =
     let parent = Directory.dirname
 
 module private Util =
+    open HighlightJs
+    open Marked
 
     let mdToHtml s = Regex.Replace(s, @"\.md\b", ".html")
 
@@ -29,7 +28,7 @@ module private Util =
             let heading =
                 fun (text: string) (level: int) ->
                     let escapedText = Regex.Replace(string text, @"[^\w]+", "-")
-                    let l = level.ToString()
+                    let l = string level
 
                     $"""<h{l}><a name="{escapedText}" class="anchor" href="#{escapedText}">{text}</a></h{l}>"""
 
@@ -103,21 +102,28 @@ module Component =
         liA ref <| Text title
 
 module Parser =
+    open Yaml
+
     type FrontMatter =
         abstract title: string
         abstract tags: string array option
         abstract date: string option
 
-    let private pattern =
-        Regex(@"^---\s*\n(?<frontMatter>[\s\S]*?)\n?---\s*\n?(?<content>[\s\S]*)")
+    let private matchFrontMatter s =
+        Regex.Match(s, @"^---\s*\n(?<frontMatter>[\s\S]*?)\n?---\s*\n?(?<content>[\s\S]*)")
+
+    let (|Empty|Matched|) (xs: Match) =
+        match xs.Success with
+        | false -> Empty
+        | _ -> Matched xs
 
     let private extractFrontMatter (str: string) =
-        match pattern.IsMatch str with
-        | true ->
-            let matches = pattern.Match str
-            let f: FrontMatter = Yaml.parse matches.Groups.["frontMatter"].Value
-            Some(f), matches.Groups.["content"].Value
-        | _ -> None, str
+        matchFrontMatter str
+        |> function
+            | Empty -> None, str
+            | Matched matches ->
+                let f: FrontMatter = Yaml.parse matches.Groups.["frontMatter"].Value
+                Some(f), matches.Groups.["content"].Value
 
     /// Parses a markdown string
     let parseMarkdown str = Util.parseMarkdown str
@@ -168,9 +174,7 @@ module Misc =
 
         match leaf.Split '-' |> List.ofArray with
         | year :: month :: day :: _ ->
-            match [ year; month; day ]
-                  |> List.map System.Int32.TryParse
-                with
+            match [ year; month; day ] |> List.map Int32.TryParse with
             | [ (true, year); (true, month); (true, day) ] ->
                 let date = $"%04d{year}-%02d{month}-%02d{day}"
                 Post(date)
@@ -311,6 +315,10 @@ module Misc =
                 | x -> x)
         )
 
+module String =
+
+    let inline format pattern x =
+        (^a: (member ToString: string -> string) (x, pattern))
 
 module DateTime =
     open System
@@ -329,9 +337,8 @@ module DateTime =
 
     // TODO: write binding.
     let formatter: obj = Intl.DateTimeFormat "en-US" options
-    let zonePattern = new Regex(@"GMT([+-])(\d+)")
 
-    let toRFC822DateTime (d: DateTime) =
+    let toRFC822DateTimeString (d: DateTime) =
         let parts: obj [] = formatter?formatToParts (d)
         let p: string [] = parts |> Array.map (fun x -> x?value)
         let d = $"{p.[0]}{p.[1]}{p.[4]} {p.[2]} {p.[6]}"
@@ -341,7 +348,7 @@ module DateTime =
             match p.[14] with
             | "UTC" -> "+0000"
             | z ->
-                let item = zonePattern.Matches(z)
+                let item = Regex.Matches(z, @"GMT([+-])(\d+)")
                 let group = item.Item 0
                 let op = (group.Groups.Item 1).Value
                 let offset = int (group.Groups.Item 2).Value
@@ -350,8 +357,7 @@ module DateTime =
 
         $"{d} {t} {z}"
 
-module String =
-    open System
+    let parseToRFC822DateTimeString (s: string) =
+        DateTime.Parse(s) |> toRFC822DateTimeString
 
-    let toRFC822DateTime (s: string) =
-        DateTime.Parse(s) |> DateTime.toRFC822DateTime
+    let toRFC3339Date (d: DateTime) = d |> String.format "yyyy-MM-dd"

@@ -1,11 +1,8 @@
 // ts2fable 0.7.1
 module rec HighlightJs
 
-open System
+open System.Text.RegularExpressions
 open Fable.Core
-open Fable.Core.JsInterop
-
-type RegExp = System.Text.RegularExpressions.Regex
 
 [<ImportDefault("highlight.js")>]
 let hljs: Hljs.IExports = jsNative
@@ -27,7 +24,7 @@ module Hljs =
         abstract listLanguages: unit -> ResizeArray<string>
         abstract getLanguage: name: string -> IMode
         abstract ``inherit``: parent: obj * obj: obj -> obj
-        abstract COMMENT: ``begin``: U2<string, RegExp> * ``end``: U2<string, RegExp> * inherits: IModeBase -> IMode
+        abstract COMMENT: ``begin``: U2<string, Regex> * ``end``: U2<string, Regex> * inherits: IModeBase -> IMode
         abstract IDENT_RE: string
         abstract UNDERSCORE_IDENT_RE: string
         abstract NUMBER_RE: string
@@ -98,8 +95,8 @@ module Hljs =
     type IModeBase =
         abstract className: string option with get, set
         abstract aliases: ResizeArray<string> option with get, set
-        abstract ``begin``: U2<string, RegExp> option with get, set
-        abstract ``end``: U2<string, RegExp> option with get, set
+        abstract ``begin``: U2<string, Regex> option with get, set
+        abstract ``end``: U2<string, Regex> option with get, set
         abstract case_insensitive: bool option with get, set
         abstract beginKeyword: string option with get, set
         abstract endsWithParent: bool option with get, set
@@ -127,7 +124,7 @@ module Hljs =
         abstract compiled: bool with get, set
         abstract contains: ResizeArray<ICompiledMode> option with get, set
         abstract keywords: obj option with get, set
-        abstract terminators: RegExp with get, set
+        abstract terminators: Regex with get, set
         abstract terminator_end: string option with get, set
 
     [<AllowNullLiteral>]

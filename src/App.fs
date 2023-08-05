@@ -15,21 +15,17 @@ render
       src = "contents"
       dst = "docs"
 
-      postsRoot = "/posts"
-      postsTitle = "Posts"
-      pagesRoot = "/pages"
-      paesTitle = "Pages"
-      tagsRoot = "/tags"
-      tagsTitle = "Tags"
-      archivesRoot = "/archives"
-      archivesTitle = "Archives"
+      posts = { root = "/posts"; title = "Posts" }
+      pages = { root = "/pages"; title = "Pages" }
+      tags = { root = "/tags"; title = "Tags" }
+      archives =
+        { root = "/archives"
+          title = "Archives" }
 
-      feed = "feed"
+      feedName = "feed"
 
       additionalNavs =
-          [ Link
-                { text = "About Me"
-                  path = "/pages/about.html"
-                  sitemap = No } ]
+          [ { text = "About Me"
+              path = "/pages/about.html" } ]
 
     }

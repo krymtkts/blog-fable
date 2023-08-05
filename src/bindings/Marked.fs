@@ -2,11 +2,11 @@
 module rec Marked
 
 open System
+open System.Text.RegularExpressions
 open Fable.Core
 open Fable.Core.JS
 
 type Array<'T> = System.Collections.Generic.IList<'T>
-type RegExp = System.Text.RegularExpressions.Regex
 
 [<Import("marked", "marked")>]
 let marked: Marked.IExports = jsNative
@@ -349,7 +349,7 @@ module Marked =
     [<AllowNullLiteral>]
     type Rules =
         [<Emit "$0[$1]{{=$2}}">]
-        abstract Item: ruleName: string -> U2<RegExp, Rules> with get, set
+        abstract Item: ruleName: string -> U2<Regex, Rules> with get, set
 
     [<AllowNullLiteral>]
     type TokensList =

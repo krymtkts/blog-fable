@@ -135,7 +135,7 @@ module Generation =
             |> Map.toList
             |> Seq.map (fun (tag, _) ->
                 { loc = sourceToSitemap $"{pathRoot}{def.tagRoot}" $"{tag}.html"
-                  lastmod = now.ToString("yyyy-MM-dd")
+                  lastmod = now |> DateTime.toRFC3339Date
                   priority = def.priority })
 
         tagsContent, tagPageContens, locs
@@ -163,7 +163,7 @@ module Generation =
                 | Yes n ->
                     Some
                         { loc = $"{pathRoot}{navi.path}"
-                          lastmod = now.ToString("yyyy-MM-dd")
+                          lastmod = now |> DateTime.toRFC3339Date
                           priority = n }
                 | No -> None
 
@@ -281,7 +281,7 @@ module Generation =
                         | Some d -> d
                         | None -> meta.date
                     | None -> meta.date
-                    |> String.toRFC822DateTime
+                    |> DateTime.parseToRFC822DateTimeString
 
                 { guid = link
                   link = link
@@ -299,7 +299,7 @@ module Generation =
                   description = conf.description
                   link = conf.link
                   xml = conf.feed
-                  lastBuildDate = now |> DateTime.toRFC822DateTime
+                  lastBuildDate = now |> DateTime.toRFC822DateTimeString
                   generator = generatorName }
                 items
 
@@ -364,7 +364,7 @@ module Rndering =
             let date =
                 match layout with
                 | Post d -> chooseDate fm d
-                | Page -> chooseDate fm <| now.ToString("yyyy-MM-dd")
+                | Page -> chooseDate fm <| DateTime.toRFC3339Date now
 
             return
                 { frontMatter = fm
@@ -525,6 +525,10 @@ type Mode =
     | Development
     | Production
 
+type Content = { root: string; title: string }
+
+type AdditionalNav = { text: string; path: string }
+
 type RnderOptions =
     { stage: Mode
       siteName: string
@@ -538,51 +542,60 @@ type RnderOptions =
       src: string
       dst: string
 
-      postsRoot: string
-      postsTitle: string
-      pagesRoot: string
-      paesTitle: string
-      tagsRoot: string
-      tagsTitle: string
-      archivesRoot: string
-      archivesTitle: string
+      posts: Content
+      pages: Content
+      tags: Content
+      archives: Content
 
-      additionalNavs: Nav list
+      additionalNavs: AdditionalNav list
 
-      feed: string
+      feedName: string
 
      }
 
+let private buildNavList opts =
+    let index = "/index.html"
+    let feed = $"/{opts.feedName}.xml"
+
+    index,
+    feed,
+    List.concat [ [ Title
+                        { text = opts.siteName
+                          path = index
+                          sitemap = Yes "1.0" }
+                    Link
+                        { text = opts.archives.title
+                          path = $"{opts.archives.root}.html"
+                          sitemap = Yes "0.9" }
+                    Link
+                        { text = opts.tags.title
+                          path = $"{opts.tags.root}.html"
+                          sitemap = Yes "0.9" } ]
+                  List.map
+                      (fun n ->
+                          Link
+                              { text = n.text
+                                path = n.path
+                                sitemap = No })
+                      opts.additionalNavs
+                  [ Link
+                        { text = "RSS"
+                          path = feed
+                          sitemap = No } ] ]
+
+let private buildDevScript opts =
+    match opts.stage with
+    | Development -> Some("/js/dev.js"), [ ("src/Dev.fs.js", $"{opts.dst}{opts.pathRoot}/js/dev.js") ]
+    | Production -> None, []
+
 let render (opts: RnderOptions) =
     promise {
-        let index = "/index.html"
-        let feed = $"/{opts.feed}.xml"
+        let index, feed, navs = buildNavList opts
 
-        let navs =
-            [ Title
-                  { text = opts.siteName
-                    path = index
-                    sitemap = Yes "1.0" }
-              Link
-                  { text = opts.archivesTitle
-                    path = $"{opts.archivesRoot}.html"
-                    sitemap = Yes "0.9" }
-              Link
-                  { text = opts.tagsTitle
-                    path = $"{opts.tagsRoot}.html"
-                    sitemap = Yes "0.9" } ]
-            @ opts.additionalNavs
-              @ [ Link
-                      { text = "RSS"
-                        path = feed
-                        sitemap = No } ]
+        let (navbar: Fable.React.ReactElement), navSitemap =
+            generateNavbar opts.pathRoot navs
 
-        let navbar, navSitemap = generateNavbar opts.pathRoot navs
-
-        let devInjection, devScript =
-            match opts.stage with
-            | Development -> Some("/js/dev.js"), [ ("src/Dev.fs.js", $"{opts.dst}{opts.pathRoot}/js/dev.js") ]
-            | Production -> None, []
+        let devInjection, devScript = buildDevScript opts
 
         let site: FixedSiteContent =
             { lang = opts.lang
@@ -591,39 +604,39 @@ let render (opts: RnderOptions) =
               title = opts.siteName
               description = opts.description
               url = opts.siteUrl
-              pathRoot = opts.pathRoot
+              pathRoot = opts.pathRoot // TODO: remove pathRoot from here and add to new created path type that includes src, dst and pathRoot.
               copyright = opts.copyright
               favicon = opts.favicon
               devInjection = devInjection }
 
-        let renderPostAndPages = renderMarkdowns site opts.tagsRoot
-        let! metaPosts = renderPostAndPages $"{opts.src}{opts.postsRoot}" $"{opts.dst}{opts.pathRoot}{opts.postsRoot}"
-        let! metaPages = renderPostAndPages $"{opts.src}{opts.pagesRoot}" $"{opts.dst}{opts.pathRoot}{opts.pagesRoot}"
+        let renderPostAndPages = renderMarkdowns site opts.tags.root
+        let! metaPosts = renderPostAndPages $"{opts.src}{opts.posts.root}" $"{opts.dst}{opts.pathRoot}{opts.posts.root}"
+        let! metaPages = renderPostAndPages $"{opts.src}{opts.pages.root}" $"{opts.dst}{opts.pathRoot}{opts.pages.root}"
 
-        do! renderIndex site opts.tagsRoot metaPosts $"{opts.dst}{opts.pathRoot}{index}"
+        do! renderIndex site opts.tags.root metaPosts $"{opts.dst}{opts.pathRoot}{index}"
 
         let archiveDefs =
             [ Posts
-                  { title = opts.postsTitle
+                  { title = opts.posts.title
                     metas = metaPosts
-                    root = opts.postsRoot
+                    root = opts.posts.root
                     priority = "0.8" }
               Pages
-                  { title = opts.paesTitle
+                  { title = opts.pages.title
                     metas = metaPages
-                    root = opts.pagesRoot
+                    root = opts.pages.root
                     priority = "0.8" } ]
 
-        let! archiveLocs = renderArchives site archiveDefs $"{opts.dst}{site.pathRoot}{opts.archivesRoot}.html"
+        let! archiveLocs = renderArchives site archiveDefs $"{opts.dst}{site.pathRoot}{opts.archives.root}.html"
 
         let tagDef =
-            { title = opts.tagsTitle
+            { title = opts.tags.title
               metas = Seq.concat [ metaPosts; metaPages ]
-              tagRoot = opts.tagsRoot
-              postRoot = opts.postsRoot
+              tagRoot = opts.tags.root
+              postRoot = opts.posts.root
               priority = "0.9" }
 
-        let! tagLocs = renderTags site tagDef $"{opts.dst}{site.pathRoot}{opts.tagsRoot}.html"
+        let! tagLocs = renderTags site tagDef $"{opts.dst}{site.pathRoot}{opts.tags.root}.html"
         do! render404 site $"{opts.dst}{opts.pathRoot}/404.html"
 
         do!
@@ -634,14 +647,13 @@ let render (opts: RnderOptions) =
                               tagLocs
                               archiveLocs ])
 
-
         do!
             renderFeed
                 { title = opts.siteName
                   description = opts.description
                   link = $"{opts.siteUrl}{opts.pathRoot}"
                   feed = feed
-                  postRoot = opts.postsRoot
+                  postRoot = opts.posts.root
                   posts = metaPosts }
                 $"{opts.dst}{opts.pathRoot}{feed}"
 
