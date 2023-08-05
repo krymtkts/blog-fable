@@ -1,13 +1,10 @@
 module Common
 
 open System.Text.RegularExpressions
-open Fable.Core.JsInterop
 open Fable.Core
+open Fable.Core.JsInterop
 open Feliz
 open Node
-open Marked
-open HighlightJs
-open Yaml
 
 module IO =
     let resolve (path: string) = File.absolutePath path
@@ -19,6 +16,8 @@ module IO =
     let parent = Directory.dirname
 
 module private Util =
+    open HighlightJs
+    open Marked
 
     let mdToHtml s = Regex.Replace(s, @"\.md\b", ".html")
 
@@ -103,6 +102,8 @@ module Component =
         liA ref <| Text title
 
 module Parser =
+    open Yaml
+
     type FrontMatter =
         abstract title: string
         abstract tags: string array option
@@ -173,9 +174,7 @@ module Misc =
 
         match leaf.Split '-' |> List.ofArray with
         | year :: month :: day :: _ ->
-            match [ year; month; day ]
-                  |> List.map System.Int32.TryParse
-                with
+            match [ year; month; day ] |> List.map Int32.TryParse with
             | [ (true, year); (true, month); (true, day) ] ->
                 let date = $"%04d{year}-%02d{month}-%02d{day}"
                 Post(date)

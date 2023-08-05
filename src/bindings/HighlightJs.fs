@@ -1,8 +1,8 @@
 // ts2fable 0.7.1
 module rec HighlightJs
 
-open Fable.Core
 open System.Text.RegularExpressions
+open Fable.Core
 
 [<ImportDefault("highlight.js")>]
 let hljs: Hljs.IExports = jsNative
