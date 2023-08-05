@@ -108,16 +108,21 @@ module Parser =
         abstract tags: string array option
         abstract date: string option
 
-    let private pattern =
-        Regex(@"^---\s*\n(?<frontMatter>[\s\S]*?)\n?---\s*\n?(?<content>[\s\S]*)")
+    let private matchFrontMatter s =
+        Regex.Match(s, @"^---\s*\n(?<frontMatter>[\s\S]*?)\n?---\s*\n?(?<content>[\s\S]*)")
+
+    let (|Empty|Matched|) (xs: Match) =
+        match xs.Success with
+        | false -> Empty
+        | _ -> Matched xs
 
     let private extractFrontMatter (str: string) =
-        match pattern.IsMatch str with
-        | true ->
-            let matches = pattern.Match str
-            let f: FrontMatter = Yaml.parse matches.Groups.["frontMatter"].Value
-            Some(f), matches.Groups.["content"].Value
-        | _ -> None, str
+        matchFrontMatter str
+        |> function
+            | Empty -> None, str
+            | Matched matches ->
+                let f: FrontMatter = Yaml.parse matches.Groups.["frontMatter"].Value
+                Some(f), matches.Groups.["content"].Value
 
     /// Parses a markdown string
     let parseMarkdown str = Util.parseMarkdown str
@@ -333,7 +338,6 @@ module DateTime =
 
     // TODO: write binding.
     let formatter: obj = Intl.DateTimeFormat "en-US" options
-    let zonePattern = new Regex(@"GMT([+-])(\d+)")
 
     let toRFC822DateTimeString (d: DateTime) =
         let parts: obj [] = formatter?formatToParts (d)
@@ -345,7 +349,7 @@ module DateTime =
             match p.[14] with
             | "UTC" -> "+0000"
             | z ->
-                let item = zonePattern.Matches(z)
+                let item = Regex.Matches(z, @"GMT([+-])(\d+)")
                 let group = item.Item 0
                 let op = (group.Groups.Item 1).Value
                 let offset = int (group.Groups.Item 2).Value
