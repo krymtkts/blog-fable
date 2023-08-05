@@ -135,7 +135,7 @@ module Generation =
             |> Map.toList
             |> Seq.map (fun (tag, _) ->
                 { loc = sourceToSitemap $"{pathRoot}{def.tagRoot}" $"{tag}.html"
-                  lastmod = now.ToString("yyyy-MM-dd")
+                  lastmod = now |> DateTime.toRFC3339Date
                   priority = def.priority })
 
         tagsContent, tagPageContens, locs
@@ -163,7 +163,7 @@ module Generation =
                 | Yes n ->
                     Some
                         { loc = $"{pathRoot}{navi.path}"
-                          lastmod = now.ToString("yyyy-MM-dd")
+                          lastmod = now |> DateTime.toRFC3339Date
                           priority = n }
                 | No -> None
 
@@ -281,7 +281,7 @@ module Generation =
                         | Some d -> d
                         | None -> meta.date
                     | None -> meta.date
-                    |> String.toRFC822DateTime
+                    |> DateTime.parseToRFC822DateTimeString
 
                 { guid = link
                   link = link
@@ -299,7 +299,7 @@ module Generation =
                   description = conf.description
                   link = conf.link
                   xml = conf.feed
-                  lastBuildDate = now |> DateTime.toRFC822DateTime
+                  lastBuildDate = now |> DateTime.toRFC822DateTimeString
                   generator = generatorName }
                 items
 
@@ -364,7 +364,7 @@ module Rndering =
             let date =
                 match layout with
                 | Post d -> chooseDate fm d
-                | Page -> chooseDate fm <| now.ToString("yyyy-MM-dd")
+                | Page -> chooseDate fm <| DateTime.toRFC3339Date now
 
             return
                 { frontMatter = fm

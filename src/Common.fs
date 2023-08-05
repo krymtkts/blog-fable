@@ -29,7 +29,7 @@ module private Util =
             let heading =
                 fun (text: string) (level: int) ->
                     let escapedText = Regex.Replace(string text, @"[^\w]+", "-")
-                    let l = level.ToString()
+                    let l = string level
 
                     $"""<h{l}><a name="{escapedText}" class="anchor" href="#{escapedText}">{text}</a></h{l}>"""
 
@@ -311,6 +311,10 @@ module Misc =
                 | x -> x)
         )
 
+module String =
+
+    let inline format pattern x =
+        (^a: (member ToString: string -> string) (x, pattern))
 
 module DateTime =
     open System
@@ -331,7 +335,7 @@ module DateTime =
     let formatter: obj = Intl.DateTimeFormat "en-US" options
     let zonePattern = new Regex(@"GMT([+-])(\d+)")
 
-    let toRFC822DateTime (d: DateTime) =
+    let toRFC822DateTimeString (d: DateTime) =
         let parts: obj [] = formatter?formatToParts (d)
         let p: string [] = parts |> Array.map (fun x -> x?value)
         let d = $"{p.[0]}{p.[1]}{p.[4]} {p.[2]} {p.[6]}"
@@ -350,8 +354,7 @@ module DateTime =
 
         $"{d} {t} {z}"
 
-module String =
-    open System
+    let parseToRFC822DateTimeString (s: string) =
+        DateTime.Parse(s) |> toRFC822DateTimeString
 
-    let toRFC822DateTime (s: string) =
-        DateTime.Parse(s) |> DateTime.toRFC822DateTime
+    let toRFC3339Date (d: DateTime) = d |> String.format "yyyy-MM-dd"
