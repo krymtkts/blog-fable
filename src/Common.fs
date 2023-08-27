@@ -25,43 +25,39 @@ module private Util =
         let markedHighlight: obj -> Marked.MarkedExtension = importMember "marked-highlight"
 
         let renderer =
-            let heading =
-                fun (text: string) (level: int) ->
-                    let escapedText = Regex.Replace(string text, @"[^\w]+", "-")
-                    let l = string level
+            let heading text level =
+                let escapedText = Regex.Replace(text, @"[^\w]+", "-")
+                let l = level
 
-                    $"""<h{l}><a name="{escapedText}" class="anchor" href="#{escapedText}">{text}</a></h{l}>"""
+                $"""<h{l}><a name="{escapedText}" class="anchor" href="#{escapedText}">{text}</a></h{l}>"""
 
-            let link =
-                fun href title text ->
-                    let ref =
-                        match href with
-                        | Some s -> mdToHtml s
-                        | None -> ""
+            let link href title text =
+                let ref =
+                    match href with
+                    | Some s -> mdToHtml s
+                    | None -> ""
 
-                    let title =
-                        match title with
-                        | null -> text
-                        | _ -> title
+                let title =
+                    match title with
+                    | null -> text
+                    | _ -> title
 
-                    $"""<a href="{ref}" title="{title}">{text}</a>"""
+                $"""<a href="{ref}" title="{title}">{text}</a>"""
 
-            let listitem =
-                fun text task check ->
-                    let checkState =
-                        match check with
-                        | true -> "checked"
-                        | false -> ""
+            let listitem text task check =
+                let checkState =
+                    match check with
+                    | true -> "checked"
+                    | false -> ""
 
-                    match task with
-                    | true ->
-                        $"""<li><label class="checkbox"><input type="checkbox" class="checkbox" disabled {checkState} />{text}</label></li>"""
-                    | false -> $"""<li>{text}</li>"""
+                match task with
+                | true ->
+                    $"""<li><label class="checkbox"><input type="checkbox" class="checkbox" disabled {checkState} />{text}</label></li>"""
+                | false -> $"""<li>{text}</li>"""
 
-            let checkbox =
-                fun _ ->
-                    // NOTE: checkbox generation is handled by listitem.
-                    ""
+            let checkbox _ =
+                // NOTE: checkbox generation is handled by listitem.
+                ""
 
             let mops =
                 !!{| heading = heading
@@ -76,10 +72,9 @@ module private Util =
                 o.headerIds <- Some true)
 
         let highlighter =
-            let highlight =
-                fun (code: string) (lang: string) ->
-                    (hljs.highlight (code, !!{| language = lang |}))
-                        .value
+            let highlight (code: string) (lang: string) =
+                (hljs.highlight (code, !!{| language = lang |}))
+                    .value
 
             markedHighlight !!{| highlight = highlight |}
 
