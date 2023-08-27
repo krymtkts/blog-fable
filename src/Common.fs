@@ -46,7 +46,28 @@ module private Util =
 
                     $"""<a href="{ref}" title="{title}">{text}</a>"""
 
-            let mops = !!{| heading = heading; link = link |}
+            let listitem =
+                fun text task check ->
+                    let checkState =
+                        match check with
+                        | true -> "checked"
+                        | false -> ""
+
+                    match task with
+                    | true ->
+                        $"""<li><label class="checkbox"><input type="checkbox" class="checkbox" disabled {checkState} />{text}</label></li>"""
+                    | false -> $"""<li>{text}</li>"""
+
+            let checkbox =
+                fun _ ->
+                    // NOTE: checkbox generation is handled by listitem.
+                    ""
+
+            let mops =
+                !!{| heading = heading
+                     link = link
+                     listitem = listitem
+                     checkbox = checkbox |}
 
 
             jsOptions<Marked.MarkedExtension> (fun o ->
