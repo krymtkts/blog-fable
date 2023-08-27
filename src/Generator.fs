@@ -308,7 +308,7 @@ module Generation =
         |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
 
 [<AutoOpen>]
-module Rndering =
+module Rendering =
     let argv = Misc.argv
     type FixedSiteContent = Misc.FixedSiteContent
 
@@ -529,7 +529,7 @@ type Content = { root: string; title: string }
 
 type AdditionalNav = { text: string; path: string }
 
-type RnderOptions =
+type RenderOptions =
     { stage: Mode
       siteName: string
       description: string
@@ -553,7 +553,7 @@ type RnderOptions =
 
      }
 
-module RnderOptions =
+module RenderOptions =
     let indexPath = "/index.html"
     let feedPath opts = $"/{opts.feedName}.xml"
     let arvhivesPath opts = $"{opts.archives.root}.html"
@@ -595,20 +595,20 @@ module RnderOptions =
     let faviconDestinationPath opts = $"{destinationRoot opts}{opts.favicon}"
 
 let private buildNavList opts =
-    let feed = RnderOptions.feedPath opts
+    let feed = RenderOptions.feedPath opts
 
     feed,
     List.concat [ [ Title
                         { text = opts.siteName
-                          path = RnderOptions.indexPath
+                          path = RenderOptions.indexPath
                           sitemap = Yes "1.0" }
                     Link
                         { text = opts.archives.title
-                          path = RnderOptions.arvhivesPath opts
+                          path = RenderOptions.arvhivesPath opts
                           sitemap = Yes "0.9" }
                     Link
                         { text = opts.tags.title
-                          path = RnderOptions.tagsPath opts
+                          path = RenderOptions.tagsPath opts
                           sitemap = Yes "0.9" } ]
                   List.map
                       (fun n ->
@@ -625,11 +625,11 @@ let private buildNavList opts =
 let private buildDevScript opts =
     match opts.stage with
     | Development ->
-        Some(RnderOptions.devScriptPath),
-        [ (RnderOptions.devScriptSourcePath, RnderOptions.devScriptDestinationPath opts) ]
+        Some(RenderOptions.devScriptPath),
+        [ (RenderOptions.devScriptSourcePath, RenderOptions.devScriptDestinationPath opts) ]
     | Production -> None, []
 
-let render (opts: RnderOptions) =
+let render (opts: RenderOptions) =
     promise {
         let feed, navs = buildNavList opts
 
@@ -654,17 +654,17 @@ let render (opts: RnderOptions) =
 
         let! metaPosts =
             renderPostAndPages
-            <| RnderOptions.postsSourceRoot opts
-            <| RnderOptions.postsDestinationRoot opts
+            <| RenderOptions.postsSourceRoot opts
+            <| RenderOptions.postsDestinationRoot opts
 
         let! metaPages =
             renderPostAndPages
-            <| RnderOptions.pagesSourceRoot opts
-            <| RnderOptions.pagesDestinationRoot opts
+            <| RenderOptions.pagesSourceRoot opts
+            <| RenderOptions.pagesDestinationRoot opts
 
         do!
             renderIndex site opts.tags.root metaPosts
-            <| RnderOptions.indexDestinationPath opts
+            <| RenderOptions.indexDestinationPath opts
 
         let archiveDefs =
             [ Posts
@@ -680,7 +680,7 @@ let render (opts: RnderOptions) =
 
         let! archiveLocs =
             renderArchives site archiveDefs
-            <| RnderOptions.arvhivesDestinationPath opts
+            <| RenderOptions.arvhivesDestinationPath opts
 
         let tagDef =
             { title = opts.tags.title
@@ -691,15 +691,15 @@ let render (opts: RnderOptions) =
 
         let! tagLocs =
             renderTags site tagDef
-            <| RnderOptions.tagsDestinationPath opts
+            <| RenderOptions.tagsDestinationPath opts
 
         do!
             render404 site
-            <| RnderOptions.``404DestinationPath`` opts
+            <| RenderOptions.``404DestinationPath`` opts
 
         do!
             renderSitemap site.url
-            <| RnderOptions.sitemapDestinationPath opts
+            <| RenderOptions.sitemapDestinationPath opts
             <| (Seq.concat [ navSitemap
                              tagLocs
                              archiveLocs ])
@@ -708,15 +708,15 @@ let render (opts: RnderOptions) =
             renderFeed
                 { title = opts.siteName
                   description = opts.description
-                  link = RnderOptions.siteUrl opts
+                  link = RenderOptions.siteUrl opts
                   feed = feed
                   postRoot = opts.posts.root
                   posts = metaPosts }
-            <| RnderOptions.feedDestinationPath opts
+            <| RenderOptions.feedDestinationPath opts
 
         do!
             copyResources
-            <| [ (RnderOptions.faviconSourcePath opts, RnderOptions.faviconDestinationPath opts) ]
+            <| [ (RenderOptions.faviconSourcePath opts, RenderOptions.faviconDestinationPath opts) ]
                @ devScript
 
         printfn "Render complete!"
