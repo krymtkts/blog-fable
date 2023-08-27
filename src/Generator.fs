@@ -553,23 +553,62 @@ type RnderOptions =
 
      }
 
-let private buildNavList opts =
-    let index = "/index.html"
-    let feed = $"/{opts.feedName}.xml"
+module RnderOptions =
+    let indexPath = "/index.html"
+    let feedPath opts = $"/{opts.feedName}.xml"
+    let arvhivesPath opts = $"{opts.archives.root}.html"
+    let tagsPath opts = $"{opts.tags.root}.html"
+    let devScriptPath = "/js/dev.js"
+    let siteUrl opts = $"{opts.siteUrl}{opts.pathRoot}"
 
-    index,
+    let postsSourceRoot opts = $"{opts.src}{opts.posts.root}"
+
+    let pagesSourceRoot opts = $"{opts.src}{opts.pages.root}"
+    let devScriptSourcePath = "src/Dev.fs.js"
+    let faviconSourcePath opts = $"{opts.src}{opts.favicon}"
+
+    let destinationRoot opts = $"{opts.dst}{opts.pathRoot}"
+    let indexDestinationPath opts = $"{destinationRoot opts}{indexPath}"
+
+    let postsDestinationRoot opts =
+        $"{destinationRoot opts}{opts.posts.root}"
+
+    let pagesDestinationRoot opts =
+        $"{destinationRoot opts}{opts.pages.root}"
+
+    let arvhivesDestinationPath opts =
+        $"{destinationRoot opts}{arvhivesPath opts}"
+
+    let tagsDestinationPath opts =
+        $"{destinationRoot opts}{tagsPath opts}"
+
+    let ``404DestinationPath`` opts = $"{destinationRoot opts}/404.html"
+
+    let sitemapDestinationPath opts = $"{destinationRoot opts}/sitemap.xml"
+
+    let feedDestinationPath opts =
+        $"{destinationRoot opts}{feedPath opts}"
+
+    let devScriptDestinationPath opts =
+        $"{destinationRoot opts}{devScriptPath}"
+
+    let faviconDestinationPath opts = $"{destinationRoot opts}{opts.favicon}"
+
+let private buildNavList opts =
+    let feed = RnderOptions.feedPath opts
+
     feed,
     List.concat [ [ Title
                         { text = opts.siteName
-                          path = index
+                          path = RnderOptions.indexPath
                           sitemap = Yes "1.0" }
                     Link
                         { text = opts.archives.title
-                          path = $"{opts.archives.root}.html"
+                          path = RnderOptions.arvhivesPath opts
                           sitemap = Yes "0.9" }
                     Link
                         { text = opts.tags.title
-                          path = $"{opts.tags.root}.html"
+                          path = RnderOptions.tagsPath opts
                           sitemap = Yes "0.9" } ]
                   List.map
                       (fun n ->
@@ -585,12 +624,14 @@ let private buildNavList opts =
 
 let private buildDevScript opts =
     match opts.stage with
-    | Development -> Some("/js/dev.js"), [ ("src/Dev.fs.js", $"{opts.dst}{opts.pathRoot}/js/dev.js") ]
+    | Development ->
+        Some(RnderOptions.devScriptPath),
+        [ (RnderOptions.devScriptSourcePath, RnderOptions.devScriptDestinationPath opts) ]
     | Production -> None, []
 
 let render (opts: RnderOptions) =
     promise {
-        let index, feed, navs = buildNavList opts
+        let feed, navs = buildNavList opts
 
         let (navbar: Fable.React.ReactElement), navSitemap =
             generateNavbar opts.pathRoot navs
@@ -610,10 +651,20 @@ let render (opts: RnderOptions) =
               devInjection = devInjection }
 
         let renderPostAndPages = renderMarkdowns site opts.tags.root
-        let! metaPosts = renderPostAndPages $"{opts.src}{opts.posts.root}" $"{opts.dst}{opts.pathRoot}{opts.posts.root}"
-        let! metaPages = renderPostAndPages $"{opts.src}{opts.pages.root}" $"{opts.dst}{opts.pathRoot}{opts.pages.root}"
 
-        do! renderIndex site opts.tags.root metaPosts $"{opts.dst}{opts.pathRoot}{index}"
+        let! metaPosts =
+            renderPostAndPages
+            <| RnderOptions.postsSourceRoot opts
+            <| RnderOptions.postsDestinationRoot opts
+
+        let! metaPages =
+            renderPostAndPages
+            <| RnderOptions.pagesSourceRoot opts
+            <| RnderOptions.pagesDestinationRoot opts
+
+        do!
+            renderIndex site opts.tags.root metaPosts
+            <| RnderOptions.indexDestinationPath opts
 
         let archiveDefs =
             [ Posts
@@ -627,7 +678,9 @@ let render (opts: RnderOptions) =
                     root = opts.pages.root
                     priority = "0.8" } ]
 
-        let! archiveLocs = renderArchives site archiveDefs $"{opts.dst}{site.pathRoot}{opts.archives.root}.html"
+        let! archiveLocs =
+            renderArchives site archiveDefs
+            <| RnderOptions.arvhivesDestinationPath opts
 
         let tagDef =
             { title = opts.tags.title
@@ -636,30 +689,34 @@ let render (opts: RnderOptions) =
               postRoot = opts.posts.root
               priority = "0.9" }
 
-        let! tagLocs = renderTags site tagDef $"{opts.dst}{site.pathRoot}{opts.tags.root}.html"
-        do! render404 site $"{opts.dst}{opts.pathRoot}/404.html"
+        let! tagLocs =
+            renderTags site tagDef
+            <| RnderOptions.tagsDestinationPath opts
 
         do!
-            renderSitemap
-                site.url
-                $"{opts.dst}{opts.pathRoot}/sitemap.xml"
-                (Seq.concat [ navSitemap
-                              tagLocs
-                              archiveLocs ])
+            render404 site
+            <| RnderOptions.``404DestinationPath`` opts
+
+        do!
+            renderSitemap site.url
+            <| RnderOptions.sitemapDestinationPath opts
+            <| (Seq.concat [ navSitemap
+                             tagLocs
+                             archiveLocs ])
 
         do!
             renderFeed
                 { title = opts.siteName
                   description = opts.description
-                  link = $"{opts.siteUrl}{opts.pathRoot}"
+                  link = RnderOptions.siteUrl opts
                   feed = feed
                   postRoot = opts.posts.root
                   posts = metaPosts }
-                $"{opts.dst}{opts.pathRoot}{feed}"
+            <| RnderOptions.feedDestinationPath opts
 
         do!
             copyResources
-            <| [ ($"{opts.src}{opts.favicon}", $"{opts.dst}{opts.pathRoot}{opts.favicon}") ]
+            <| [ (RnderOptions.faviconSourcePath opts, RnderOptions.faviconDestinationPath opts) ]
                @ devScript
 
         printfn "Render complete!"
