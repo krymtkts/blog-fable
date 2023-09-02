@@ -249,9 +249,9 @@ module Misc =
                                                             prop.href site.url ]
                                                 Html.link [ prop.rel "icon"
                                                             prop.href site.favicon ]
-                                                cssLink
-                                                    "https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css"
-                                                    "sha512-HqxHUkJM0SYcbvxUw5P60SzdOTy/QVwA1JJrvaXJv4q7lmbDZCmZaqz01UPOaQveoxfYRv1tHozWGPMcuTBuvQ=="
+                                                Html.link [ prop.rel "stylesheet"
+                                                            prop.type' "text/css"
+                                                            prop.href $"{site.pathRoot}/css/style.css" ]
                                                 cssLink
                                                     "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/solarized-dark.min.css"
                                                     "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]

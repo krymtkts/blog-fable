@@ -3,6 +3,7 @@
   "type": "module",
   "scripts": {
     "postinstall": "dotnet tool restore",
+    "css-build": "node-sass --omit-source-map-url ./sass/style.scss ./docs/blog-fable/css/style.css",
     "serve": "dotnet fsi ./dev-server.fsx",
     "build": "dotnet fable src --runScript",
     "dev": "npm run build dev && npm run serve"
