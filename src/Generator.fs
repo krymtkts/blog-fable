@@ -558,6 +558,7 @@ module RenderOptions =
     let feedPath opts = $"/{opts.feedName}.xml"
     let arvhivesPath opts = $"{opts.archives.root}.html"
     let tagsPath opts = $"{opts.tags.root}.html"
+    let stylePath = "/css/style.css"
     let devScriptPath = "/js/dev.js"
     let siteUrl opts = $"{opts.siteUrl}{opts.pathRoot}"
 
@@ -648,6 +649,7 @@ let render (opts: RenderOptions) =
               pathRoot = opts.pathRoot // TODO: remove pathRoot from here and add to new created path type that includes src, dst and pathRoot.
               copyright = opts.copyright
               favicon = opts.favicon
+              style = RenderOptions.stylePath
               devInjection = devInjection }
 
         let renderPostAndPages = renderMarkdowns site opts.tags.root

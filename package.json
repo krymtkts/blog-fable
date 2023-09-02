@@ -3,19 +3,23 @@
   "type": "module",
   "scripts": {
     "postinstall": "dotnet tool restore",
+    "build-css": "sass --style=compressed --no-source-map ./sass/style.scss ./docs/blog-fable/css/style.css",
     "serve": "dotnet fsi ./dev-server.fsx",
-    "build": "dotnet fable src --runScript",
+    "build-fable": "dotnet fable src --runScript",
+    "build": "npm run build-css && npm run build-fable",
     "dev": "npm run build dev && npm run serve"
   },
   "version": "1.0.0",
   "devDependencies": {
     "@types/highlightjs": "^9.12.2",
     "@types/marked": "^4.3.0",
+    "bulma": "^0.9.4",
     "highlight.js": "^11.7.0",
     "marked": "^4.3.0",
     "marked-highlight": "^1.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "sass": "^1.66.1",
     "ts2fable": "^0.7.1",
     "yaml": "^2.2.2"
   }

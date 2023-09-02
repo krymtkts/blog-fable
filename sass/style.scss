@@ -1,0 +1,52 @@
+@charset "utf-8";
+
+// NOTE: based on https://ethanschoonover.com/solarized/
+$base03    :#002b36;
+$base02    :#073642;
+$base01    :#586e75;
+$base00    :#657b83;
+$base0     :#839496;
+$base1     :#93a1a1;
+$base2     :#eee8d5;
+$base3     :#fdf6e3;
+$yellow    :#b58900;
+$orange    :#cb4b16;
+$red       :#dc322f;
+$magenta   :#d33682;
+$violet    :#6c71c4;
+$blue      :#268bd2;
+$cyan      :#2aa198;
+$green     :#859900;
+
+@use "../node_modules/bulma/bulma.sass" with (
+    // NOTE: Solarized.
+    // $black: $base03,
+    // $black-bis: $base02,
+    // $black-ter: $base02,
+    // $grey-darker: $base00,
+    // $grey-dark: $base00,
+    // $grey: $base01,
+    // $grey-light: $base0,
+    // $grey-lighter: $base1,
+    // $grey-lightest: $base1,
+    // $white-ter: $base2,
+    // $white-bis: $base2,
+    // $white: $base3,
+    // NOTE: Solarized Dark.
+    $black: $base3,
+    $black-bis: $base2,
+    $black-ter: $base2,
+    $grey-darker: $base1,
+    $grey-dark: $base1,
+    $grey: $base0,
+    $grey-light: $base00,
+    $grey-lighter: $base01,
+    $grey-lightest: $base01,
+    $white-ter: $base02,
+    $white-bis: $base02,
+    $white: $base03,
+
+    // NOTE: set alternative colors.
+    $turquoise: $cyan,
+    $purple: $violet,
+);
