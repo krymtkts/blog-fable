@@ -3,9 +3,10 @@
   "type": "module",
   "scripts": {
     "postinstall": "dotnet tool restore",
-    "css-build": "sass --style=compressed --no-source-map ./sass/style.scss ./docs/blog-fable/css/style.css",
+    "build-css": "sass --style=compressed --no-source-map ./sass/style.scss ./docs/blog-fable/css/style.css",
     "serve": "dotnet fsi ./dev-server.fsx",
-    "build": "dotnet fable src --runScript",
+    "build-fable": "dotnet fable src --runScript",
+    "build": "npm run build-css && npm run build-fable",
     "dev": "npm run build dev && npm run serve"
   },
   "version": "1.0.0",
