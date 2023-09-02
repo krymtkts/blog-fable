@@ -19,18 +19,34 @@ $cyan      :#2aa198;
 $green     :#859900;
 
 @use "../node_modules/bulma/bulma.sass" with (
-    $black: $base03,
-    $black-bis: $base02,
-    $black-ter: $base02,
-    $grey-darker: $base00,
-    $grey-dark: $base00,
-    $grey: $base01,
-    $grey-light: $base0,
-    $grey-lighter: $base1,
-    $grey-lightest: $base1,
-    $white-ter: $base2,
-    $white-bis: $base2,
-    $white: $base3,
+    // NOTE: Solarized.
+    // $black: $base03,
+    // $black-bis: $base02,
+    // $black-ter: $base02,
+    // $grey-darker: $base00,
+    // $grey-dark: $base00,
+    // $grey: $base01,
+    // $grey-light: $base0,
+    // $grey-lighter: $base1,
+    // $grey-lightest: $base1,
+    // $white-ter: $base2,
+    // $white-bis: $base2,
+    // $white: $base3,
+    // NOTE: Solarized Dark.
+    $black: $base3,
+    $black-bis: $base2,
+    $black-ter: $base2,
+    $grey-darker: $base1,
+    $grey-dark: $base1,
+    $grey: $base0,
+    $grey-light: $base00,
+    $grey-lighter: $base01,
+    $grey-lightest: $base01,
+    $white-ter: $base02,
+    $white-bis: $base02,
+    $white: $base03,
+
+    // NOTE: set alternative colors.
     $turquoise: $cyan,
     $purple: $violet,
 );
