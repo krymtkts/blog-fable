@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "postinstall": "dotnet tool restore",
-    "css-build": "node-sass --omit-source-map-url ./sass/style.scss ./docs/blog-fable/css/style.css",
+    "css-build": "sass --style=compressed --no-source-map ./sass/style.scss ./docs/blog-fable/css/style.css",
     "serve": "dotnet fsi ./dev-server.fsx",
     "build": "dotnet fable src --runScript",
     "dev": "npm run build dev && npm run serve"
@@ -16,9 +16,9 @@
     "highlight.js": "^11.7.0",
     "marked": "^4.3.0",
     "marked-highlight": "^1.0.1",
-    "node-sass": "^9.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "sass": "^1.66.1",
     "ts2fable": "^0.7.1",
     "yaml": "^2.2.2"
   }
