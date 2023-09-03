@@ -318,7 +318,7 @@ module Rendering =
             let! m = IO.readFile source
 
             let tagToElement tag =
-                Component.liAWithClass $"{site.pathRoot}{tagDest}/{tag}.html" tag [ "tag" ]
+                Component.liAWithClass $"{site.pathRoot}{tagDest}/{tag}.html" tag [ "tag"; "is-medium" ]
 
             let leaf = IO.leaf dest
 
