@@ -45,21 +45,46 @@ $green: #859900;
   $white-ter: $base02,
   $white-bis: $base02,
   $white: $base03,
-  // NOTE: set alternative colors.
+  $orange: $orange,
+  $yellow: $yellow,
+  $green: $green,
   $turquoise: $cyan,
+  $cyan: $cyan,
+  $blue: $blue,
   $purple: $violet,
-  // NOTE: set tag background color darker.
-  $tag-background-color: $base03
+  $red: $red,
+
+  $background: $base03,
+  $code: $base0,
+  $code-size: 1em,
+  $tag-background-color: $base03,
+  $link-hover: $violet
 );
 
 // NOTE: adjust non-parameterized styles.
+a:visited {
+  color: $violet;
+}
+.checkbox {
+  margin-right: 0.5em;
+}
 main {
   padding-bottom: 1.5em;
 }
-pre {
-  background-color: $base03;
-  border: 1px solid $base01;
+code {
+  word-wrap: break-word;
 }
+code,
+pre,
 .tag:not(body) {
   border: 1px solid $base01;
+  border-radius: bulma.$radius;
+}
+pre code {
+  border: none;
+}
+.content {
+  li:first-child {
+    margin-top: 0.25em;
+  }
 }

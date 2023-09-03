@@ -44,7 +44,7 @@ module private Util =
 
                 $"""<a href="{ref}" title="{title}">{text}</a>"""
 
-            let listitem text task check =
+            let listitem (text: string) task check =
                 let checkState =
                     match check with
                     | true -> "checked"
@@ -52,7 +52,12 @@ module private Util =
 
                 match task with
                 | true ->
-                    $"""<li><label class="checkbox"><input type="checkbox" class="checkbox" disabled {checkState} />{text}</label></li>"""
+                    let str, rst =
+                        match text.IndexOf("<") with
+                        | -1 -> text, ""
+                        | i -> text.Substring(0, i), text.Substring(i)
+
+                    $"""<li><label class="checkbox"><input type="checkbox" class="checkbox" disabled {checkState} />{str}</label>{rst}</li>"""
                 | false -> $"""<li>{text}</li>"""
 
             let checkbox _ =
