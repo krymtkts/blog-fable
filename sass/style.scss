@@ -71,6 +71,9 @@ a:visited {
 main {
   padding-bottom: 1.5em;
 }
+code {
+  word-wrap: break-word;
+}
 code,
 pre,
 .tag:not(body) {
