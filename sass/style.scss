@@ -45,14 +45,24 @@ $green: #859900;
   $white-ter: $base02,
   $white-bis: $base02,
   $white: $base03,
-  // NOTE: set alternative colors.
+  $orange: $orange,
+  $yellow: $yellow,
+  $green: $green,
   $turquoise: $cyan,
+  $cyan: $cyan,
+  $blue: $blue,
   $purple: $violet,
+  $red: $red,
   // NOTE: set tag background color darker.
-  $tag-background-color: $base03
+  $tag-background-color: $base03,
+
+  $link-hover: $violet
 );
 
 // NOTE: adjust non-parameterized styles.
+a:visited {
+  color: $violet;
+}
 main {
   padding-bottom: 1.5em;
 }
