@@ -45,8 +45,21 @@ $green: #859900;
   $white-ter: $base02,
   $white-bis: $base02,
   $white: $base03,
-
   // NOTE: set alternative colors.
   $turquoise: $cyan,
-  $purple: $violet
+  $purple: $violet,
+  // NOTE: set tag background color darker.
+  $tag-background-color: $base03
 );
+
+// NOTE: adjust non-parameterized styles.
+main {
+  padding-bottom: 1.5em;
+}
+pre {
+  background-color: $base03;
+  border: 1px solid $base01;
+}
+.tag:not(body) {
+  border: 1px solid $base01;
+}
