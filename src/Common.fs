@@ -29,7 +29,7 @@ module private Util =
                 let escapedText = Regex.Replace(text, @"[^\w]+", "-")
                 let l = level
 
-                $"""<h{l}><a name="{escapedText}" class="anchor" href="#{escapedText}">{text}</a></h{l}>"""
+                $"""<h%d{l}><a name="%s{escapedText}" class="anchor" href="#%s{escapedText}">%s{text}</a></h%d{l}>"""
 
             let link href title text =
                 let ref =
@@ -42,7 +42,7 @@ module private Util =
                     | null -> text
                     | _ -> title
 
-                $"""<a href="{ref}" title="{title}">{text}</a>"""
+                $"""<a href="%s{ref}" title="%s{title}">%s{text}</a>"""
 
             let listitem (text: string) task check =
                 let checkState =
@@ -57,8 +57,8 @@ module private Util =
                         | -1 -> text, ""
                         | i -> text.Substring(0, i), text.Substring(i)
 
-                    $"""<li><label class="checkbox"><input type="checkbox" class="checkbox" disabled {checkState} />{str}</label>{rst}</li>"""
-                | false -> $"""<li>{text}</li>"""
+                    $"""<li><label class="checkbox"><input type="checkbox" class="checkbox" disabled %s{checkState} />%s{str}</label>%s{rst}</li>"""
+                | false -> $"""<li>%s{text}</li>"""
 
             let checkbox _ =
                 // NOTE: checkbox generation is handled by listitem.
@@ -159,7 +159,7 @@ module Parser =
         let date pubDate fmDate =
             let date =
                 match pubDate, fmDate with
-                | Some pub, Some upd -> $"{pub} - updated {upd}"
+                | Some pub, Some upd -> $"%s{pub} - updated %s{upd}"
                 | Some pub, _ -> pub
                 | _, Some pub -> pub
                 | _ -> null
@@ -270,7 +270,7 @@ module Misc =
                                                             prop.href site.favicon ]
                                                 Html.link [ prop.rel "stylesheet"
                                                             prop.type' "text/css"
-                                                            prop.href $"{site.pathRoot}{site.style}" ]
+                                                            prop.href $"%s{site.pathRoot}%s{site.style}" ]
                                                 cssLink
                                                     "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/solarized-dark.min.css"
                                                     "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]
@@ -280,12 +280,14 @@ module Misc =
                                                             prop.children [ content ] ] ]
                                     Html.footer [ prop.className "footer"
                                                   prop.children [ Html.div [ prop.className "container"
-                                                                             prop.text ($"Copyright © {site.copyright}") ] ] ]
+                                                                             prop.text (
+                                                                                 $"Copyright © %s{site.copyright}"
+                                                                             ) ] ] ]
                                     match site.devInjection with
                                     | Some src ->
                                         Html.script [ prop.lang "javascript"
                                                       prop.type' "text/javascript"
-                                                      prop.src $"{site.pathRoot}{src}" ]
+                                                      prop.src $"%s{site.pathRoot}%s{src}" ]
                                     | None -> null ] ]
 
     let getDestinationPath (source: string) (dir: string) =
@@ -322,12 +324,12 @@ module Misc =
 
         let prefix =
             match meta.layout with
-            | Post (date) -> $"{date} - "
+            | Post (date) -> $"%s{date} - "
             | _ -> ""
 
         let title =
             match meta.frontMatter with
-            | Some fm -> $"{prefix}{fm.title}"
+            | Some fm -> $"%s{prefix}%s{fm.title}"
             | None -> leaf
 
         let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
@@ -376,7 +378,7 @@ module DateTime =
     let toRFC822DateTimeString (d: DateTime) =
         let parts: obj [] = formatter?formatToParts (d)
         let p: string [] = parts |> Array.map (fun x -> x?value)
-        let d = $"{p.[0]}{p.[1]}{p.[4]} {p.[2]} {p.[6]}"
+        let d = $"%s{p.[0]}%s{p.[1]}%s{p.[4]} %s{p.[2]} %s{p.[6]}"
         let t = (p.[8..12] |> String.concat "")
 
         let z =
@@ -388,9 +390,9 @@ module DateTime =
                 let op = (group.Groups.Item 1).Value
                 let offset = int (group.Groups.Item 2).Value
 
-                $"{op}%02d{offset}00"
+                $"%s{op}%02d{offset}00"
 
-        $"{d} {t} {z}"
+        $"%s{d} %s{t} %s{z}"
 
     let parseToRFC822DateTimeString (s: string) =
         DateTime.Parse(s) |> toRFC822DateTimeString
