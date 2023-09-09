@@ -67,11 +67,11 @@ module Generation =
                     let refs =
                         def.metas
                         |> Seq.map (fun meta ->
-                            { loc = sourceToSitemap $"{pathRoot}{def.root}" meta.source
+                            { loc = sourceToSitemap $"%s{pathRoot}%s{def.root}" meta.source
                               lastmod = meta.date
                               priority = def.priority })
 
-                    generate def.metas $"{pathRoot}{def.root}"
+                    generate def.metas $"%s{pathRoot}%s{def.root}"
                     |> Promise.map (fun content ->
                         [ Html.li [ Html.h2 def.title ]
                           content ],
@@ -118,13 +118,13 @@ module Generation =
             [ Html.ul [ prop.children [ Html.li [ Html.h2 def.title ]
                                         Html.ul [ prop.children tags ] ] ] ]
 
-        let tagPageContens =
+        let tagPageContents =
             tagAndPage
             |> Map.toList
             |> List.map (fun (tag, metas) ->
                 let lis =
                     metas
-                    |> List.map (metaToLi $"{pathRoot}{def.postRoot}")
+                    |> List.map (metaToLi $"%s{pathRoot}%s{def.postRoot}")
 
                 tag,
                 [ Html.ul [ prop.children [ Html.li [ Html.h2 tag ]
@@ -134,11 +134,11 @@ module Generation =
             tagAndPage
             |> Map.toList
             |> Seq.map (fun (tag, _) ->
-                { loc = sourceToSitemap $"{pathRoot}{def.tagRoot}" $"{tag}.html"
+                { loc = sourceToSitemap $"%s{pathRoot}%s{def.tagRoot}" $"%s{tag}.html"
                   lastmod = now |> DateTime.toRFC3339Date
                   priority = def.priority })
 
-        tagsContent, tagPageContens, locs
+        tagsContent, tagPageContents, locs
 
     type UseSitemap =
         | Yes of string
@@ -162,7 +162,7 @@ module Generation =
                 match navi.sitemap with
                 | Yes n ->
                     Some
-                        { loc = $"{pathRoot}{navi.path}"
+                        { loc = $"%s{pathRoot}%s{navi.path}"
                           lastmod = now |> DateTime.toRFC3339Date
                           priority = n }
                 | No -> None
@@ -170,10 +170,10 @@ module Generation =
         navs
         |> List.map (function
             | Title navi ->
-                Component.liA $"{pathRoot}{navi.path}"
+                Component.liA $"%s{pathRoot}%s{navi.path}"
                 <| Component.Element(navi.text, Html.h1 [ prop.text navi.text ])
             | Link navi ->
-                Component.liA $"{pathRoot}{navi.path}"
+                Component.liA $"%s{pathRoot}%s{navi.path}"
                 <| Component.Text navi.text)
         |> Html.ul,
         navs
@@ -312,67 +312,74 @@ module Rendering =
     let argv = Misc.argv
     type FixedSiteContent = Misc.FixedSiteContent
 
-    let private readAndWrite (site: FixedSiteContent) tagDest source dest =
+    let private readAndWrite (site: FixedSiteContent) tagDest source (dest: string) =
         promise {
-            printfn $"Rendering {source}..."
-            let! m = IO.readFile source
+            printfn $"Rendering %s{source}..."
+            let! md = IO.readFile source
 
             let tagToElement tag =
-                Component.liAWithClass $"{site.pathRoot}{tagDest}/{tag}.html" tag [ "tag"; "is-medium" ]
-
-            let leaf = IO.leaf dest
+                Component.liAWithClass $"%s{site.pathRoot}%s{tagDest}/%s{tag}.html" tag [ "tag"; "is-medium" ]
 
             let path =
-                dest.Replace("\\", "/").Split($"{site.pathRoot}/")
+                dest
+                    .Replace("\\", "/")
+                    .Split($"%s{site.pathRoot}/")
                 |> Seq.last
 
+            let layout = discriminateLayout source
+
+            let pubDate =
+                match layout with
+                | Post d -> Some(d)
+                | Page -> None
+
+            let fmToHeader = Parser.header <| tagToElement <| pubDate
+
             let fm, content, page =
-                m
-                |> Parser.parseMarkdownAsReactEl tagToElement
-                |> fun (fm, h, c) ->
+                md
+                |> Parser.parseMarkdownAsReactEl
+                |> fun (fm, c) ->
                     let title =
                         match fm with
-                        | Some fm -> $"{site.title} - {fm.title}"
+                        | Some fm -> $"%s{site.title} - %s{fm.title}"
                         | None -> site.title
+
+                    let header = fmToHeader fm
 
                     fm,
                     c |> Parser.parseReactStaticMarkup,
-                    List.append h [ c ]
+                    List.append header [ c ]
                     |> wrapContent
                     |> frame
                         { site with
                             title = title
-                            url = $"{site.url}/{path}" }
-
+                            url = $"%s{site.url}/%s{path}" }
                     |> Parser.parseReactStaticHtml
 
-
-            printfn $"Writing {dest}..."
+            printfn $"Writing %s{dest}..."
 
             do! IO.writeFile dest page
 
-            let layout = discriminateLayout source
-
             let chooseDate (fm: Parser.FrontMatter option) alt =
+                let date =
+                    match alt with
+                    | Some date -> date
+                    | _ -> DateTime.toRFC3339Date now
+
                 match fm with
                 | Some fm ->
                     match fm.date with
-                    | None -> alt
-                    | Some x -> x
-                | None -> alt
-
-            let date =
-                match layout with
-                | Post d -> chooseDate fm d
-                | Page -> chooseDate fm <| DateTime.toRFC3339Date now
+                    | None -> date
+                    | Some date -> date
+                | None -> date
 
             return
                 { frontMatter = fm
                   content = content
                   layout = layout
                   source = source
-                  leaf = leaf
-                  date = date }
+                  leaf = IO.leaf dest
+                  date = chooseDate fm pubDate }
         }
 
     let renderMarkdowns site tagDest sourceDir destDir =
@@ -417,11 +424,11 @@ module Rendering =
                 |> wrapContent
                 |> frame
                     { site with
-                        title = $"{site.title} - Archives"
-                        url = $"{site.url}{site.pathRoot}/{IO.leaf dest}" }
+                        title = $"%s{site.title} - Archives"
+                        url = $"%s{site.url}%s{site.pathRoot}/%s{IO.leaf dest}" }
                 |> Parser.parseReactStaticHtml
 
-            printfn $"Writing archives {dest}..."
+            printfn $"Writing archives %s{dest}..."
 
             do! IO.writeFile dest content
             return locs
@@ -432,7 +439,7 @@ module Rendering =
 
         promise {
             printfn "Rendering tags..."
-            let title = $"{site.title} - Tags"
+            let title = $"%s{site.title} - Tags"
 
             let content =
                 tagsContent
@@ -440,27 +447,27 @@ module Rendering =
                 |> frame
                     { site with
                         title = title
-                        url = $"{site.url}{site.pathRoot}/{IO.leaf dest}" }
+                        url = $"%s{site.url}%s{site.pathRoot}/%s{IO.leaf dest}" }
                 |> Parser.parseReactStaticHtml
 
-            printfn $"Writing tags {dest}..."
+            printfn $"Writing tags %s{dest}..."
 
             do! IO.writeFile dest content
 
             do!
                 tagPageContents
                 |> List.map (fun (tag, tagPageContent) ->
-                    let dest = IO.resolve ($"""{dest.Replace(".html", "")}/{tag}.html""")
+                    let dest = IO.resolve ($"""%s{dest.Replace(".html", "")}/%s{tag}.html""")
                     let parent = dest |> IO.parent |> IO.leaf
-                    printfn $"Writing tag {dest}..."
+                    printfn $"Writing tag %s{dest}..."
 
                     let content =
                         tagPageContent
                         |> wrapContent
                         |> frame
                             { site with
-                                title = $"{title} - {tag}"
-                                url = $"{site.url}{site.pathRoot}/{parent}/{IO.leaf dest}" }
+                                title = $"%s{title} - %s{tag}"
+                                url = $"%s{site.url}%s{site.pathRoot}/%s{parent}/%s{IO.leaf dest}" }
                         |> Parser.parseReactStaticHtml
 
                     IO.writeFile dest content |> Promise.map ignore)
@@ -479,8 +486,8 @@ module Rendering =
                 |> wrapContent
                 |> frame
                     { site with
-                        title = $"{site.title} - 404"
-                        url = $"{site.url}{site.pathRoot}/{IO.leaf dest}" }
+                        title = $"%s{site.title} - 404"
+                        url = $"%s{site.url}%s{site.pathRoot}/%s{IO.leaf dest}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing 404 {dest}..."
@@ -493,7 +500,7 @@ module Rendering =
             printfn "Rendering sitemap..."
             let sitemap = generateSitemap root locs
 
-            printfn $"Writing sitemap {dest}..."
+            printfn $"Writing sitemap %s{dest}..."
             do! IO.writeFile dest sitemap
         }
 
@@ -502,7 +509,7 @@ module Rendering =
             printfn "Rendering feed..."
             let feed = generateFeed conf
 
-            printfn $"Writing feed {dest}..."
+            printfn $"Writing feed %s{dest}..."
             do! IO.writeFile dest feed
         }
 
@@ -514,7 +521,7 @@ module Rendering =
                 resources
                 |> List.map (fun (source, dest) ->
                     promise {
-                        printfn $"Copying {source}..."
+                        printfn $"Copying %s{source}..."
                         do! IO.copy source dest
                     })
                 |> Promise.all
@@ -555,45 +562,48 @@ type RenderOptions =
 
 module RenderOptions =
     let indexPath = "/index.html"
-    let feedPath opts = $"/{opts.feedName}.xml"
-    let arvhivesPath opts = $"{opts.archives.root}.html"
-    let tagsPath opts = $"{opts.tags.root}.html"
+    let feedPath opts = $"/%s{opts.feedName}.xml"
+    let archivesPath opts = $"%s{opts.archives.root}.html"
+    let tagsPath opts = $"%s{opts.tags.root}.html"
     let stylePath = "/css/style.css"
     let devScriptPath = "/js/dev.js"
-    let siteUrl opts = $"{opts.siteUrl}{opts.pathRoot}"
+    let siteUrl opts = $"%s{opts.siteUrl}%s{opts.pathRoot}"
 
-    let postsSourceRoot opts = $"{opts.src}{opts.posts.root}"
+    let postsSourceRoot opts = $"%s{opts.src}%s{opts.posts.root}"
 
-    let pagesSourceRoot opts = $"{opts.src}{opts.pages.root}"
+    let pagesSourceRoot opts = $"%s{opts.src}%s{opts.pages.root}"
     let devScriptSourcePath = "src/Dev.fs.js"
-    let faviconSourcePath opts = $"{opts.src}{opts.favicon}"
+    let faviconSourcePath opts = $"%s{opts.src}%s{opts.favicon}"
 
-    let destinationRoot opts = $"{opts.dst}{opts.pathRoot}"
-    let indexDestinationPath opts = $"{destinationRoot opts}{indexPath}"
+    let destinationRoot opts = $"%s{opts.dst}%s{opts.pathRoot}"
+
+    let indexDestinationPath opts =
+        $"%s{destinationRoot opts}%s{indexPath}"
 
     let postsDestinationRoot opts =
-        $"{destinationRoot opts}{opts.posts.root}"
+        $"%s{destinationRoot opts}%s{opts.posts.root}"
 
     let pagesDestinationRoot opts =
-        $"{destinationRoot opts}{opts.pages.root}"
+        $"%s{destinationRoot opts}%s{opts.pages.root}"
 
-    let arvhivesDestinationPath opts =
-        $"{destinationRoot opts}{arvhivesPath opts}"
+    let archivesDestinationPath opts =
+        $"%s{destinationRoot opts}%s{archivesPath opts}"
 
     let tagsDestinationPath opts =
-        $"{destinationRoot opts}{tagsPath opts}"
+        $"%s{destinationRoot opts}%s{tagsPath opts}"
 
-    let ``404DestinationPath`` opts = $"{destinationRoot opts}/404.html"
+    let ``404DestinationPath`` opts = $"%s{destinationRoot opts}/404.html"
 
-    let sitemapDestinationPath opts = $"{destinationRoot opts}/sitemap.xml"
+    let sitemapDestinationPath opts = $"%s{destinationRoot opts}/sitemap.xml"
 
     let feedDestinationPath opts =
-        $"{destinationRoot opts}{feedPath opts}"
+        $"%s{destinationRoot opts}%s{feedPath opts}"
 
     let devScriptDestinationPath opts =
-        $"{destinationRoot opts}{devScriptPath}"
+        $"%s{destinationRoot opts}%s{devScriptPath}"
 
-    let faviconDestinationPath opts = $"{destinationRoot opts}{opts.favicon}"
+    let faviconDestinationPath opts =
+        $"%s{destinationRoot opts}%s{opts.favicon}"
 
 let private buildNavList opts =
     let feed = RenderOptions.feedPath opts
@@ -605,7 +615,7 @@ let private buildNavList opts =
                           sitemap = Yes "1.0" }
                     Link
                         { text = opts.archives.title
-                          path = RenderOptions.arvhivesPath opts
+                          path = RenderOptions.archivesPath opts
                           sitemap = Yes "0.9" }
                     Link
                         { text = opts.tags.title
@@ -682,7 +692,7 @@ let render (opts: RenderOptions) =
 
         let! archiveLocs =
             renderArchives site archiveDefs
-            <| RenderOptions.arvhivesDestinationPath opts
+            <| RenderOptions.archivesDestinationPath opts
 
         let tagDef =
             { title = opts.tags.title
