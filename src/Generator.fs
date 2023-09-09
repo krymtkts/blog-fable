@@ -118,7 +118,7 @@ module Generation =
             [ Html.ul [ prop.children [ Html.li [ Html.h2 def.title ]
                                         Html.ul [ prop.children tags ] ] ] ]
 
-        let tagPageContens =
+        let tagPageContents =
             tagAndPage
             |> Map.toList
             |> List.map (fun (tag, metas) ->
@@ -138,7 +138,7 @@ module Generation =
                   lastmod = now |> DateTime.toRFC3339Date
                   priority = def.priority })
 
-        tagsContent, tagPageContens, locs
+        tagsContent, tagPageContents, locs
 
     type UseSitemap =
         | Yes of string
@@ -559,7 +559,7 @@ type RenderOptions =
 module RenderOptions =
     let indexPath = "/index.html"
     let feedPath opts = $"/{opts.feedName}.xml"
-    let arvhivesPath opts = $"{opts.archives.root}.html"
+    let archivesPath opts = $"{opts.archives.root}.html"
     let tagsPath opts = $"{opts.tags.root}.html"
     let stylePath = "/css/style.css"
     let devScriptPath = "/js/dev.js"
@@ -580,8 +580,8 @@ module RenderOptions =
     let pagesDestinationRoot opts =
         $"{destinationRoot opts}{opts.pages.root}"
 
-    let arvhivesDestinationPath opts =
-        $"{destinationRoot opts}{arvhivesPath opts}"
+    let archivesDestinationPath opts =
+        $"{destinationRoot opts}{archivesPath opts}"
 
     let tagsDestinationPath opts =
         $"{destinationRoot opts}{tagsPath opts}"
@@ -608,7 +608,7 @@ let private buildNavList opts =
                           sitemap = Yes "1.0" }
                     Link
                         { text = opts.archives.title
-                          path = RenderOptions.arvhivesPath opts
+                          path = RenderOptions.archivesPath opts
                           sitemap = Yes "0.9" }
                     Link
                         { text = opts.tags.title
@@ -685,7 +685,7 @@ let render (opts: RenderOptions) =
 
         let! archiveLocs =
             renderArchives site archiveDefs
-            <| RenderOptions.arvhivesDestinationPath opts
+            <| RenderOptions.archivesDestinationPath opts
 
         let tagDef =
             { title = opts.tags.title

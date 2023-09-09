@@ -293,7 +293,7 @@ module Misc =
         |> Directory.join2 dir
         |> IO.resolve
 
-    let isMarkdwon (path: string) = path.EndsWith ".md"
+    let isMarkdown (path: string) = path.EndsWith ".md"
 
     let getMarkdownFiles dir =
         promise {
@@ -301,7 +301,7 @@ module Misc =
 
             let files =
                 paths
-                |> List.filter isMarkdwon
+                |> List.filter isMarkdown
                 |> List.map (Directory.join2 dir)
                 |> List.map IO.resolve
 
@@ -366,7 +366,7 @@ module DateTime =
              minute = "numeric"
              second = "numeric"
              hourCycle = "h23"
-             timeZone = "Asia/Tokyo" // TODO: parametarize it.
+             timeZone = "Asia/Tokyo" // TODO: parameterize it.
              timeZoneName = "short" |}
 
     // TODO: write binding.
