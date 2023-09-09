@@ -333,18 +333,22 @@ module Rendering =
                 | Post d -> Some(d)
                 | Page -> None
 
+            let fmToHeader = Parser.header <| tagToElement <| pubDate
+
             let fm, content, page =
                 md
-                |> Parser.parseMarkdownAsReactEl tagToElement pubDate
-                |> fun (fm, h, c) ->
+                |> Parser.parseMarkdownAsReactEl
+                |> fun (fm, c) ->
                     let title =
                         match fm with
                         | Some fm -> $"{site.title} - {fm.title}"
                         | None -> site.title
 
+                    let header = fmToHeader fm
+
                     fm,
                     c |> Parser.parseReactStaticMarkup,
-                    List.append h [ c ]
+                    List.append header [ c ]
                     |> wrapContent
                     |> frame
                         { site with

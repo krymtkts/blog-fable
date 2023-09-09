@@ -149,9 +149,13 @@ module Parser =
     /// Parses a markdown string
     let parseMarkdown str = Util.parseMarkdown str
 
-    let parseMarkdownAsReactEl (tagToElement: string -> ReactElement) pubDate content =
+    let parseMarkdownAsReactEl content =
         let (frontMatter, content) = extractFrontMatter content
+        let content = Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ]
 
+        frontMatter, content
+
+    let header (tagToElement: string -> ReactElement) pubDate (fm: FrontMatter option) =
         let date pubDate fmDate =
             let date =
                 match pubDate, fmDate with
@@ -164,7 +168,7 @@ module Parser =
                        prop.text date ]
 
         let header =
-            match frontMatter with
+            match fm with
             | Some fm ->
                 [ date pubDate fm.date
                   Html.h1 [ prop.className [ "title" ]
@@ -178,10 +182,7 @@ module Parser =
                             ) ] ]
             | None -> []
 
-        let content = Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ]
-
-        frontMatter, header, content
-
+        header
 
     /// Parses a React element invoking ReactDOMServer.renderToString
     let parseReact el = ReactDOMServer.renderToString el
