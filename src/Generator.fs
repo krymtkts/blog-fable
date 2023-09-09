@@ -326,9 +326,16 @@ module Rendering =
                 dest.Replace("\\", "/").Split($"{site.pathRoot}/")
                 |> Seq.last
 
+            let layout = discriminateLayout source
+
+            let pubDate =
+                match layout with
+                | Post d -> Some(d)
+                | Page -> None
+
             let fm, content, page =
                 m
-                |> Parser.parseMarkdownAsReactEl tagToElement
+                |> Parser.parseMarkdownAsReactEl tagToElement pubDate
                 |> fun (fm, h, c) ->
                     let title =
                         match fm with
@@ -343,28 +350,24 @@ module Rendering =
                         { site with
                             title = title
                             url = $"{site.url}/{path}" }
-
                     |> Parser.parseReactStaticHtml
-
 
             printfn $"Writing {dest}..."
 
             do! IO.writeFile dest page
 
-            let layout = discriminateLayout source
-
             let chooseDate (fm: Parser.FrontMatter option) alt =
+                let d =
+                    match alt with
+                    | Some d -> d
+                    | _ -> DateTime.toRFC3339Date now
+
                 match fm with
                 | Some fm ->
                     match fm.date with
-                    | None -> alt
+                    | None -> d
                     | Some x -> x
-                | None -> alt
-
-            let date =
-                match layout with
-                | Post d -> chooseDate fm d
-                | Page -> chooseDate fm <| DateTime.toRFC3339Date now
+                | None -> d
 
             return
                 { frontMatter = fm
@@ -372,7 +375,7 @@ module Rendering =
                   layout = layout
                   source = source
                   leaf = leaf
-                  date = date }
+                  date = chooseDate fm pubDate }
         }
 
     let renderMarkdowns site tagDest sourceDir destDir =

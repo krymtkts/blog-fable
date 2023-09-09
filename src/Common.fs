@@ -149,13 +149,25 @@ module Parser =
     /// Parses a markdown string
     let parseMarkdown str = Util.parseMarkdown str
 
-    let parseMarkdownAsReactEl (tagToElement: string -> ReactElement) content =
+    let parseMarkdownAsReactEl (tagToElement: string -> ReactElement) pubDate content =
         let (frontMatter, content) = extractFrontMatter content
+
+        let date pubDate fmDate =
+            let date =
+                match pubDate, fmDate with
+                | Some pub, Some upd -> $"{pub} - updated {upd}"
+                | Some pub, _ -> pub
+                | _, Some pub -> pub
+                | _ -> null
+
+            Html.div [ prop.className "date"
+                       prop.text date ]
 
         let header =
             match frontMatter with
             | Some fm ->
-                [ Html.h1 [ prop.className [ "title" ]
+                [ date pubDate fm.date
+                  Html.h1 [ prop.className [ "title" ]
                             prop.text fm.title ]
                   Html.ul [ prop.className [ "tags" ]
                             prop.children (
