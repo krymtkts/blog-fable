@@ -312,15 +312,13 @@ module Rendering =
     let argv = Misc.argv
     type FixedSiteContent = Misc.FixedSiteContent
 
-    let private readAndWrite (site: FixedSiteContent) tagDest source dest =
+    let private readAndWrite (site: FixedSiteContent) tagDest source (dest: string) =
         promise {
             printfn $"Rendering {source}..."
             let! md = IO.readFile source
 
             let tagToElement tag =
                 Component.liAWithClass $"{site.pathRoot}{tagDest}/{tag}.html" tag [ "tag"; "is-medium" ]
-
-            let leaf = IO.leaf dest
 
             let path =
                 dest.Replace("\\", "/").Split($"{site.pathRoot}/")
@@ -378,7 +376,7 @@ module Rendering =
                   content = content
                   layout = layout
                   source = source
-                  leaf = leaf
+                  leaf = IO.leaf dest
                   date = chooseDate fm pubDate }
         }
 
