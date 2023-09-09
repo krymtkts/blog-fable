@@ -159,7 +159,7 @@ module Parser =
         let date pubDate fmDate =
             let date =
                 match pubDate, fmDate with
-                | Some pub, Some upd -> $"%s{pub} - updated %s{upd}"
+                | Some pub, Some upd -> $"%s{pub} - Last updated on %s{upd}"
                 | Some pub, _ -> pub
                 | _, Some pub -> pub
                 | _ -> null
