@@ -315,7 +315,7 @@ module Rendering =
     let private readAndWrite (site: FixedSiteContent) tagDest source dest =
         promise {
             printfn $"Rendering {source}..."
-            let! m = IO.readFile source
+            let! md = IO.readFile source
 
             let tagToElement tag =
                 Component.liAWithClass $"{site.pathRoot}{tagDest}/{tag}.html" tag [ "tag"; "is-medium" ]
@@ -334,7 +334,7 @@ module Rendering =
                 | Page -> None
 
             let fm, content, page =
-                m
+                md
                 |> Parser.parseMarkdownAsReactEl tagToElement pubDate
                 |> fun (fm, h, c) ->
                     let title =
@@ -357,17 +357,17 @@ module Rendering =
             do! IO.writeFile dest page
 
             let chooseDate (fm: Parser.FrontMatter option) alt =
-                let d =
+                let date =
                     match alt with
-                    | Some d -> d
+                    | Some date -> date
                     | _ -> DateTime.toRFC3339Date now
 
                 match fm with
                 | Some fm ->
                     match fm.date with
-                    | None -> d
-                    | Some x -> x
-                | None -> d
+                    | None -> date
+                    | Some date -> date
+                | None -> date
 
             return
                 { frontMatter = fm
