@@ -1,6 +1,6 @@
 ---
-title: About Me
-date: 2023-01-01
+title: About
+date: 2023-09-10
 ---
 
-krymtkts.
+Written by [krymtkts (KURIYAMA Takatoshi)](https://github.com/krymtkts).

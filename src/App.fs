@@ -5,8 +5,8 @@ open StaticWebGenerator
 render
     { stage = dev
       lang = "ja"
-      siteName = "Blog Title"
-      description = "Blog Description"
+      siteName = "Blog Fable"
+      description = "A small Fable app project to generate static pages"
       siteUrl = "https://krymtkts.github.io"
       pathRoot = "/blog-fable"
       copyright = "2023 krymtkts"
@@ -25,7 +25,7 @@ render
       feedName = "feed"
 
       additionalNavs =
-          [ { text = "About Me"
+          [ { text = "About"
               path = "/pages/about.html" } ]
 
     }
