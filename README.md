@@ -24,9 +24,13 @@ GitHub Pages deployment is [here](https://krymtkts.github.io/blog-fable/index.ht
 ## Building and running the app
 
 - Install dependencies: `npm install`
-- Build pages: `npm run build`
-- Build pages and start a development server: `npm run start`
+- Build entire pages: `npm run build`
+  - It depends `npm run build-fable` and `npm run build-css`
+    - Build pages: `npm run build-fable`
+    - Build styles: `npm run build-css`
+- Build pages and start a development server: `npm run dev`
   - After finished the first compilation, open: `http://localhost:8080/`
+  - The simplest way to build and start a server
 
 ## Credits
 
