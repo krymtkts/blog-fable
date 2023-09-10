@@ -1,5 +1,6 @@
 #r "nuget: Fake.Core.Trace"
 #r "nuget: Fake.DotNet.Cli"
+#r "nuget: Fake.JavaScript.Npm"
 #r "nuget: Fake.IO.FileSystem"
 #r "nuget: Suave"
 
@@ -7,6 +8,7 @@ open Fake.Core
 open Fake.DotNet
 open Fake.IO
 open Fake.IO.Globbing.Operators
+open Fake.JavaScript
 open Suave
 open Suave.Files
 open Suave.Filters
@@ -37,7 +39,7 @@ let port =
 
     findPort 8080us
 
-let handleWatcherEvents, socketHandler =
+let handleWatcherEvents, handleScssWatcherEvents, socketHandler =
     let refreshEvent = new Event<_>()
 
     let handleWatcherEvents (events: FileChange seq) =
@@ -55,6 +57,14 @@ let handleWatcherEvents, socketHandler =
         else
             printfn $"`dotnet %s{cmd} %s{args}` failed"
 
+    let handleScssWatcherEvents (events: FileChange seq) =
+        for e in events do
+            let fi = FileInfo.ofPath e.FullPath
+
+            Trace.traceImportant $"%s{fi.FullName} was changed."
+
+        Npm.run "build-css" (fun x -> x)
+
     let socketHandler (webSocket: WebSocket) =
         fun _ ->
             socket {
@@ -67,7 +77,7 @@ let handleWatcherEvents, socketHandler =
                     do! webSocket.send Text seg true
             }
 
-    handleWatcherEvents, socketHandler
+    handleWatcherEvents, handleScssWatcherEvents, socketHandler
 
 let home =
     IO.Path.Join [| __SOURCE_DIRECTORY__
@@ -114,6 +124,10 @@ try
     use _ =
         !! "src/**/*.fs" ++ "contents/**/*.md"
         |> ChangeWatcher.run handleWatcherEvents
+
+    use _ =
+        !! "sass/**/*.scss"
+        |> ChangeWatcher.run handleScssWatcherEvents
 
     let index: string = $"http://localhost:%d{port}/blog-fable/index.html"
     printfn $"Open %s{index} ..."
