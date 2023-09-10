@@ -89,6 +89,7 @@ module Generation =
           metas: Meta seq
           tagRoot: string
           postRoot: string
+          pageRoot: string
           priority: string }
 
     let generateTagsContent pathRoot def =
@@ -124,7 +125,13 @@ module Generation =
             |> List.map (fun (tag, metas) ->
                 let lis =
                     metas
-                    |> List.map (metaToLi $"%s{pathRoot}%s{def.postRoot}")
+                    |> List.map (fun meta ->
+                        let parent =
+                            match meta.layout with
+                            | Post _ -> def.postRoot
+                            | Page -> def.pageRoot
+
+                        metaToLi $"%s{pathRoot}%s{parent}" meta)
 
                 tag,
                 [ Html.ul [ prop.children [ Html.li [ Html.h2 tag ]
@@ -699,6 +706,7 @@ let render (opts: RenderOptions) =
               metas = Seq.concat [ metaPosts; metaPages ]
               tagRoot = opts.tags.root
               postRoot = opts.posts.root
+              pageRoot = opts.pages.root
               priority = "0.9" }
 
         let! tagLocs =
