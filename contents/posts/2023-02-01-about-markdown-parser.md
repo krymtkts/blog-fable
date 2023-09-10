@@ -1,11 +1,12 @@
 ---
-title: This is sample post
-tags: [diary, fsharp, sample]
-date: 2023-03-01
+title: About Markdown parser
+tags: [sample, markdown, fsharp]
 ---
 
 You can write posts or pages in Markdown.
 Markdown is parse by [Marked](https://marked.js.org/).
+
+The sample rendering is following.
 
 ---
 
@@ -23,14 +24,16 @@ plain _italic_ **bold** `code` ~~strikethrough~~
 
 `extreme long inline code ......................................................................`
 
-### blockquote
+Recommends to start Markdown headings from h2 because it render the blog title as h1.
+
+## blockquote
 
 > blockquote
 >
 > blockquote
 > blockquote
 
-### codeblock
+## codeblock
 
 ```fsharp
 module App
@@ -41,7 +44,7 @@ let private docsPath = IO.resolve "docs"
 let private extremeLongVariableNameXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx = "this is long string long long long ..........."
 ```
 
-### list
+## list
 
 - bullet list item a
   - [x] level 2 task item 1
@@ -57,8 +60,10 @@ let private extremeLongVariableNameXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx = "this is lo
    - [ ] level 3
 
 - composition
+
   1. [x] ordered item 1
      - ~~strikethrough~~
+
   - unordered item 1 has extreme long label text ......................................
   - [ ] unordered item 2 has extreme long label text ......................................
     - `inline code`
@@ -74,13 +79,13 @@ let private extremeLongVariableNameXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx = "this is lo
     open StaticWebGenerator
     ```
 
-### table
+## table
 
 | col1 | col2 |  col3 | col4 |
 | ---- | :--- | ----: | :--: |
 | 1    | 2    |     3 |  4   |
 | one  | two  | three | four |
 
-### link
+## link
 
 [krymtkts/blog-fable](https://github.com/krymtkts/blog-fable)
