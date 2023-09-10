@@ -340,7 +340,7 @@ module Rendering =
                 | Post d -> Some(d)
                 | Page -> None
 
-            let fmToHeader = Parser.header <| tagToElement <| pubDate
+            let fmToHeader = Component.header <| tagToElement <| pubDate
 
             let fm, content, page =
                 md

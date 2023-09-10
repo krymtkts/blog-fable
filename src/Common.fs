@@ -90,37 +90,6 @@ module private Util =
 
     let parseMarkdown (content: string) : string = marked.parse $ (content)
 
-module Component =
-    let liAWithClass ref title classes =
-        Html.li [ prop.classes classes
-                  prop.children [ Html.a [ prop.href ref
-                                           prop.title title
-                                           prop.text title ] ] ]
-
-    type NavItem =
-        | Text of string
-        | Element of string * Fable.React.ReactElement
-
-    let liA ref (title: NavItem) =
-        let children =
-            function
-            | Element (s, el) -> [ prop.title s; prop.children [ el ] ]
-            | Text (s) -> [ prop.title s; prop.text s ]
-
-        Html.li [ Html.a <| prop.href ref :: children title ]
-
-    let liSpanA (span: string) ref title =
-        Html.li [ Html.span [ prop.text span ]
-                  Html.a [ prop.href ref
-                           prop.title title
-                           prop.text title ] ]
-
-    let pathToLi root source =
-        let leaf = Directory.leaf source
-        let title = Regex.Replace(leaf, "\.(md|html)", "")
-        let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
-
-        liA ref <| Text title
 
 module Parser =
     open Yaml
@@ -155,7 +124,49 @@ module Parser =
 
         frontMatter, content
 
-    let header (tagToElement: string -> ReactElement) pubDate (fm: FrontMatter option) =
+    /// Parses a React element invoking ReactDOMServer.renderToString
+    let parseReact el = ReactDOMServer.renderToString el
+
+    /// Parses a React element invoking ReactDOMServer.renderToStaticMarkup
+    let parseReactStaticMarkup el = ReactDOMServer.renderToStaticMarkup el
+
+    let parseReactStaticHtml el =
+        @"<!DOCTYPE html>"
+        + ReactDOMServer.renderToStaticMarkup el
+
+module Component =
+    let liAWithClass ref title classes =
+        Html.li [ prop.classes classes
+                  prop.children [ Html.a [ prop.href ref
+                                           prop.title title
+                                           prop.text title ] ] ]
+
+    type NavItem =
+        | Text of string
+        | Element of string * Fable.React.ReactElement
+
+    let liA ref (title: NavItem) =
+        let children =
+            function
+            | Element (s, el) -> [ prop.title s; prop.children [ el ] ]
+            | Text (s) -> [ prop.title s; prop.text s ]
+
+        Html.li [ Html.a <| prop.href ref :: children title ]
+
+    let liSpanA (span: string) ref title =
+        Html.li [ Html.span [ prop.text span ]
+                  Html.a [ prop.href ref
+                           prop.title title
+                           prop.text title ] ]
+
+    let pathToLi root source =
+        let leaf = Directory.leaf source
+        let title = Regex.Replace(leaf, "\.(md|html)", "")
+        let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
+
+        liA ref <| Text title
+
+    let header (tagToElement: string -> ReactElement) pubDate (fm: Parser.FrontMatter option) =
         let date pubDate fmDate =
             let date =
                 match pubDate, fmDate with
@@ -183,16 +194,6 @@ module Parser =
             | None -> []
 
         header
-
-    /// Parses a React element invoking ReactDOMServer.renderToString
-    let parseReact el = ReactDOMServer.renderToString el
-
-    /// Parses a React element invoking ReactDOMServer.renderToStaticMarkup
-    let parseReactStaticMarkup el = ReactDOMServer.renderToStaticMarkup el
-
-    let parseReactStaticHtml el =
-        @"<!DOCTYPE html>"
-        + ReactDOMServer.renderToStaticMarkup el
 
 [<AutoOpen>]
 module Misc =
