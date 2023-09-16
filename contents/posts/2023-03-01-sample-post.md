@@ -1,6 +1,6 @@
 ---
 title: Sample post
-tags: [sample, yaml]
+tags: [sample, yaml, t, tag, this-is-extreme-long-tag-name]
 date: 2023-03-02
 ---
 
@@ -12,7 +12,7 @@ The front matter for this post is as follows.
 ```yaml
 ---
 title: This is sample post
-tags: [sample, yaml]
+tags: [sample, yaml, t, tag, this-is-extreme-long-tag-name]
 date: 2023-03-02
 ---
 ```

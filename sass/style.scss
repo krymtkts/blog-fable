@@ -62,6 +62,9 @@ $green: #859900;
 );
 
 // NOTE: adjust non-parameterized styles.
+.content a {
+  text-decoration: underline;
+}
 a:visited {
   color: $violet;
 }
