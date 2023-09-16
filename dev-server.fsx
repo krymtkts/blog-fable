@@ -59,9 +59,13 @@ let handleWatcherEvents, socketHandler =
             printfn $"`dotnet %s{cmd} %s{args}` failed"
             Error false
 
-    let buildMd () = Npm.run "build-md" id
+    let buildMd () =
+        Npm.run "build-md" id
+        Ok true
 
-    let buildStyle () = Npm.run "build-css" id
+    let buildStyle () =
+        Npm.run "build-css" id
+        Ok true
 
     let handleWatcherEvents (events: FileChange seq) =
         let es =
@@ -78,32 +82,24 @@ let handleWatcherEvents, socketHandler =
                 | _ -> Noop)
             |> Set.ofSeq
 
-        let result =
-            match [ BuildFable; BuildMd; BuildStyle ]
-                  |> List.map es.Contains
-                with
-            | [ false; false; style ] ->
-                match style with
-                | true ->
-                    buildStyle ()
-                    Ok true
-                | _ -> Ok false
-            | [ true; true; style ] ->
-                if style then buildStyle ()
-                buildFable ()
-            | [ _; true; style ] ->
-                buildMd ()
-                if style then buildStyle ()
-                Ok true
-            | [ true; style; _ ] ->
-                if style then buildStyle ()
-                buildFable ()
+        let fableOrMd =
+            match [ BuildFable; BuildMd ] |> List.map es.Contains with
+            | [ true; true ] -> buildFable ()
+            | [ _; true ] -> buildMd ()
+            | [ true; _ ] -> buildFable ()
             | _ -> Ok false
 
-        match result with
-        | Ok false
-        | Error _ -> printfn "refresh event not triggered."
-        | Ok true -> refreshEvent.Trigger()
+        let style =
+            match es |> Set.contains BuildStyle with
+            | true -> buildStyle ()
+            | _ -> Ok false
+
+        match fableOrMd, style with
+        | Ok true, _
+        | _, Ok true ->
+            refreshEvent.Trigger()
+            printfn "refresh event is triggered."
+        | _ -> printfn "refresh event not triggered."
 
     let socketHandler (webSocket: WebSocket) =
         fun _ ->
