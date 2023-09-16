@@ -39,31 +39,71 @@ let port =
 
     findPort 8080us
 
-let handleWatcherEvents, handleScssWatcherEvents, socketHandler =
+type BuildEvent =
+    | BuildFable
+    | BuildMd
+    | BuildStyle
+    | Noop
+
+let handleWatcherEvents, socketHandler =
     let refreshEvent = new Event<_>()
 
-    let handleWatcherEvents (events: FileChange seq) =
-        for e in events do
-            let fi = FileInfo.ofPath e.FullPath
-
-            Trace.traceImportant $"%s{fi.FullName} was changed."
-
+    let buildFable () =
         let cmd = "fable src"
         let args = "--runScript dev" // NOTE: run script with development mode.
         let result = DotNet.exec (fun x -> { x with DotNetCliPath = "dotnet" }) cmd args
 
-        if result.OK then
-            refreshEvent.Trigger()
-        else
+        match result.OK with
+        | true -> Ok true
+        | false ->
             printfn $"`dotnet %s{cmd} %s{args}` failed"
+            Error false
 
-    let handleScssWatcherEvents (events: FileChange seq) =
-        for e in events do
-            let fi = FileInfo.ofPath e.FullPath
+    let buildMd () = Npm.run "build-md" id
 
-            Trace.traceImportant $"%s{fi.FullName} was changed."
+    let buildStyle () = Npm.run "build-css" id
 
-        Npm.run "build-css" (fun x -> x)
+    let handleWatcherEvents (events: FileChange seq) =
+        let es =
+            events
+            |> Seq.map (fun e ->
+                let fi = FileInfo.ofPath e.FullPath
+
+                Trace.traceImportant $"%s{fi.FullName} was changed."
+
+                match fi.FullName with
+                | x when x.EndsWith(".fs") -> BuildFable
+                | x when x.EndsWith(".md") -> BuildMd
+                | x when x.EndsWith(".scss") -> BuildStyle
+                | _ -> Noop)
+            |> Set.ofSeq
+
+        let result =
+            match [ BuildFable; BuildMd; BuildStyle ]
+                  |> List.map es.Contains
+                with
+            | [ false; false; style ] ->
+                match style with
+                | true ->
+                    buildStyle ()
+                    Ok true
+                | _ -> Ok false
+            | [ true; true; style ] ->
+                if style then buildStyle ()
+                buildFable ()
+            | [ _; true; style ] ->
+                buildMd ()
+                if style then buildStyle ()
+                Ok true
+            | [ true; style; _ ] ->
+                if style then buildStyle ()
+                buildFable ()
+            | _ -> Ok false
+
+        match result with
+        | Ok false
+        | Error _ -> printfn "refresh event not triggered."
+        | Ok true -> refreshEvent.Trigger()
 
     let socketHandler (webSocket: WebSocket) =
         fun _ ->
@@ -77,7 +117,7 @@ let handleWatcherEvents, handleScssWatcherEvents, socketHandler =
                     do! webSocket.send Text seg true
             }
 
-    handleWatcherEvents, handleScssWatcherEvents, socketHandler
+    handleWatcherEvents, socketHandler
 
 let home =
     IO.Path.Join [| __SOURCE_DIRECTORY__
@@ -122,12 +162,10 @@ let openIndex url =
 
 try
     use _ =
-        !! "src/**/*.fs" ++ "contents/**/*.md"
+        !! "src/**/*.fs"
+        ++ "contents/**/*.md"
+        ++ "sass/**/*.scss"
         |> ChangeWatcher.run handleWatcherEvents
-
-    use _ =
-        !! "sass/**/*.scss"
-        |> ChangeWatcher.run handleScssWatcherEvents
 
     let index: string = $"http://localhost:%d{port}/blog-fable/index.html"
     printfn $"Open %s{index} ..."

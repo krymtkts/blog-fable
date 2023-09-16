@@ -7,7 +7,8 @@
     "serve": "dotnet fsi ./dev-server.fsx",
     "build-fable": "dotnet fable src --runScript",
     "build": "npm run build-css && npm run build-fable",
-    "dev": "npm run build dev && npm run serve"
+    "dev": "npm run build dev && npm run serve",
+    "build-md": "node ./src/App.fs.js"
   },
   "version": "1.0.0",
   "devDependencies": {
