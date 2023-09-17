@@ -103,32 +103,39 @@ let handleWatcherEvents, socketHandler =
         | _ -> printfn "refresh event not triggered."
 
     let socketHandler (ws: WebSocket) _ =
-        let mutable loop = true // TODO: rewrite with recursion.
+        let mutable loop = true
 
-        Async.Start(
+        let rec refreshLoop () =
             async {
-                while loop do
-                    do! refreshEvent.Publish |> Async.AwaitEvent
+                do! refreshEvent.Publish |> Async.AwaitEvent
 
-                    printfn "fire event."
+                match loop with
+                | true ->
+                    printfn "refresh client."
 
                     let seg = ASCII.bytes "refreshed" |> ByteSegment
-                    do! ws.send Text seg true |> Async.Ignore
-            }
-        )
+                    let! _ = ws.send Text seg true
 
-        socket {
-            while loop do
+                    return! refreshLoop ()
+                | false -> printfn "end refresh loop."
+            }
+
+        let rec mainLoop () =
+            socket {
                 let! msg = ws.read ()
 
                 match msg with
                 | (Close, _, _) ->
+                    loop <- false
                     let emptyResponse = [||] |> ByteSegment
                     do! ws.send Close emptyResponse true
                     printfn "WebSocket connection closed gracefully."
-                    loop <- false
-                | _ -> ()
-        }
+                | _ -> return! mainLoop ()
+            }
+
+        refreshLoop () |> Async.Start
+        mainLoop ()
+
 
     handleWatcherEvents, socketHandler
 
