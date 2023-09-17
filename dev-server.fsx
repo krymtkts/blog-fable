@@ -19,6 +19,7 @@ open Suave.Utils
 open Suave.WebSocket
 open System
 open System.Net
+open System.Threading
 
 
 let port =
@@ -101,17 +102,33 @@ let handleWatcherEvents, socketHandler =
             printfn "refresh event is triggered."
         | _ -> printfn "refresh event not triggered."
 
-    let socketHandler (webSocket: WebSocket) =
-        fun _ ->
-            socket {
-                while true do
-                    do!
-                        Async.AwaitEvent(refreshEvent.Publish)
-                        |> SocketOp.ofAsync
+    let socketHandler (ws: WebSocket) _ =
+        let mutable loop = true // TODO: rewrite with recursion.
+
+        Async.Start(
+            async {
+                while loop do
+                    do! refreshEvent.Publish |> Async.AwaitEvent
+
+                    printfn "fire event."
 
                     let seg = ASCII.bytes "refreshed" |> ByteSegment
-                    do! webSocket.send Text seg true
+                    do! ws.send Text seg true |> Async.Ignore
             }
+        )
+
+        socket {
+            while loop do
+                let! msg = ws.read ()
+
+                match msg with
+                | (Close, _, _) ->
+                    let emptyResponse = [||] |> ByteSegment
+                    do! ws.send Close emptyResponse true
+                    printfn "WebSocket connection closed gracefully."
+                    loop <- false
+                | _ -> ()
+        }
 
     handleWatcherEvents, socketHandler
 
