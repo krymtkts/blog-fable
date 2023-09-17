@@ -20,7 +20,6 @@ open Suave.WebSocket
 open System
 open System.Net
 
-
 let port =
     let rec findPort port =
         let portIsTaken =
@@ -101,17 +100,41 @@ let handleWatcherEvents, socketHandler =
             printfn "refresh event is triggered."
         | _ -> printfn "refresh event not triggered."
 
-    let socketHandler (webSocket: WebSocket) =
-        fun _ ->
-            socket {
-                while true do
-                    do!
-                        Async.AwaitEvent(refreshEvent.Publish)
-                        |> SocketOp.ofAsync
+    let socketHandler (ws: WebSocket) _ =
+        let mutable loop = true
+
+        let rec refreshLoop () =
+            async {
+                // TODO: how can i cancel AwaitEvent of closed websocket?
+                do! refreshEvent.Publish |> Async.AwaitEvent
+
+                match loop with
+                | true ->
+                    printfn "refresh client."
 
                     let seg = ASCII.bytes "refreshed" |> ByteSegment
-                    do! webSocket.send Text seg true
+                    let! _ = ws.send Text seg true
+
+                    return! refreshLoop ()
+                | false -> printfn "end refresh loop."
             }
+
+        let rec mainLoop () =
+            socket {
+                let! msg = ws.read ()
+
+                match msg with
+                | (Close, _, _) ->
+                    loop <- false
+                    let emptyResponse = [||] |> ByteSegment
+                    do! ws.send Close emptyResponse true
+                    printfn "WebSocket connection closed gracefully."
+                | _ -> return! mainLoop ()
+            }
+
+        refreshLoop () |> Async.Start
+        mainLoop ()
+
 
     handleWatcherEvents, socketHandler
 
