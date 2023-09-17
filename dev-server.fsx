@@ -19,8 +19,6 @@ open Suave.Utils
 open Suave.WebSocket
 open System
 open System.Net
-open System.Threading
-
 
 let port =
     let rec findPort port =
@@ -107,6 +105,7 @@ let handleWatcherEvents, socketHandler =
 
         let rec refreshLoop () =
             async {
+                // TODO: how can i cancel AwaitEvent of closed websocket?
                 do! refreshEvent.Publish |> Async.AwaitEvent
 
                 match loop with
