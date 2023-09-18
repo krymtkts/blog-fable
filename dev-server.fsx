@@ -148,6 +148,12 @@ let cfg =
         bindings = [ HttpBinding.create HTTP IPAddress.Loopback port ]
         listenTimeout = TimeSpan.FromMilliseconds 3000. }
 
+
+let root =
+    match fsi.CommandLineArgs with
+    | [| _; root |] -> root
+    | _ -> ""
+
 let app: WebPart =
     let logger = Logging.Log.create "dev-server"
 
@@ -155,20 +161,14 @@ let app: WebPart =
              path "/websocket" >=> handShake socketHandler
 
              GET
-             >=> path "/blog-fable"
-             >=> browseFileHome "blog-fable/index.html"
-             GET
-             >=> path "/blog-fable/"
-             >=> browseFileHome "blog-fable/index.html"
-
-             GET
              >=> Writers.setHeader "Cache-Control" "no-cache, no-store, must-revalidate"
              >=> Writers.setHeader "Pragma" "no-cache"
              >=> Writers.setHeader "Expires" "0"
              >=> browseHome
 
+             // TODO: how can i redirect root without ending slash to index.html?
              Writers.setStatus HTTP_404
-             >=> browseFileHome "/blog-fable/404.html" ]
+             >=> choose [ browseFileHome $"{root}/404.html" ] ]
 
 let openIndex url =
     let p = new Diagnostics.ProcessStartInfo(url)
@@ -183,7 +183,7 @@ try
         ++ "sass/**/*.scss"
         |> ChangeWatcher.run handleWatcherEvents
 
-    let index: string = $"http://localhost:%d{port}/blog-fable/index.html"
+    let index: string = $"http://localhost:%d{port}%s{root}/index.html"
     printfn $"Open %s{index} ..."
     openIndex index
 
