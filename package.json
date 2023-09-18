@@ -4,7 +4,7 @@
   "scripts": {
     "postinstall": "dotnet tool restore",
     "build-css": "sass --style=compressed --no-source-map ./sass/style.scss ./docs/blog-fable/css/style.css",
-    "serve": "dotnet fsi ./dev-server.fsx",
+    "serve": "dotnet fsi ./dev-server.fsx /blog-fable",
     "build-fable": "dotnet fable src --runScript",
     "build": "npm run build-css && npm run build-fable",
     "dev": "npm run build dev && npm run serve",
