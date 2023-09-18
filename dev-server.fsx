@@ -113,24 +113,24 @@ let handleWatcherEvents, socketHandler =
                 return! refreshLoop ()
             }
 
-        let rec mainLoop (ctx: CancellationTokenSource) =
+        let rec mainLoop (cts: CancellationTokenSource) =
             socket {
                 let! msg = ws.read ()
 
                 match msg with
                 | (Close, _, _) ->
-                    use _ = ctx
-                    ctx.Cancel()
+                    use _ = cts
+                    cts.Cancel()
 
                     let emptyResponse = [||] |> ByteSegment
                     do! ws.send Close emptyResponse true
                     printfn "WebSocket connection closed gracefully."
-                | _ -> return! mainLoop ctx
+                | _ -> return! mainLoop cts
             }
 
-        let ctx = new CancellationTokenSource()
-        Async.Start(refreshLoop (), ctx.Token)
-        mainLoop ctx
+        let cts = new CancellationTokenSource()
+        Async.Start(refreshLoop (), cts.Token)
+        mainLoop cts
 
 
     handleWatcherEvents, socketHandler
