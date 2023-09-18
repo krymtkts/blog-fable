@@ -29,7 +29,7 @@ module private Util =
                 let escapedText = Regex.Replace(text, @"[^\w]+", "-")
                 let l = level
 
-                $"""<h%d{l}><a name="%s{escapedText}" class="anchor" href="#%s{escapedText}">%s{text}</a></h%d{l}>"""
+                $"""<h%d{l}><a name="%s{escapedText}" href="#%s{escapedText}">%s{text}</a></h%d{l}>"""
 
             let link href title text =
                 let ref =
