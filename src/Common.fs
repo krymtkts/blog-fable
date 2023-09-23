@@ -78,7 +78,7 @@ module private Util =
 
         let highlighter =
             let highlight (code: string) (lang: string) =
-                (hljs.highlight (code, !!{| language = lang |}))
+                (hljs.highlight code !!{| language = lang |} false)
                     .value
 
             markedHighlight !!{| highlight = highlight |}

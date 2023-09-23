@@ -1,135 +1,166 @@
-// ts2fable 0.7.1
+// based on ts2fable 0.7.1 generation.
 module rec HighlightJs
 
-open System.Text.RegularExpressions
 open Fable.Core
+open Browser.Types
+
+type Error = System.Exception
+type RegExp = System.Text.RegularExpressions.Regex
 
 [<ImportDefault("highlight.js")>]
-let hljs: Hljs.IExports = jsNative
+let hljs: HighlightJs.IExports = jsNative
 
-module Hljs =
+module HighlightJs =
+    type IExports =
+        inherit HLJSApi
+    // NOTE: omit ModesAPI
+    // inherit ModesAPI
+
+    type HLJSApi =
+        inherit PublicApi
 
     [<AllowNullLiteral>]
-    type IExports =
-        abstract highlight:
-            name: string * value: string * ?ignore_illegals: bool * ?continuation: ICompiledMode -> IHighlightResult
+    type VuePlugin =
+        abstract install: (obj option -> unit) with get, set
 
-        abstract highlightAuto: value: string * ?languageSubset: ResizeArray<string> -> IAutoHighlightResult
-        abstract fixMarkup: value: string -> string
-        abstract highlightBlock: block: Node -> unit
-        abstract configure: options: IOptions -> unit
+    [<AllowNullLiteral>]
+    type RegexEitherOptions =
+        abstract capture: bool option with get, set
+
+    [<AllowNullLiteral>]
+    type PublicApi =
+        abstract highlight: string -> U2<string, HighlightOptions> -> bool -> HighlightResult
+        abstract highlightAuto: string -> ResizeArray<string> -> AutoHighlightResult
+        abstract highlightBlock: HTMLElement -> unit
+        abstract highlightElement: HTMLElement -> unit
+        abstract configure: obj -> unit
         abstract initHighlighting: unit -> unit
         abstract initHighlightingOnLoad: unit -> unit
-        abstract registerLanguage: name: string * language: (HLJSStatic -> IModeBase) -> unit
+        abstract highlightAll: unit -> unit
+        abstract registerLanguage: string -> LanguageFn -> unit
+        abstract unregisterLanguage: string -> unit
         abstract listLanguages: unit -> ResizeArray<string>
-        abstract getLanguage: name: string -> IMode
-        abstract ``inherit``: parent: obj * obj: obj -> obj
-        abstract COMMENT: ``begin``: U2<string, Regex> * ``end``: U2<string, Regex> * inherits: IModeBase -> IMode
-        abstract IDENT_RE: string
-        abstract UNDERSCORE_IDENT_RE: string
-        abstract NUMBER_RE: string
-        abstract C_NUMBER_RE: string
-        abstract BINARY_NUMBER_RE: string
-        abstract RE_STARTERS_RE: string
-        abstract BACKSLASH_ESCAPE: IMode
-        abstract APOS_STRING_MODE: IMode
-        abstract QUOTE_STRING_MODE: IMode
-        abstract PHRASAL_WORDS_MODE: IMode
-        abstract C_LINE_COMMENT_MODE: IMode
-        abstract C_BLOCK_COMMENT_MODE: IMode
-        abstract HASH_COMMENT_MODE: IMode
-        abstract NUMBER_MODE: IMode
-        abstract C_NUMBER_MODE: IMode
-        abstract BINARY_NUMBER_MODE: IMode
-        abstract CSS_NUMBER_MODE: IMode
-        abstract REGEX_MODE: IMode
-        abstract TITLE_MODE: IMode
-        abstract UNDERSCORE_TITLE_MODE: IMode
+        abstract registerAliases: U2<string, ResizeArray<string>> -> PublicApiRegisterAliases -> unit
+        abstract getLanguage: string -> Language option
+        abstract autoDetection: string -> bool
+        // abstract ``inherit``: ('T -> ResizeArray<Record<string, obj option>> -> 'T) with get, set
+        abstract addPlugin: (HLJSPlugin -> unit) with get, set
+        abstract removePlugin: (HLJSPlugin -> unit) with get, set
+        abstract debugMode: (unit -> unit) with get, set
+        abstract safeMode: (unit -> unit) with get, set
+        abstract versionString: string with get, set
+        abstract vuePlugin: (unit -> VuePlugin) with get, set
+        abstract regex: PublicApiRegex with get, set
+        abstract newInstance: (unit -> HLJSApi) with get, set
+
 
     [<AllowNullLiteral>]
-    type Node =
+    type LanguageFn =
+        [<Emit "$0($1...)">]
+        abstract Invoke: hljs: HLJSApi -> Language
+
+    [<AllowNullLiteral>]
+    type HighlightResultSecondBest =
+        abstract code: string option with get, set
+        abstract relevance: float with get, set
+        abstract value: string with get, set
+        abstract language: string option with get, set
+        abstract illegal: bool with get, set
+        abstract errorRaised: Error option with get, set
+
+    [<AllowNullLiteral>]
+    type HighlightResult =
+        abstract code: string option with get, set
+        abstract relevance: float with get, set
+        abstract value: string with get, set
+        abstract language: string option with get, set
+        abstract illegal: bool with get, set
+        abstract errorRaised: Error option with get, set
+        abstract secondBest: HighlightResultSecondBest option with get, set
+
+    [<AllowNullLiteral>]
+    type AutoHighlightResult =
+        inherit HighlightResult
+
+    [<AllowNullLiteral>]
+    type BeforeHighlightContext =
+        abstract code: string with get, set
+        abstract language: string with get, set
+        abstract result: HighlightResult option with get, set
+
+    type PluginEvent = HLJSPlugin
+
+    [<AllowNullLiteral>]
+    type HLJSPlugin =
+        abstract ``after:highlight``: (HighlightResult -> unit) option with get, set
+        abstract ``before:highlight``: (BeforeHighlightContext -> unit) option with get, set
+        abstract ``after:highlightElement``: (HLJSPluginAfter_highlightElement -> unit) option with get, set
+        abstract ``before:highlightElement``: (HLJSPluginBefore_highlightElement -> unit) option with get, set
+        abstract ``after:highlightBlock``: (HLJSPluginAfter_highlightBlock -> unit) option with get, set
+        abstract ``before:highlightBlock``: (HLJSPluginBefore_highlightBlock -> unit) option with get, set
+
+    [<AllowNullLiteral>]
+    type HighlightOptions =
+        abstract language: string with get, set
+        abstract ignoreIllegals: bool option with get, set
+
+    [<AllowNullLiteral>]
+    type HLJSOptions =
+        abstract noHighlightRe: RegExp with get, set
+        abstract languageDetectRe: RegExp with get, set
+        abstract classPrefix: string with get, set
+        abstract cssSelector: string with get, set
+        abstract languages: ResizeArray<string> option with get, set
+        // abstract __emitter: EmitterConstructor with get, set
+        abstract ignoreUnescapedHTML: bool option with get, set
+        abstract throwUnescapedHTML: bool option with get, set
+
+    [<AllowNullLiteral>]
+    type Language =
         interface
         end
 
     [<AllowNullLiteral>]
-    type IHighlightResultBase =
-        abstract relevance: float with get, set
+    type Emitter =
+        abstract addKeyword: text: string * kind: string -> unit
+        abstract addText: text: string -> unit
+        abstract toHTML: unit -> string
+        abstract finalize: unit -> unit
+        abstract closeAllNodes: unit -> unit
+        abstract openNode: kind: string -> unit
+        abstract closeNode: unit -> unit
+        abstract addSublanguage: emitter: Emitter * subLanguageName: string -> unit
+
+    [<AllowNullLiteral>]
+    type PublicApiRegisterAliases =
+        abstract languageName: string with get, set
+
+    [<AllowNullLiteral>]
+    type PublicApiRegex =
+        abstract concat: (ResizeArray<U2<RegExp, string>> -> string) with get, set
+        abstract lookahead: (U2<RegExp, string> -> string) with get, set
+        abstract either: (U2<ResizeArray<U2<RegExp, string>>, obj * RegexEitherOptions> -> string) with get, set
+        abstract optional: (U2<RegExp, string> -> string) with get, set
+        abstract anyNumberOfTimes: (U2<RegExp, string> -> string) with get, set
+
+    [<AllowNullLiteral>]
+    type HLJSPluginAfter_highlightElement =
+        abstract el: Element with get, set
+        abstract result: HighlightResult with get, set
+        abstract text: string with get, set
+
+    [<AllowNullLiteral>]
+    type HLJSPluginBefore_highlightElement =
+        abstract el: Element with get, set
         abstract language: string with get, set
-        abstract value: string with get, set
 
     [<AllowNullLiteral>]
-    type IAutoHighlightResult =
-        inherit IHighlightResultBase
-        abstract second_best: IAutoHighlightResult option with get, set
+    type HLJSPluginAfter_highlightBlock =
+        abstract block: Element with get, set
+        abstract result: HighlightResult with get, set
+        abstract text: string with get, set
 
     [<AllowNullLiteral>]
-    type IHighlightResult =
-        inherit IHighlightResultBase
-        abstract top: ICompiledMode with get, set
-
-    [<AllowNullLiteral>]
-    type HLJSStatic =
-        abstract ``inherit``: parent: obj * obj: obj -> obj
-        abstract IDENT_RE: string with get, set
-        abstract UNDERSCORE_IDENT_RE: string with get, set
-        abstract NUMBER_RE: string with get, set
-        abstract C_NUMBER_RE: string with get, set
-        abstract BINARY_NUMBER_RE: string with get, set
-        abstract RE_STARTERS_RE: string with get, set
-        abstract BACKSLASH_ESCAPE: IMode with get, set
-        abstract APOS_STRING_MODE: IMode with get, set
-        abstract QUOTE_STRING_MODE: IMode with get, set
-        abstract PHRASAL_WORDS_MODE: IMode with get, set
-        abstract C_LINE_COMMENT_MODE: IMode with get, set
-        abstract C_BLOCK_COMMENT_MODE: IMode with get, set
-        abstract HASH_COMMENT_MODE: IMode with get, set
-        abstract NUMBER_MODE: IMode with get, set
-        abstract C_NUMBER_MODE: IMode with get, set
-        abstract BINARY_NUMBER_MODE: IMode with get, set
-        abstract CSS_NUMBER_MODE: IMode with get, set
-        abstract REGEX_MODE: IMode with get, set
-        abstract TITLE_MODE: IMode with get, set
-        abstract UNDERSCORE_TITLE_MODE: IMode with get, set
-
-    [<AllowNullLiteral>]
-    type IModeBase =
-        abstract className: string option with get, set
-        abstract aliases: ResizeArray<string> option with get, set
-        abstract ``begin``: U2<string, Regex> option with get, set
-        abstract ``end``: U2<string, Regex> option with get, set
-        abstract case_insensitive: bool option with get, set
-        abstract beginKeyword: string option with get, set
-        abstract endsWithParent: bool option with get, set
-        abstract lexems: string option with get, set
-        abstract illegal: string option with get, set
-        abstract excludeBegin: bool option with get, set
-        abstract excludeEnd: bool option with get, set
-        abstract returnBegin: bool option with get, set
-        abstract returnEnd: bool option with get, set
-        abstract starts: string option with get, set
-        abstract subLanguage: string option with get, set
-        abstract subLanguageMode: string option with get, set
-        abstract relevance: float option with get, set
-        abstract variants: ResizeArray<IMode> option with get, set
-
-    [<AllowNullLiteral>]
-    type IMode =
-        inherit IModeBase
-        abstract keywords: obj option with get, set
-        abstract contains: ResizeArray<IMode> option with get, set
-
-    [<AllowNullLiteral>]
-    type ICompiledMode =
-        inherit IModeBase
-        abstract compiled: bool with get, set
-        abstract contains: ResizeArray<ICompiledMode> option with get, set
-        abstract keywords: obj option with get, set
-        abstract terminators: Regex with get, set
-        abstract terminator_end: string option with get, set
-
-    [<AllowNullLiteral>]
-    type IOptions =
-        abstract classPrefix: string option with get, set
-        abstract tabReplace: string option with get, set
-        abstract useBR: bool option with get, set
-        abstract languages: ResizeArray<string> option with get, set
+    type HLJSPluginBefore_highlightBlock =
+        abstract block: Element with get, set
+        abstract language: string with get, set
