@@ -73,12 +73,11 @@ module private Util =
 
             jsOptions<Marked.MarkedExtension> (fun o ->
                 o.renderer <- Some <| U2.Case2 mops
-                o.gfm <- Some true
-                o.headerIds <- Some true)
+                o.gfm <- Some true)
 
         let highlighter =
             let highlight (code: string) (lang: string) =
-                (hljs.highlight (code, !!{| language = lang |}))
+                (hljs.highlight code !!{| language = lang |} false)
                     .value
 
             markedHighlight !!{| highlight = highlight |}
