@@ -267,7 +267,7 @@ module Misc =
                                                 Html.link [ prop.rel "canonical"
                                                             prop.href site.url ]
                                                 Html.link [ prop.rel "icon"
-                                                            prop.href site.favicon ]
+                                                            prop.href $"%s{site.pathRoot}%s{site.favicon}" ]
                                                 Html.link [ prop.rel "stylesheet"
                                                             prop.type' "text/css"
                                                             prop.href $"%s{site.pathRoot}%s{site.style}" ]
