@@ -164,9 +164,9 @@ let app: WebPart =
              >=> Writers.setHeader "Cache-Control" "no-cache, no-store, must-revalidate"
              >=> Writers.setHeader "Pragma" "no-cache"
              >=> Writers.setHeader "Expires" "0"
-             >=> choose [ path $"/blog-fable/"
+             >=> choose [ path $"{root}/"
                           >=> Files.browseFileHome "blog-fable/index.html"
-                          path $"/blog-fable"
+                          path $"{root}"
                           >=> Redirection.redirect $"/blog-fable/"
 
                           Files.browseHome ]
