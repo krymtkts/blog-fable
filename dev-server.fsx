@@ -10,7 +10,6 @@ open Fake.IO
 open Fake.IO.Globbing.Operators
 open Fake.JavaScript
 open Suave
-open Suave.Files
 open Suave.Filters
 open Suave.Operators
 open Suave.Sockets
@@ -157,18 +156,25 @@ let root =
 let app: WebPart =
     let logger = Logging.Log.create "dev-server"
 
-    choose [ log logger logFormat >=> never
+    choose [
+
              path "/websocket" >=> handShake socketHandler
 
              GET
              >=> Writers.setHeader "Cache-Control" "no-cache, no-store, must-revalidate"
              >=> Writers.setHeader "Pragma" "no-cache"
              >=> Writers.setHeader "Expires" "0"
-             >=> browseHome
+             >=> choose [ path $"{root}/"
+                          >=> Files.browseFileHome "blog-fable/index.html"
+                          path $"{root}"
+                          >=> Redirection.redirect $"/blog-fable/"
 
-             // TODO: how can i redirect root without ending slash to index.html?
+                          Files.browseHome ]
+             >=> log logger logFormat
+
              Writers.setStatus HTTP_404
-             >=> choose [ browseFileHome $"{root}/404.html" ] ]
+             >=> logWithLevel Logging.Error logger logFormat
+             >=> Files.browseFileHome $"{root}/404.html" ]
 
 let openIndex url =
     let p = new Diagnostics.ProcessStartInfo(url)
