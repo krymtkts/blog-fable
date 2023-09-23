@@ -571,34 +571,18 @@ module Marked =
     type MarkedExtension =
         /// True will tell marked to await any walkTokens functions before parsing the tokens and returning an HTML string.
         abstract async: bool option with get, set
-        /// A prefix URL for any relative link.
-        abstract baseUrl: string option with get, set
         /// Enable GFM line breaks. This option requires the gfm option to be true.
         abstract breaks: bool option with get, set
         /// Add tokenizers and renderers to marked
         abstract extensions: ResizeArray<TokenizerAndRendererExtension> option with get, set
         /// Enable GitHub flavored markdown.
         abstract gfm: bool option with get, set
-        /// Include an id attribute when emitting headings.
-        abstract headerIds: bool option with get, set
-        /// Set the prefix for header tag ids.
-        abstract headerPrefix: string option with get, set
-
-        /// A function to highlight code blocks. The function can either be
-        /// synchronous (returning a string) or asynchronous (callback invoked
-        /// with an error if any occurred during highlighting and a string
-        /// if highlighting was successful)
-        abstract highlight: code: string * lang: string * ?callback: (obj option -> string -> unit) -> U2<string, unit>
 
         /// Hooks are methods that hook into some part of marked.
         /// preprocess is called to process markdown before sending it to marked.
         /// postprocess is called to process html after marked has finished parsing.
         abstract hooks: MarkedExtensionHooks option with get, set
 
-        /// Set the prefix for code block classes.
-        abstract langPrefix: string option with get, set
-        /// Mangle autolinks (<email@domain.com>).
-        abstract mangle: bool option with get, set
         /// Conform to obscure parts of markdown.pl as much as possible. Don't fix any of the original markdown bugs or poor behavior.
         abstract pedantic: bool option with get, set
 
@@ -607,16 +591,8 @@ module Marked =
         /// An object containing functions to render tokens to HTML.
         abstract renderer: U2<Renderer, RendererObject> option with get, set
 
-        /// Sanitize the output. Ignore any HTML that has been input.
-        abstract sanitize: bool option with get, set
-        /// Optionally sanitize found HTML with a sanitizer function.
-        abstract sanitizer: html: string -> string
         /// Shows an HTML error message when rendering fails.
         abstract silent: bool option with get, set
-        /// Use smarter list behavior than the original markdown. May eventually be default with the old behavior moved into pedantic.
-        abstract smartLists: bool option with get, set
-        /// Use "smart" typograhic punctuation for things like quotes and dashes.
-        abstract smartypants: bool option with get, set
         /// The tokenizer defines how to turn markdown text into tokens.
         abstract tokenizer: U2<Tokenizer, TokenizerObject> option with get, set
 
@@ -625,9 +601,6 @@ module Marked =
         /// Each token is passed by reference so updates are persisted when passed to the parser.
         /// The return value of the function is ignored.
         abstract walkTokens: (Token -> unit) option with get, set
-
-        /// Generate closing slash for self-closing tags (<br/> instead of <br>)
-        abstract xhtml: bool option with get, set
 
     [<AllowNullLiteral>]
     type MarkedOptions =
