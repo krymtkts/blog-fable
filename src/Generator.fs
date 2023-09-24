@@ -398,13 +398,25 @@ module Rendering =
         promise {
             let! files = getMarkdownFiles sourceDir
 
-            return!
+            let! metas =
                 files
                 |> List.map (fun source ->
-                    let dest = getDestinationPath source destDir
+                    let dest = getDestinationPath source destDir // TODO: move into readSource?
 
+                    promise { return! readSource source dest })
+                |> Promise.all
+
+            return!
+                metas
+                |> Seq.mapi (fun i meta ->
                     promise {
-                        let! meta = readSource source dest
+                        let prev, next =
+                            match i with
+                            | 0 -> None, Some(metas.[i + 1])
+                            | i when (i = Seq.length metas - 1) -> Some(metas.[i - 1]), None
+                            | i -> Some(metas.[i - 1]), Some(metas.[i + 1])
+
+                        let dest = getDestinationPath meta.source destDir
                         do! writeContent site meta tagDest dest
                         return meta
                     })
