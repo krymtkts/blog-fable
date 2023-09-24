@@ -177,11 +177,11 @@ module Generation =
         navs
         |> List.map (function
             | Title navi ->
-                Component.liA $"%s{pathRoot}%s{navi.path}"
-                <| Component.Element(navi.text, Html.h1 [ prop.text navi.text ])
+                liA $"%s{pathRoot}%s{navi.path}"
+                <| Element(navi.text, Html.h1 [ prop.text navi.text ])
             | Link navi ->
-                Component.liA $"%s{pathRoot}%s{navi.path}"
-                <| Component.Text navi.text)
+                liA $"%s{pathRoot}%s{navi.path}"
+                <| Misc.Text navi.text)
         |> Html.ul,
         navs
         |> Seq.map toSitemap
@@ -361,7 +361,7 @@ module Rendering =
                   pubDate = pubDate }
         }
 
-    let private writeContent (site: FixedSiteContent) (meta: Meta) tagDest (dest: string) =
+    let private writeContent (site: FixedSiteContent) tagDest (meta: Meta) (dest: string) prev next =
         promise {
             let path =
                 dest
@@ -378,7 +378,7 @@ module Rendering =
                 Component.liAWithClass $"%s{site.pathRoot}%s{tagDest}/%s{tag}.html" tag [ "tag"; "is-medium" ]
 
             let fmToHeader = Component.header <| tagToElement <| meta.pubDate
-            let header = fmToHeader meta.frontMatter
+            let header = fmToHeader meta.frontMatter prev next
 
             let page =
                 List.append header [ meta.content ]
@@ -417,7 +417,7 @@ module Rendering =
                             | i -> Some(metas.[i - 1]), Some(metas.[i + 1])
 
                         let dest = getDestinationPath meta.source destDir
-                        do! writeContent site meta tagDest dest
+                        do! writeContent site tagDest meta dest prev next
                         return meta
                     })
                 |> Promise.all
@@ -432,7 +432,7 @@ module Rendering =
         promise {
             let dest = IO.resolve dest
             let! meta = readSource latest dest
-            do! writeContent site meta tagDest dest
+            do! writeContent site tagDest meta dest None None // TODO: add prev.
         }
 
     let renderArchives site archives dest =
