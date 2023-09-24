@@ -319,7 +319,7 @@ module Rendering =
     let argv = Misc.argv
     type FixedSiteContent = Misc.FixedSiteContent
 
-    let private readAndWrite (site: FixedSiteContent) tagDest source (dest: string) =
+    let private readSource (site: FixedSiteContent) tagDest source (dest: string) =
         promise {
             printfn $"Rendering %s{source}..."
             let! md = IO.readFile source
@@ -392,7 +392,7 @@ module Rendering =
     let renderMarkdowns site tagDest sourceDir destDir =
         promise {
             let! files = getMarkdownFiles sourceDir
-            let rw = readAndWrite site tagDest
+            let rw = readSource site tagDest
 
             return!
                 files
@@ -415,7 +415,7 @@ module Rendering =
             |> getLatestPost
 
         promise {
-            let rw = readAndWrite site tagDest
+            let rw = readSource site tagDest
             let dest = IO.resolve dest
 
             do! rw latest dest |> Promise.map ignore
