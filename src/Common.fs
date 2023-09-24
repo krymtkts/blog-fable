@@ -217,11 +217,12 @@ module Misc =
 
     type Meta =
         { frontMatter: Parser.FrontMatter option
-          content: string
+          content: ReactElement
           layout: Layout
           source: string
           leaf: string
-          date: string }
+          date: string
+          pubDate: string option }
 
     type FixedSiteContent =
         { lang: string
