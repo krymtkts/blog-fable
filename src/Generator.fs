@@ -92,7 +92,7 @@ module Generation =
           pageRoot: string
           priority: string }
 
-    let generateTagsContent pathRoot def =
+    let generateTagsContent def =
         let tagAndPage =
             def.metas
             |> Seq.map (fun meta ->
@@ -114,7 +114,7 @@ module Generation =
             let tags =
                 tagAndPage
                 |> Map.toList
-                |> List.map (fun (tag, _) -> Component.pathToLi $"{pathRoot}{def.tagRoot}" $"{tag}.html")
+                |> List.map (fun (tag, _) -> Component.pathToLi def.tagRoot $"{tag}.html")
 
             [ Html.ul [ prop.children [ Html.li [ Html.h2 def.title ]
                                         Html.ul [ prop.children tags ] ] ] ]
@@ -131,7 +131,7 @@ module Generation =
                             | Post _ -> def.postRoot
                             | Page -> def.pageRoot
 
-                        metaToLi $"%s{pathRoot}%s{parent}" meta)
+                        metaToLi parent meta)
 
                 tag,
                 [ Html.ul [ prop.children [ Html.li [ Html.h2 tag ]
@@ -141,7 +141,7 @@ module Generation =
             tagAndPage
             |> Map.toList
             |> Seq.map (fun (tag, _) ->
-                { loc = sourceToSitemap $"%s{pathRoot}%s{def.tagRoot}" $"%s{tag}.html"
+                { loc = sourceToSitemap def.tagRoot $"%s{tag}.html"
                   lastmod = now |> DateTime.toRFC3339Date
                   priority = def.priority })
 
@@ -320,7 +320,12 @@ module Generation =
 [<AutoOpen>]
 module Rendering =
     let argv = Misc.argv
-    type FixedSiteContent = Misc.FixedSiteContent
+
+    type FixedSiteContent =
+        { pathRoot: string
+          postRoot: string
+          pageRoot: string
+          tagRoot: string }
 
     let private readSource source =
         promise {
@@ -361,7 +366,7 @@ module Rendering =
                   pubDate = pubDate }
         }
 
-    let private writeContent (site: FixedSiteContent) tagDest (meta: Meta) (dest: string) prev next =
+    let private writeContent (conf: FrameConfiguration) (site: FixedSiteContent) (meta: Meta) (dest: string) prev next =
         promise {
             let path =
                 dest
@@ -371,18 +376,18 @@ module Rendering =
 
             let title =
                 match meta.frontMatter with
-                | Some fm -> $"%s{site.title} - %s{fm.title}"
-                | None -> site.title
+                | Some fm -> $"%s{conf.title} - %s{fm.title}"
+                | None -> conf.title
 
             let tagToElement tag =
-                Component.liAWithClass $"%s{site.pathRoot}%s{tagDest}/%s{tag}.html" tag [ "tag"; "is-medium" ]
+                Component.liAWithClass $"%s{site.pathRoot}%s{site.tagRoot}/%s{tag}.html" tag [ "tag"; "is-medium" ]
 
             let fmToHeader = Component.header <| tagToElement <| meta.pubDate
             let header = fmToHeader meta.frontMatter
 
             let footer =
                 match meta.layout with
-                | Post _ -> Component.footer $"{site.pathRoot}/{IO.parent path}/" prev next
+                | Post _ -> Component.footer $"%s{site.pathRoot}%s{site.postRoot}/" prev next
                 | _ -> []
 
             let page =
@@ -391,9 +396,9 @@ module Rendering =
                               footer ]
                 |> wrapContent
                 |> frame
-                    { site with
+                    { conf with
                         title = title
-                        url = $"%s{site.url}/%s{path}" }
+                        url = $"%s{conf.url}/%s{path}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing %s{dest}..."
@@ -401,7 +406,7 @@ module Rendering =
             do! IO.writeFile dest page
         }
 
-    let renderMarkdowns site tagDest sourceDir destDir =
+    let renderMarkdowns (conf: FrameConfiguration) (site: FixedSiteContent) sourceDir destDir =
         promise {
             let! files = getMarkdownFiles sourceDir
             let! metas = files |> List.map readSource |> Promise.all
@@ -417,13 +422,13 @@ module Rendering =
                             | i -> Some(metas.[i - 1]), Some(metas.[i + 1])
 
                         let dest = getDestinationPath meta.source destDir
-                        do! writeContent site tagDest meta dest prev next
+                        do! writeContent conf site meta dest prev next
                         return meta
                     })
                 |> Promise.all
         }
 
-    let renderIndex site tagDest metaPosts dest =
+    let renderIndex conf site metaPosts dest =
         let posts =
             metaPosts
             |> Seq.map (fun m -> m.source)
@@ -446,10 +451,10 @@ module Rendering =
 
             let dest = IO.resolve dest
 
-            do! writeContent site tagDest meta dest metaPrev None
+            do! writeContent conf site meta dest metaPrev None
         }
 
-    let renderArchives site archives dest =
+    let renderArchives conf site archives dest =
         promise {
             printfn "Rendering archives..."
             let! archives, locs = generateArchives site.pathRoot archives
@@ -458,9 +463,9 @@ module Rendering =
                 archives
                 |> wrapContent
                 |> frame
-                    { site with
-                        title = $"%s{site.title} - Archives"
-                        url = $"%s{site.url}%s{site.pathRoot}/%s{IO.leaf dest}" }
+                    { conf with
+                        title = $"%s{conf.title} - Archives"
+                        url = $"%s{conf.url}%s{site.pathRoot}/%s{IO.leaf dest}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing archives %s{dest}..."
@@ -469,20 +474,20 @@ module Rendering =
             return locs
         }
 
-    let renderTags (site: FixedSiteContent) def dest =
-        let tagsContent, tagPageContents, locs = generateTagsContent site.pathRoot def
+    let renderTags (conf: FrameConfiguration) (site: FixedSiteContent) def dest =
+        let tagsContent, tagPageContents, locs = generateTagsContent def
 
         promise {
             printfn "Rendering tags..."
-            let title = $"%s{site.title} - Tags"
+            let title = $"%s{conf.title} - Tags"
 
             let content =
                 tagsContent
                 |> wrapContent
                 |> frame
-                    { site with
+                    { conf with
                         title = title
-                        url = $"%s{site.url}%s{site.pathRoot}/%s{IO.leaf dest}" }
+                        url = $"%s{conf.url}%s{site.pathRoot}/%s{IO.leaf dest}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing tags %s{dest}..."
@@ -500,9 +505,9 @@ module Rendering =
                         tagPageContent
                         |> wrapContent
                         |> frame
-                            { site with
+                            { conf with
                                 title = $"%s{title} - %s{tag}"
-                                url = $"%s{site.url}%s{site.pathRoot}/%s{parent}/%s{IO.leaf dest}" }
+                                url = $"%s{conf.url}%s{site.pathRoot}/%s{parent}/%s{IO.leaf dest}" }
                         |> Parser.parseReactStaticHtml
 
                     IO.writeFile dest content |> Promise.map ignore)
@@ -512,7 +517,7 @@ module Rendering =
             return locs
         }
 
-    let render404 site dest =
+    let render404 conf site dest =
         promise {
             printfn "Rendering 404..."
 
@@ -520,9 +525,9 @@ module Rendering =
                 generate404
                 |> wrapContent
                 |> frame
-                    { site with
-                        title = $"%s{site.title} - 404"
-                        url = $"%s{site.url}%s{site.pathRoot}/%s{IO.leaf dest}" }
+                    { conf with
+                        title = $"%s{conf.title} - 404"
+                        url = $"%s{conf.url}%s{site.pathRoot}/%s{IO.leaf dest}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing 404 {dest}..."
@@ -600,8 +605,14 @@ module RenderOptions =
     let feedPath opts = $"/%s{opts.feedName}.xml"
     let archivesPath opts = $"%s{opts.archives.root}.html"
     let tagsPath opts = $"%s{opts.tags.root}.html"
-    let stylePath = "/css/style.css"
-    let devScriptPath = "/js/dev.js"
+    let stylePath opts = $"%s{opts.pathRoot}/css/style.css"
+    let devScriptPath opts = $"%s{opts.pathRoot}/js/dev.js"
+    let faviconPath opts = $"%s{opts.pathRoot}%s{opts.favicon}"
+
+    let postsRootPath opts = $"%s{opts.pathRoot}%s{opts.posts.root}"
+    let pagesRootPath opts = $"%s{opts.pathRoot}%s{opts.pages.root}"
+    let tagsRootPath opts = $"%s{opts.pathRoot}%s{opts.tags.root}"
+
     let siteUrl opts = $"%s{opts.siteUrl}%s{opts.pathRoot}"
 
     let postsSourceRoot opts = $"%s{opts.src}%s{opts.posts.root}"
@@ -634,8 +645,7 @@ module RenderOptions =
     let feedDestinationPath opts =
         $"%s{destinationRoot opts}%s{feedPath opts}"
 
-    let devScriptDestinationPath opts =
-        $"%s{destinationRoot opts}%s{devScriptPath}"
+    let devScriptDestinationPath opts = $"%s{opts.dst}%s{devScriptPath opts}"
 
     let faviconDestinationPath opts =
         $"%s{destinationRoot opts}%s{opts.favicon}"
@@ -671,7 +681,7 @@ let private buildNavList opts =
 let private buildDevScript opts =
     match opts.stage with
     | Development ->
-        Some(RenderOptions.devScriptPath),
+        Some(RenderOptions.devScriptPath opts),
         [ (RenderOptions.devScriptSourcePath, RenderOptions.devScriptDestinationPath opts) ]
     | Production -> None, []
 
@@ -685,19 +695,24 @@ let render (opts: RenderOptions) =
         let devInjection, devScript = buildDevScript opts
 
         let site: FixedSiteContent =
+            { pathRoot = opts.pathRoot
+              postRoot = opts.posts.root
+              pageRoot = opts.pages.root
+              tagRoot = opts.tags.root }
+
+        let conf: FrameConfiguration =
             { lang = opts.lang
               navbar = navbar
               name = opts.siteName
               title = opts.siteName
               description = opts.description
               url = opts.siteUrl
-              pathRoot = opts.pathRoot // TODO: remove pathRoot from here and add to new created path type that includes src, dst and pathRoot.
               copyright = opts.copyright
-              favicon = opts.favicon
-              style = RenderOptions.stylePath
+              favicon = RenderOptions.faviconPath opts
+              style = RenderOptions.stylePath opts
               devInjection = devInjection }
 
-        let renderPostAndPages = renderMarkdowns site opts.tags.root
+        let renderPostAndPages = renderMarkdowns conf site
 
         let! metaPosts =
             renderPostAndPages
@@ -710,7 +725,7 @@ let render (opts: RenderOptions) =
             <| RenderOptions.pagesDestinationRoot opts
 
         do!
-            renderIndex site opts.tags.root metaPosts
+            renderIndex conf site metaPosts
             <| RenderOptions.indexDestinationPath opts
 
         let archiveDefs =
@@ -726,27 +741,27 @@ let render (opts: RenderOptions) =
                     priority = "0.8" } ]
 
         let! archiveLocs =
-            renderArchives site archiveDefs
+            renderArchives conf site archiveDefs
             <| RenderOptions.archivesDestinationPath opts
 
         let tagDef =
             { title = opts.tags.title
+              tagRoot = RenderOptions.tagsRootPath opts
+              postRoot = RenderOptions.postsRootPath opts
+              pageRoot = RenderOptions.pagesRootPath opts
               metas = Seq.concat [ metaPosts; metaPages ]
-              tagRoot = opts.tags.root
-              postRoot = opts.posts.root
-              pageRoot = opts.pages.root
               priority = "0.9" }
 
         let! tagLocs =
-            renderTags site tagDef
+            renderTags conf site tagDef
             <| RenderOptions.tagsDestinationPath opts
 
         do!
-            render404 site
+            render404 conf site
             <| RenderOptions.``404DestinationPath`` opts
 
         do!
-            renderSitemap site.url
+            renderSitemap conf.url
             <| RenderOptions.sitemapDestinationPath opts
             <| (Seq.concat [ navSitemap
                              tagLocs

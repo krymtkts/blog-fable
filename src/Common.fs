@@ -178,13 +178,12 @@ module Misc =
           date: string
           pubDate: string option }
 
-    type FixedSiteContent =
+    type FrameConfiguration =
         { lang: string
           navbar: ReactElement
           name: string
           title: string
           description: string
-          pathRoot: string
           url: string
           copyright: string
           favicon: string
@@ -195,7 +194,7 @@ module Misc =
         Html.div [ prop.className "content"
                    prop.children elm ]
 
-    let frame site (content: Fable.React.ReactElement) =
+    let frame (conf: FrameConfiguration) (content: Fable.React.ReactElement) =
         let cssLink path integrity =
             Html.link [ prop.rel "stylesheet"
                         prop.type' "text/css"
@@ -204,45 +203,45 @@ module Misc =
                         prop.crossOrigin.anonymous
                         prop.referrerPolicy.noReferrer ]
 
-        Html.html [ prop.lang site.lang
-                    prop.children [ Html.head [ Html.title [ prop.text site.title ]
+        Html.html [ prop.lang conf.lang
+                    prop.children [ Html.head [ Html.title [ prop.text conf.title ]
                                                 Html.meta [ prop.charset "utf-8" ]
                                                 Html.meta [ prop.name "description"
-                                                            prop.content site.description ]
+                                                            prop.content conf.description ]
                                                 Html.meta [ prop.name "viewport"
                                                             prop.content "width=device-width, initial-scale=1" ]
                                                 Html.meta [ prop.custom ("property", "og:site_name")
-                                                            prop.content site.name ]
+                                                            prop.content conf.name ]
                                                 Html.meta [ prop.custom ("property", "og:title")
-                                                            prop.content site.title ]
+                                                            prop.content conf.title ]
                                                 Html.meta [ prop.custom ("property", "og:description")
-                                                            prop.content site.description ]
+                                                            prop.content conf.description ]
                                                 Html.meta [ prop.custom ("property", "og:url")
-                                                            prop.content site.url ]
+                                                            prop.content conf.url ]
                                                 Html.link [ prop.rel "canonical"
-                                                            prop.href site.url ]
+                                                            prop.href conf.url ]
                                                 Html.link [ prop.rel "icon"
-                                                            prop.href $"%s{site.pathRoot}%s{site.favicon}" ]
+                                                            prop.href conf.favicon ]
                                                 Html.link [ prop.rel "stylesheet"
                                                             prop.type' "text/css"
-                                                            prop.href $"%s{site.pathRoot}%s{site.style}" ]
+                                                            prop.href conf.style ]
                                                 cssLink
                                                     "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/solarized-dark.min.css"
                                                     "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]
                                     Html.body [ Html.nav [ prop.className "tabs"
-                                                           prop.children site.navbar ]
+                                                           prop.children conf.navbar ]
                                                 Html.main [ prop.className "container"
                                                             prop.children [ content ] ] ]
                                     Html.footer [ prop.className "footer"
                                                   prop.children [ Html.div [ prop.className "container"
                                                                              prop.text (
-                                                                                 $"Copyright © %s{site.copyright}"
+                                                                                 $"Copyright © %s{conf.copyright}"
                                                                              ) ] ] ]
-                                    match site.devInjection with
+                                    match conf.devInjection with
                                     | Some src ->
                                         Html.script [ prop.lang "javascript"
                                                       prop.type' "text/javascript"
-                                                      prop.src $"%s{site.pathRoot}%s{src}" ]
+                                                      prop.src src ]
                                     | None -> null ] ]
 
     let getDestinationPath (source: string) (dir: string) =
