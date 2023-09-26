@@ -320,25 +320,26 @@ module DateTime =
     open System
 
     let options (timeZone: string) =
-        !!{| weekday = "short"
-             year = "numeric"
-             month = "short"
-             day = "2-digit"
-             hour = "numeric"
-             minute = "numeric"
-             second = "numeric"
-             hourCycle = "h23"
-             timeZone = timeZone
-             timeZoneName = "short" |}
+        jsOptions<Intl.DateTimeFormatOptions> (fun o ->
+            o.weekday <- "short"
+            o.year <- "numeric"
+            o.month <- "short"
+            o.day <- "2-digit"
+            o.hour <- "numeric"
+            o.minute <- "numeric"
+            o.second <- "numeric"
+            o.hourCycle <- "h23"
+            o.timeZone <- timeZone
+            o.timeZoneName <- "short")
 
-    // TODO: write binding.
     let datetimeFormat timeZone =
-        Intl.DateTimeFormat "en-US" <| options timeZone
+        Intl.DateTimeFormat.Create "en-US"
+        <| options timeZone
 
     let toRFC822DateTimeString timeZone (d: DateTime) =
         let formatter = datetimeFormat timeZone
-        let parts: obj [] = formatter?formatToParts (d)
-        let p: string [] = parts |> Array.map (fun x -> x?value)
+        let parts = formatter.formatToParts (d)
+        let p: string [] = parts |> Array.map (fun x -> x.value)
         let d = $"%s{p.[0]}%s{p.[1]}%s{p.[4]} %s{p.[2]} %s{p.[6]}"
         let t = (p.[8..12] |> String.concat "")
 
