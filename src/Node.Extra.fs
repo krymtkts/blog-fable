@@ -185,6 +185,33 @@ module Process =
     let argv = process'.argv
 
 
+// NOTE: minimum implementation for Intl.DateTimeFormat.formatToParts.
+[<RequireQualifiedAccess>]
 module Intl =
-    [<Emit "new Intl.DateTimeFormat([$0], $1)">]
-    let DateTimeFormat lang options = jsNative
+    [<Global>]
+    let DateTimeFormat: DateTimeFormat = jsNative
+
+    [<AllowNullLiteral>]
+    type DateTimeFormatOptions =
+        abstract weekday: string with get, set
+        abstract year: string with get, set
+        abstract month: string with get, set
+        abstract day: string with get, set
+        abstract hour: string with get, set
+        abstract minute: string with get, set
+        abstract second: string with get, set
+        abstract hourCycle: string with get, set
+        abstract timeZone: string with get, set
+        abstract timeZoneName: string with get, set
+
+    [<AllowNullLiteral>]
+    type DateTimeFormatPart =
+        abstract ``type``: string with get, set
+        abstract value: string with get, set
+
+    [<AllowNullLiteral>]
+    type DateTimeFormat =
+        [<Emit "new Intl.$0($1, $2)">]
+        abstract Create: lang: string -> options: DateTimeFormatOptions -> DateTimeFormat
+
+        abstract formatToParts: date: System.DateTime -> DateTimeFormatPart array
