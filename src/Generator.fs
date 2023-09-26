@@ -177,11 +177,11 @@ module Generation =
         navs
         |> List.map (function
             | Title navi ->
-                Component.liA $"%s{pathRoot}%s{navi.path}"
-                <| Component.Element(navi.text, Html.h1 [ prop.text navi.text ])
+                liA $"%s{pathRoot}%s{navi.path}"
+                <| Element(navi.text, Html.h1 [ prop.text navi.text ])
             | Link navi ->
-                Component.liA $"%s{pathRoot}%s{navi.path}"
-                <| Component.Text navi.text)
+                liA $"%s{pathRoot}%s{navi.path}"
+                <| Misc.Text navi.text)
         |> Html.ul,
         navs
         |> Seq.map toSitemap
@@ -296,7 +296,10 @@ module Generation =
                     match meta.frontMatter with
                     | Some fm -> fm.title
                     | None -> meta.leaf
-                  description = meta.content |> simpleEscape
+                  description =
+                    meta.content
+                    |> Parser.parseReactStaticMarkup
+                    |> simpleEscape
                   pubDate = pubDate })
 
 
@@ -319,20 +322,10 @@ module Rendering =
     let argv = Misc.argv
     type FixedSiteContent = Misc.FixedSiteContent
 
-    let private readAndWrite (site: FixedSiteContent) tagDest source (dest: string) =
+    let private readSource source dest =
         promise {
             printfn $"Rendering %s{source}..."
             let! md = IO.readFile source
-
-            let tagToElement tag =
-                Component.liAWithClass $"%s{site.pathRoot}%s{tagDest}/%s{tag}.html" tag [ "tag"; "is-medium" ]
-
-            let path =
-                dest
-                    .Replace("\\", "/")
-                    .Split($"%s{site.pathRoot}/")
-                |> Seq.last
-
             let layout = discriminateLayout source
 
             let pubDate =
@@ -340,32 +333,10 @@ module Rendering =
                 | Post d -> Some(d)
                 | Page -> None
 
-            let fmToHeader = Component.header <| tagToElement <| pubDate
-
-            let fm, content, page =
+            let fm, content =
                 md
                 |> Parser.parseMarkdownAsReactEl
-                |> fun (fm, c) ->
-                    let title =
-                        match fm with
-                        | Some fm -> $"%s{site.title} - %s{fm.title}"
-                        | None -> site.title
-
-                    let header = fmToHeader fm
-
-                    fm,
-                    c |> Parser.parseReactStaticMarkup,
-                    List.append header [ c ]
-                    |> wrapContent
-                    |> frame
-                        { site with
-                            title = title
-                            url = $"%s{site.url}/%s{path}" }
-                    |> Parser.parseReactStaticHtml
-
-            printfn $"Writing %s{dest}..."
-
-            do! IO.writeFile dest page
+                |> fun (fm, c) -> fm, c
 
             let chooseDate (fm: Parser.FrontMatter option) alt =
                 let date =
@@ -385,40 +356,103 @@ module Rendering =
                   content = content
                   layout = layout
                   source = source
-                  leaf = IO.leaf dest
-                  date = chooseDate fm pubDate }
+                  leaf = IO.leaf dest // TODO: leaf is not necessary here. It should be in writeContent.
+                  date = chooseDate fm pubDate
+                  pubDate = pubDate }
+        }
+
+    let private writeContent (site: FixedSiteContent) tagDest (meta: Meta) (dest: string) prev next =
+        promise {
+            let path =
+                dest
+                    .Replace("\\", "/")
+                    .Split($"%s{site.pathRoot}/")
+                |> Seq.last
+
+            let title =
+                match meta.frontMatter with
+                | Some fm -> $"%s{site.title} - %s{fm.title}"
+                | None -> site.title
+
+            let tagToElement tag =
+                Component.liAWithClass $"%s{site.pathRoot}%s{tagDest}/%s{tag}.html" tag [ "tag"; "is-medium" ]
+
+            let fmToHeader = Component.header <| tagToElement <| meta.pubDate
+            let header = fmToHeader meta.frontMatter
+
+            let footer =
+                match meta.layout with
+                | Post _ -> Component.footer $"{site.pathRoot}/{IO.parent path}/" prev next
+                | _ -> []
+
+            let page =
+                List.concat [ header
+                              [ meta.content ]
+                              footer ]
+                |> wrapContent
+                |> frame
+                    { site with
+                        title = title
+                        url = $"%s{site.url}/%s{path}" }
+                |> Parser.parseReactStaticHtml
+
+            printfn $"Writing %s{dest}..."
+
+            do! IO.writeFile dest page
         }
 
     let renderMarkdowns site tagDest sourceDir destDir =
         promise {
             let! files = getMarkdownFiles sourceDir
-            let rw = readAndWrite site tagDest
 
-            return!
+            let! metas =
                 files
                 |> List.map (fun source ->
-                    let dest = getDestinationPath source destDir
+                    let dest = getDestinationPath source destDir // TODO: move into readSource?
 
+                    promise { return! readSource source dest })
+                |> Promise.all
+
+            return!
+                metas
+                |> Seq.mapi (fun i meta ->
                     promise {
-                        let! meta = rw source dest
+                        let prev, next =
+                            match i with
+                            | 0 -> None, Some(metas.[i + 1])
+                            | i when (i = Seq.length metas - 1) -> Some(metas.[i - 1]), None
+                            | i -> Some(metas.[i - 1]), Some(metas.[i + 1])
 
+                        let dest = getDestinationPath meta.source destDir
+                        do! writeContent site tagDest meta dest prev next
                         return meta
-
                     })
                 |> Promise.all
         }
 
     let renderIndex site tagDest metaPosts dest =
-        let latest =
+        let posts =
             metaPosts
             |> Seq.map (fun m -> m.source)
-            |> getLatestPost
+            |> getLatest2Posts
+            |> List.ofSeq
+
+        let latest, prev =
+            match posts with
+            | [ latest; prev ] -> latest, Some(prev)
+            | [ latest ] -> latest, None
+            | _ -> failwith "requires at least one post."
 
         promise {
-            let rw = readAndWrite site tagDest
             let dest = IO.resolve dest
+            let! meta = readSource latest dest
 
-            do! rw latest dest |> Promise.map ignore
+            let! metaPrev =
+                match prev with
+                | Some prev -> readSource prev dest |> Promise.map Some
+                | _ -> Promise.lift None
+
+            do! writeContent site tagDest meta dest metaPrev None
         }
 
     let renderArchives site archives dest =

@@ -58,7 +58,8 @@ $green: #859900;
   $code: $base0,
   $code-size: 1em,
   $tag-background-color: $base03,
-  $link-hover: $violet
+  $link-hover: $violet,
+  $section-padding: 1.5rem
 );
 
 // NOTE: adjust non-parameterized styles.
@@ -93,4 +94,10 @@ pre code {
 }
 .date {
   color: $base01;
+}
+.prev a:before {
+  content: "\2190";
+}
+.next a:after {
+  content: "\2192";
 }

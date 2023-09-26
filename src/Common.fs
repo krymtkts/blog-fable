@@ -119,7 +119,10 @@ module Parser =
 
     let parseMarkdownAsReactEl content =
         let (frontMatter, content) = extractFrontMatter content
-        let content = Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ]
+
+        let content =
+            Html.div [ prop.className "section"
+                       prop.dangerouslySetInnerHTML (parseMarkdown content) ]
 
         frontMatter, content
 
@@ -133,67 +136,6 @@ module Parser =
         @"<!DOCTYPE html>"
         + ReactDOMServer.renderToStaticMarkup el
 
-module Component =
-    let liAWithClass ref title classes =
-        Html.li [ prop.classes classes
-                  prop.children [ Html.a [ prop.href ref
-                                           prop.title title
-                                           prop.text title ] ] ]
-
-    type NavItem =
-        | Text of string
-        | Element of string * Fable.React.ReactElement
-
-    let liA ref (title: NavItem) =
-        let children =
-            function
-            | Element (s, el) -> [ prop.title s; prop.children [ el ] ]
-            | Text (s) -> [ prop.title s; prop.text s ]
-
-        Html.li [ Html.a <| prop.href ref :: children title ]
-
-    let liSpanA (span: string) ref title =
-        Html.li [ Html.span [ prop.text span ]
-                  Html.a [ prop.href ref
-                           prop.title title
-                           prop.text title ] ]
-
-    let pathToLi root source =
-        let leaf = Directory.leaf source
-        let title = Regex.Replace(leaf, "\.(md|html)", "")
-        let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
-
-        liA ref <| Text title
-
-    let header (tagToElement: string -> ReactElement) pubDate (fm: Parser.FrontMatter option) =
-        let date pubDate fmDate =
-            let date =
-                match pubDate, fmDate with
-                | Some pub, Some upd -> $"%s{pub} - Last updated on %s{upd}"
-                | Some pub, _ -> pub
-                | _, Some pub -> pub
-                | _ -> null
-
-            Html.div [ prop.className "date"
-                       prop.text date ]
-
-        let header =
-            match fm with
-            | Some fm ->
-                [ date pubDate fm.date
-                  Html.h1 [ prop.className [ "title" ]
-                            prop.text fm.title ]
-                  Html.ul [ prop.className [ "tags" ]
-                            prop.children (
-                                match fm.tags with
-                                | Some tags -> tags
-                                | None -> [||]
-                                |> Seq.map tagToElement
-                            ) ] ]
-            | None -> []
-
-        header
-
 [<AutoOpen>]
 module Misc =
     open System
@@ -202,6 +144,18 @@ module Misc =
     type Layout =
         | Post of string
         | Page
+
+    type NavItem = // TODO: move to another module.
+        | Text of string
+        | Element of string * Fable.React.ReactElement
+
+    let liA ref (title: NavItem) = // TODO: move to another module.
+        let children =
+            function
+            | Element (s, el) -> [ prop.title s; prop.children [ el ] ]
+            | Text (s) -> [ prop.title s; prop.text s ]
+
+        Html.li [ Html.a <| prop.href ref :: children title ]
 
     let discriminateLayout source =
         let leaf = Directory.leaf source
@@ -217,11 +171,12 @@ module Misc =
 
     type Meta =
         { frontMatter: Parser.FrontMatter option
-          content: string
+          content: ReactElement
           layout: Layout
           source: string
           leaf: string
-          date: string }
+          date: string
+          pubDate: string option }
 
     type FixedSiteContent =
         { lang: string
@@ -311,8 +266,11 @@ module Misc =
             return files
         }
 
-    let getLatestPost paths =
-        paths |> Seq.sortBy Directory.leaf |> Seq.last
+    let getLatest2Posts paths =
+        paths
+        |> Seq.sortBy Directory.leaf
+        |> Seq.rev
+        |> Seq.take 2
 
     let sourceToSitemap root source =
         let leaf: string = Directory.leaf source
@@ -334,7 +292,7 @@ module Misc =
 
         let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
 
-        Component.liA ref <| Component.Text title
+        liA ref <| Text title
 
     let now = DateTime.Now
 
@@ -398,3 +356,82 @@ module DateTime =
         DateTime.Parse(s) |> toRFC822DateTimeString
 
     let toRFC3339Date (d: DateTime) = d |> String.format "yyyy-MM-dd"
+
+module Component =
+    let liAWithClass ref title classes =
+        Html.li [ prop.classes classes
+                  prop.children [ Html.a [ prop.href ref
+                                           prop.title title
+                                           prop.text title ] ] ]
+
+    let liSpanA (span: string) ref title =
+        Html.li [ Html.span [ prop.text span ]
+                  Html.a [ prop.href ref
+                           prop.title title
+                           prop.text title ] ]
+
+    let pathToLi root source =
+        let leaf = Directory.leaf source
+        let title = Regex.Replace(leaf, "\.(md|html)", "")
+        let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
+
+        liA ref <| Text title
+
+    let header (tagToElement: string -> ReactElement) pubDate (fm: Parser.FrontMatter option) =
+        let date pubDate fmDate =
+            let date =
+                match pubDate, fmDate with
+                | Some pub, Some upd -> $"%s{pub} - Last updated on %s{upd}"
+                | Some pub, _ -> pub
+                | _, Some pub -> pub
+                | _ -> null
+
+            Html.div [ prop.className "date"
+                       prop.text date ]
+
+        let header =
+            match fm with
+            | Some fm ->
+                [ date pubDate fm.date
+                  Html.h1 [ prop.className [ "title" ]
+                            prop.text fm.title ]
+                  Html.ul [ prop.className [ "tags" ]
+                            prop.children (
+                                match fm.tags with
+                                | Some tags -> tags
+                                | None -> [||]
+                                |> Seq.map tagToElement
+                            ) ] ]
+            | None -> []
+
+        header
+
+    let footer (postRoot: string) (prev: Meta option) (next: Meta option) =
+        let button className meta =
+            match meta with
+            | Some meta ->
+                Html.span [ prop.classes [ className; "button" ]
+                            prop.children (
+                                let ref = $"%s{postRoot}%s{meta.leaf}"
+
+                                let title =
+                                    match meta.frontMatter with
+                                    | Some fm -> fm.title
+                                    | None -> meta.leaf
+
+                                let text =
+                                    match meta.frontMatter with
+                                    | Some fm -> $"%s{meta.date} %s{fm.title}"
+                                    | None -> $"%s{meta.date} %s{meta.leaf}"
+
+                                [ Html.a [ prop.href ref
+                                           prop.title title
+                                           prop.text text ] ]
+                            ) ]
+            | None -> null
+
+        let prev = button "prev" prev
+        let next = button "next" next
+
+        [ Html.div [ prop.className "buttons"
+                     prop.children [ prev; next ] ] ]
