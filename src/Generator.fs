@@ -239,7 +239,8 @@ module Generation =
           link: string
           feed: string
           postRoot: string
-          posts: Meta seq }
+          posts: Meta seq
+          timeZone: string }
 
     let createRss (channel: RssChannel) (items: RssItem seq) =
         let itemNodes =
@@ -288,7 +289,7 @@ module Generation =
                         | Some d -> d
                         | None -> meta.date
                     | None -> meta.date
-                    |> DateTime.parseToRFC822DateTimeString
+                    |> DateTime.parseToRFC822DateTimeString conf.timeZone
 
                 { guid = link
                   link = link
@@ -309,7 +310,9 @@ module Generation =
                   description = conf.description
                   link = conf.link
                   xml = conf.feed
-                  lastBuildDate = now |> DateTime.toRFC822DateTimeString
+                  lastBuildDate =
+                    now
+                    |> DateTime.toRFC822DateTimeString conf.timeZone
                   generator = generatorName }
                 items
 
@@ -598,6 +601,8 @@ type RenderOptions =
 
       feedName: string
 
+      timeZone: string
+
      }
 
 module RenderOptions =
@@ -774,7 +779,8 @@ let render (opts: RenderOptions) =
                   link = RenderOptions.siteUrl opts
                   feed = feed
                   postRoot = opts.posts.root
-                  posts = metaPosts }
+                  posts = metaPosts
+                  timeZone = opts.timeZone }
             <| RenderOptions.feedDestinationPath opts
 
         do!

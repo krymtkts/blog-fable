@@ -141,21 +141,21 @@ module Misc =
     open System
     let argv = Process.argv
 
-    type Layout =
-        | Post of string
-        | Page
-
-    type NavItem = // TODO: move to another module.
+    type NavItem =
         | Text of string
         | Element of string * Fable.React.ReactElement
 
-    let liA ref (title: NavItem) = // TODO: move to another module.
+    let liA ref (title: NavItem) =
         let children =
             function
             | Element (s, el) -> [ prop.title s; prop.children [ el ] ]
             | Text (s) -> [ prop.title s; prop.text s ]
 
         Html.li [ Html.a <| prop.href ref :: children title ]
+
+    type Layout =
+        | Post of string
+        | Page
 
     let discriminateLayout source =
         let leaf = Directory.leaf source
@@ -319,7 +319,7 @@ module String =
 module DateTime =
     open System
 
-    let options: obj =
+    let options (timeZone: string) =
         !!{| weekday = "short"
              year = "numeric"
              month = "short"
@@ -328,13 +328,15 @@ module DateTime =
              minute = "numeric"
              second = "numeric"
              hourCycle = "h23"
-             timeZone = "Asia/Tokyo" // TODO: parameterize it.
+             timeZone = timeZone
              timeZoneName = "short" |}
 
     // TODO: write binding.
-    let formatter: obj = Intl.DateTimeFormat "en-US" options
+    let datetimeFormat timeZone =
+        Intl.DateTimeFormat "en-US" <| options timeZone
 
-    let toRFC822DateTimeString (d: DateTime) =
+    let toRFC822DateTimeString timeZone (d: DateTime) =
+        let formatter = datetimeFormat timeZone
         let parts: obj [] = formatter?formatToParts (d)
         let p: string [] = parts |> Array.map (fun x -> x?value)
         let d = $"%s{p.[0]}%s{p.[1]}%s{p.[4]} %s{p.[2]} %s{p.[6]}"
@@ -353,8 +355,9 @@ module DateTime =
 
         $"%s{d} %s{t} %s{z}"
 
-    let parseToRFC822DateTimeString (s: string) =
-        DateTime.Parse(s) |> toRFC822DateTimeString
+    let parseToRFC822DateTimeString timeZone str =
+        DateTime.Parse(str)
+        |> toRFC822DateTimeString timeZone
 
     let toRFC3339Date (d: DateTime) = d |> String.format "yyyy-MM-dd"
 
