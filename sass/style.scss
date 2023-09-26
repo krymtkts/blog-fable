@@ -94,3 +94,9 @@ pre code {
 .date {
   color: $base01;
 }
+.prev a:before {
+  content: "\2190";
+}
+.next a:after {
+  content: "\2192";
+}
