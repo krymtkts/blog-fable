@@ -322,7 +322,7 @@ module Rendering =
     let argv = Misc.argv
     type FixedSiteContent = Misc.FixedSiteContent
 
-    let private readSource source dest =
+    let private readSource source =
         promise {
             printfn $"Rendering %s{source}..."
             let! md = IO.readFile source
@@ -356,7 +356,7 @@ module Rendering =
                   content = content
                   layout = layout
                   source = source
-                  leaf = IO.leaf dest // TODO: leaf is not necessary here. It should be in writeContent.
+                  leaf = leafHtml source
                   date = chooseDate fm pubDate
                   pubDate = pubDate }
         }
@@ -404,14 +404,7 @@ module Rendering =
     let renderMarkdowns site tagDest sourceDir destDir =
         promise {
             let! files = getMarkdownFiles sourceDir
-
-            let! metas =
-                files
-                |> List.map (fun source ->
-                    let dest = getDestinationPath source destDir // TODO: move into readSource?
-
-                    promise { return! readSource source dest })
-                |> Promise.all
+            let! metas = files |> List.map readSource |> Promise.all
 
             return!
                 metas
@@ -444,13 +437,14 @@ module Rendering =
             | _ -> failwith "requires at least one post."
 
         promise {
-            let dest = IO.resolve dest
-            let! meta = readSource latest dest
+            let! meta = readSource latest
 
             let! metaPrev =
                 match prev with
-                | Some prev -> readSource prev dest |> Promise.map Some
+                | Some prev -> readSource prev |> Promise.map Some
                 | _ -> Promise.lift None
+
+            let dest = IO.resolve dest
 
             do! writeContent site tagDest meta dest metaPrev None
         }

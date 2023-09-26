@@ -310,6 +310,8 @@ module Misc =
                 | x -> x)
         )
 
+    let leafHtml source = source |> IO.leaf |> Util.mdToHtml
+
 module String =
 
     let inline format pattern x =
