@@ -28,4 +28,6 @@ render
           [ { text = "About"
               path = "/pages/about.html" } ]
 
+      timeZone = "Asia/Tokyo"
+
     }

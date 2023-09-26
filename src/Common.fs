@@ -141,21 +141,21 @@ module Misc =
     open System
     let argv = Process.argv
 
-    type Layout =
-        | Post of string
-        | Page
-
-    type NavItem = // TODO: move to another module.
+    type NavItem =
         | Text of string
         | Element of string * Fable.React.ReactElement
 
-    let liA ref (title: NavItem) = // TODO: move to another module.
+    let liA ref (title: NavItem) =
         let children =
             function
             | Element (s, el) -> [ prop.title s; prop.children [ el ] ]
             | Text (s) -> [ prop.title s; prop.text s ]
 
         Html.li [ Html.a <| prop.href ref :: children title ]
+
+    type Layout =
+        | Post of string
+        | Page
 
     let discriminateLayout source =
         let leaf = Directory.leaf source
@@ -178,13 +178,12 @@ module Misc =
           date: string
           pubDate: string option }
 
-    type FixedSiteContent =
+    type FrameConfiguration =
         { lang: string
           navbar: ReactElement
           name: string
           title: string
           description: string
-          pathRoot: string
           url: string
           copyright: string
           favicon: string
@@ -195,7 +194,7 @@ module Misc =
         Html.div [ prop.className "content"
                    prop.children elm ]
 
-    let frame site (content: Fable.React.ReactElement) =
+    let frame (conf: FrameConfiguration) (content: Fable.React.ReactElement) =
         let cssLink path integrity =
             Html.link [ prop.rel "stylesheet"
                         prop.type' "text/css"
@@ -204,45 +203,45 @@ module Misc =
                         prop.crossOrigin.anonymous
                         prop.referrerPolicy.noReferrer ]
 
-        Html.html [ prop.lang site.lang
-                    prop.children [ Html.head [ Html.title [ prop.text site.title ]
+        Html.html [ prop.lang conf.lang
+                    prop.children [ Html.head [ Html.title [ prop.text conf.title ]
                                                 Html.meta [ prop.charset "utf-8" ]
                                                 Html.meta [ prop.name "description"
-                                                            prop.content site.description ]
+                                                            prop.content conf.description ]
                                                 Html.meta [ prop.name "viewport"
                                                             prop.content "width=device-width, initial-scale=1" ]
                                                 Html.meta [ prop.custom ("property", "og:site_name")
-                                                            prop.content site.name ]
+                                                            prop.content conf.name ]
                                                 Html.meta [ prop.custom ("property", "og:title")
-                                                            prop.content site.title ]
+                                                            prop.content conf.title ]
                                                 Html.meta [ prop.custom ("property", "og:description")
-                                                            prop.content site.description ]
+                                                            prop.content conf.description ]
                                                 Html.meta [ prop.custom ("property", "og:url")
-                                                            prop.content site.url ]
+                                                            prop.content conf.url ]
                                                 Html.link [ prop.rel "canonical"
-                                                            prop.href site.url ]
+                                                            prop.href conf.url ]
                                                 Html.link [ prop.rel "icon"
-                                                            prop.href $"%s{site.pathRoot}%s{site.favicon}" ]
+                                                            prop.href conf.favicon ]
                                                 Html.link [ prop.rel "stylesheet"
                                                             prop.type' "text/css"
-                                                            prop.href $"%s{site.pathRoot}%s{site.style}" ]
+                                                            prop.href conf.style ]
                                                 cssLink
                                                     "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/solarized-dark.min.css"
                                                     "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]
                                     Html.body [ Html.nav [ prop.className "tabs"
-                                                           prop.children site.navbar ]
+                                                           prop.children conf.navbar ]
                                                 Html.main [ prop.className "container"
                                                             prop.children [ content ] ] ]
                                     Html.footer [ prop.className "footer"
                                                   prop.children [ Html.div [ prop.className "container"
                                                                              prop.text (
-                                                                                 $"Copyright © %s{site.copyright}"
+                                                                                 $"Copyright © %s{conf.copyright}"
                                                                              ) ] ] ]
-                                    match site.devInjection with
+                                    match conf.devInjection with
                                     | Some src ->
                                         Html.script [ prop.lang "javascript"
                                                       prop.type' "text/javascript"
-                                                      prop.src $"%s{site.pathRoot}%s{src}" ]
+                                                      prop.src src ]
                                     | None -> null ] ]
 
     let getDestinationPath (source: string) (dir: string) =
@@ -310,6 +309,8 @@ module Misc =
                 | x -> x)
         )
 
+    let leafHtml source = source |> IO.leaf |> Util.mdToHtml
+
 module String =
 
     let inline format pattern x =
@@ -318,7 +319,7 @@ module String =
 module DateTime =
     open System
 
-    let options: obj =
+    let options (timeZone: string) =
         !!{| weekday = "short"
              year = "numeric"
              month = "short"
@@ -327,13 +328,15 @@ module DateTime =
              minute = "numeric"
              second = "numeric"
              hourCycle = "h23"
-             timeZone = "Asia/Tokyo" // TODO: parameterize it.
+             timeZone = timeZone
              timeZoneName = "short" |}
 
     // TODO: write binding.
-    let formatter: obj = Intl.DateTimeFormat "en-US" options
+    let datetimeFormat timeZone =
+        Intl.DateTimeFormat "en-US" <| options timeZone
 
-    let toRFC822DateTimeString (d: DateTime) =
+    let toRFC822DateTimeString timeZone (d: DateTime) =
+        let formatter = datetimeFormat timeZone
         let parts: obj [] = formatter?formatToParts (d)
         let p: string [] = parts |> Array.map (fun x -> x?value)
         let d = $"%s{p.[0]}%s{p.[1]}%s{p.[4]} %s{p.[2]} %s{p.[6]}"
@@ -352,8 +355,9 @@ module DateTime =
 
         $"%s{d} %s{t} %s{z}"
 
-    let parseToRFC822DateTimeString (s: string) =
-        DateTime.Parse(s) |> toRFC822DateTimeString
+    let parseToRFC822DateTimeString timeZone str =
+        DateTime.Parse(str)
+        |> toRFC822DateTimeString timeZone
 
     let toRFC3339Date (d: DateTime) = d |> String.format "yyyy-MM-dd"
 
