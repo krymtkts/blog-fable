@@ -378,10 +378,17 @@ module Rendering =
                 Component.liAWithClass $"%s{site.pathRoot}%s{tagDest}/%s{tag}.html" tag [ "tag"; "is-medium" ]
 
             let fmToHeader = Component.header <| tagToElement <| meta.pubDate
-            let header = fmToHeader meta.frontMatter prev next
+            let header = fmToHeader meta.frontMatter
+
+            let footer =
+                match meta.layout with
+                | Post _ -> Component.footer $"{site.pathRoot}/{IO.parent path}/" prev next
+                | _ -> []
 
             let page =
-                List.append header [ meta.content ]
+                List.concat [ header
+                              [ meta.content ]
+                              footer ]
                 |> wrapContent
                 |> frame
                     { site with
@@ -424,15 +431,28 @@ module Rendering =
         }
 
     let renderIndex site tagDest metaPosts dest =
-        let latest =
+        let posts =
             metaPosts
             |> Seq.map (fun m -> m.source)
-            |> getLatestPost
+            |> getLatest2Posts
+            |> List.ofSeq
+
+        let latest, prev =
+            match posts with
+            | [ latest; prev ] -> latest, Some(prev)
+            | [ latest ] -> latest, None
+            | _ -> failwith "requires at least one post."
 
         promise {
             let dest = IO.resolve dest
             let! meta = readSource latest dest
-            do! writeContent site tagDest meta dest None None // TODO: add prev.
+
+            let! metaPrev =
+                match prev with
+                | Some prev -> readSource prev dest |> Promise.map Some
+                | _ -> Promise.lift None
+
+            do! writeContent site tagDest meta dest metaPrev None
         }
 
     let renderArchives site archives dest =

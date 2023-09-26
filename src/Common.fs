@@ -119,7 +119,10 @@ module Parser =
 
     let parseMarkdownAsReactEl content =
         let (frontMatter, content) = extractFrontMatter content
-        let content = Html.div [ prop.dangerouslySetInnerHTML (parseMarkdown content) ]
+
+        let content =
+            Html.div [ prop.className "section"
+                       prop.dangerouslySetInnerHTML (parseMarkdown content) ]
 
         frontMatter, content
 
@@ -263,8 +266,11 @@ module Misc =
             return files
         }
 
-    let getLatestPost paths =
-        paths |> Seq.sortBy Directory.leaf |> Seq.last
+    let getLatest2Posts paths =
+        paths
+        |> Seq.sortBy Directory.leaf
+        |> Seq.rev
+        |> Seq.take 2
 
     let sourceToSitemap root source =
         let leaf: string = Directory.leaf source
@@ -371,13 +377,7 @@ module Component =
 
         liA ref <| Text title
 
-    let header
-        (tagToElement: string -> ReactElement)
-        pubDate
-        (fm: Parser.FrontMatter option)
-        (prev: Meta option)
-        (next: Meta option)
-        =
+    let header (tagToElement: string -> ReactElement) pubDate (fm: Parser.FrontMatter option) =
         let date pubDate fmDate =
             let date =
                 match pubDate, fmDate with
@@ -388,52 +388,6 @@ module Component =
 
             Html.div [ prop.className "date"
                        prop.text date ]
-
-        let prev = // TODO: refactor this.
-            Html.div [ prop.className "prev"
-                       prop.children (
-                           match prev with
-                           | Some meta ->
-                               let ref = $"/blog-fable/posts/%s{meta.leaf}"
-
-                               let title =
-                                   match meta.frontMatter with
-                                   | Some fm -> fm.title
-                                   | None -> meta.leaf
-
-                               let text =
-                                   match meta.frontMatter with
-                                   | Some fm -> $"<- %s{meta.date} %s{fm.title}"
-                                   | None -> $"<- %s{meta.date} %s{meta.leaf}"
-
-                               [ Html.a [ prop.href ref
-                                          prop.title title
-                                          prop.text text ] ]
-                           | None -> []
-                       ) ]
-
-        let next = // TODO: refactor this.
-            Html.div [ prop.className "next"
-                       prop.children (
-                           match next with
-                           | Some meta ->
-                               let ref = $"/blog-fable/posts/%s{meta.leaf}"
-
-                               let title =
-                                   match meta.frontMatter with
-                                   | Some fm -> fm.title
-                                   | None -> meta.leaf
-
-                               let text =
-                                   match meta.frontMatter with
-                                   | Some fm -> $"%s{meta.date} %s{fm.title} ->"
-                                   | None -> $"%s{meta.date} %s{meta.leaf} ->"
-
-                               [ Html.a [ prop.href ref
-                                          prop.title title
-                                          prop.text text ] ]
-                           | None -> []
-                       ) ]
 
         let header =
             match fm with
@@ -447,9 +401,37 @@ module Component =
                                 | Some tags -> tags
                                 | None -> [||]
                                 |> Seq.map tagToElement
-                            ) ]
-                  prev
-                  next ]
+                            ) ] ]
             | None -> []
 
         header
+
+    let footer (postRoot: string) (prev: Meta option) (next: Meta option) =
+        let button className meta =
+            match meta with
+            | Some meta ->
+                Html.span [ prop.classes [ className; "button" ]
+                            prop.children (
+                                let ref = $"%s{postRoot}%s{meta.leaf}"
+
+                                let title =
+                                    match meta.frontMatter with
+                                    | Some fm -> fm.title
+                                    | None -> meta.leaf
+
+                                let text =
+                                    match meta.frontMatter with
+                                    | Some fm -> $"%s{meta.date} %s{fm.title}"
+                                    | None -> $"%s{meta.date} %s{meta.leaf}"
+
+                                [ Html.a [ prop.href ref
+                                           prop.title title
+                                           prop.text text ] ]
+                            ) ]
+            | None -> null
+
+        let prev = button "prev" prev
+        let next = button "next" next
+
+        [ Html.div [ prop.className "buttons"
+                     prop.children [ prev; next ] ] ]
