@@ -514,24 +514,17 @@ module Component =
         let button className meta =
             match meta with
             | Some meta ->
-                Html.span [ prop.classes [ className; "button" ]
-                            prop.children (
-                                let ref = $"%s{postRoot}%s{meta.leaf}"
+                let ref = $"%s{postRoot}%s{meta.leaf}"
 
-                                let title =
-                                    match meta.frontMatter with
-                                    | Some fm -> fm.title
-                                    | None -> meta.leaf
+                let text =
+                    match meta.frontMatter with
+                    | Some fm -> $"%s{meta.date} %s{fm.title}"
+                    | None -> $"%s{meta.date} %s{meta.leaf}"
 
-                                let text =
-                                    match meta.frontMatter with
-                                    | Some fm -> $"%s{meta.date} %s{fm.title}"
-                                    | None -> $"%s{meta.date} %s{meta.leaf}"
-
-                                [ Html.a [ prop.href ref
-                                           prop.title title
-                                           prop.text text ] ]
-                            ) ]
+                Html.a [ prop.classes [ className; "button" ]
+                         prop.href ref
+                         prop.title text
+                         prop.children [ Html.span [ prop.text text ] ] ]
             | None -> null
 
         let prev = button "prev" prev
