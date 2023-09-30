@@ -324,8 +324,8 @@ module Generation =
 module Rendering =
     let argv = Misc.argv
 
-    type FixedSiteContent =
-        { pathRoot: string
+    type PathConfiguration =
+        { siteRoot: string
           postRoot: string
           pageRoot: string
           tagRoot: string }
@@ -369,12 +369,19 @@ module Rendering =
                   pubDate = pubDate }
         }
 
-    let private writeContent (conf: FrameConfiguration) (site: FixedSiteContent) (meta: Meta) (dest: string) prev next =
+    let private writeContent
+        (conf: FrameConfiguration)
+        (root: PathConfiguration)
+        (meta: Meta)
+        (dest: string)
+        prev
+        next
+        =
         promise {
             let path =
                 dest
                     .Replace("\\", "/")
-                    .Split($"%s{site.pathRoot}/")
+                    .Split($"%s{root.siteRoot}/")
                 |> Seq.last
 
             let title =
@@ -383,14 +390,14 @@ module Rendering =
                 | None -> conf.title
 
             let tagToElement tag =
-                Component.liAWithClass $"%s{site.pathRoot}%s{site.tagRoot}/%s{tag}.html" tag [ "tag"; "is-medium" ]
+                Component.liAWithClass $"%s{root.siteRoot}%s{root.tagRoot}/%s{tag}.html" tag [ "tag"; "is-medium" ]
 
             let fmToHeader = Component.header <| tagToElement <| meta.pubDate
             let header = fmToHeader meta.frontMatter
 
             let footer =
                 match meta.layout with
-                | Post _ -> Component.footer $"%s{site.pathRoot}%s{site.postRoot}/" prev next
+                | Post _ -> Component.footer $"%s{root.siteRoot}%s{root.postRoot}/" prev next
                 | _ -> []
 
             let page =
@@ -409,7 +416,7 @@ module Rendering =
             do! IO.writeFile dest page
         }
 
-    let renderMarkdowns (conf: FrameConfiguration) (site: FixedSiteContent) sourceDir destDir =
+    let renderMarkdowns (conf: FrameConfiguration) (site: PathConfiguration) sourceDir destDir =
         promise {
             let! files = getMarkdownFiles sourceDir
             let! metas = files |> List.map readSource |> Promise.all
@@ -451,7 +458,7 @@ module Rendering =
     let renderArchives conf site archives dest =
         promise {
             printfn "Rendering archives..."
-            let! archives, locs = generateArchives site.pathRoot archives
+            let! archives, locs = generateArchives site.siteRoot archives
 
             let content =
                 archives
@@ -459,7 +466,7 @@ module Rendering =
                 |> frame
                     { conf with
                         title = $"%s{conf.title} - Archives"
-                        url = $"%s{conf.url}%s{site.pathRoot}/%s{IO.leaf dest}" }
+                        url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing archives %s{dest}..."
@@ -468,7 +475,7 @@ module Rendering =
             return locs
         }
 
-    let renderTags (conf: FrameConfiguration) (site: FixedSiteContent) def dest =
+    let renderTags (conf: FrameConfiguration) (site: PathConfiguration) def dest =
         let tagsContent, tagPageContents, locs = generateTagsContent def
 
         promise {
@@ -481,7 +488,7 @@ module Rendering =
                 |> frame
                     { conf with
                         title = title
-                        url = $"%s{conf.url}%s{site.pathRoot}/%s{IO.leaf dest}" }
+                        url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing tags %s{dest}..."
@@ -501,7 +508,7 @@ module Rendering =
                         |> frame
                             { conf with
                                 title = $"%s{title} - %s{tag}"
-                                url = $"%s{conf.url}%s{site.pathRoot}/%s{parent}/%s{IO.leaf dest}" }
+                                url = $"%s{conf.url}%s{site.siteRoot}/%s{parent}/%s{IO.leaf dest}" }
                         |> Parser.parseReactStaticHtml
 
                     IO.writeFile dest content |> Promise.map ignore)
@@ -521,7 +528,7 @@ module Rendering =
                 |> frame
                     { conf with
                         title = $"%s{conf.title} - 404"
-                        url = $"%s{conf.url}%s{site.pathRoot}/%s{IO.leaf dest}" }
+                        url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing 404 {dest}..."
@@ -690,8 +697,8 @@ let render (opts: RenderOptions) =
 
         let devInjection, devScript = buildDevScript opts
 
-        let site: FixedSiteContent =
-            { pathRoot = opts.pathRoot
+        let site: PathConfiguration =
+            { siteRoot = opts.pathRoot
               postRoot = opts.posts.root
               pageRoot = opts.pages.root
               tagRoot = opts.tags.root }
