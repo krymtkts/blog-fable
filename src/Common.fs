@@ -265,12 +265,6 @@ module Misc =
             return files
         }
 
-    let getLatest2Posts paths =
-        paths
-        |> Seq.sortBy Directory.leaf
-        |> Seq.rev
-        |> Seq.take 2
-
     let sourceToSitemap root source =
         let leaf: string = Directory.leaf source
         let path = Directory.join3 "/" root <| Util.mdToHtml leaf

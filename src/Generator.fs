@@ -432,28 +432,19 @@ module Rendering =
         }
 
     let renderIndex conf site metaPosts dest =
-        let posts =
-            metaPosts
-            |> Seq.map (fun m -> m.source)
-            |> getLatest2Posts
-            |> List.ofSeq
-
-        let latest, prev =
-            match posts with
-            | [ latest; prev ] -> latest, Some(prev)
-            | [ latest ] -> latest, None
-            | _ -> failwith "requires at least one post."
+        let meta, metaPrev =
+            match metaPosts
+                  |> Seq.sortBy (fun m -> IO.leaf m.source)
+                  |> Seq.rev
+                  |> Seq.take 2
+                  |> List.ofSeq
+                with
+            | [ post ] -> post, None
+            | [ post; prev ] -> post, Some(prev)
+            | _ -> failwith "requires at last one post."
 
         promise {
-            let! meta = readSource latest
-
-            let! metaPrev =
-                match prev with
-                | Some prev -> readSource prev |> Promise.map Some
-                | _ -> Promise.lift None
-
             let dest = IO.resolve dest
-
             do! writeContent conf site meta dest metaPrev None
         }
 
