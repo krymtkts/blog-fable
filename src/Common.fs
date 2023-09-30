@@ -305,6 +305,89 @@ module Misc =
 
     let leafHtml source = source |> IO.leaf |> Util.mdToHtml
 
+[<AutoOpen>]
+module Xml =
+    open Fable.SimpleXml.Generator
+
+    type SiteLocation =
+        { loc: string
+          lastmod: string
+          priority: string }
+
+    let createSitemap (root: string) (locs: SiteLocation seq) =
+        let urls =
+            locs
+            |> Seq.map (fun loc ->
+                node
+                    "url"
+                    []
+                    [ node "loc" [] [ text $"{root}{loc.loc}" ]
+                      node "lastmod" [] [ text loc.lastmod ]
+                      //   node "changefreq" [] [ text "monthly" ]
+                      node "priority" [] [ text loc.priority ] ])
+            |> List.ofSeq
+
+        let urlSet =
+            node
+                "urlset"
+                [ attr.value ("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9")
+                  attr.value ("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance") ]
+                urls
+
+        urlSet
+        |> serializeXml
+        |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
+
+    type RssItem =
+        { guid: string
+          link: string
+          title: string
+          description: string
+          pubDate: string }
+
+    type RssChannel =
+        { title: string
+          description: string
+          link: string
+          xml: string
+          lastBuildDate: string
+          generator: string }
+
+    let createRss (channel: RssChannel) (items: RssItem seq) =
+        let itemNodes =
+            items
+            |> Seq.map (fun item ->
+                node
+                    "item"
+                    []
+                    [ node "guid" [] [ text item.guid ]
+                      node "link" [] [ text item.link ]
+                      node "title" [] [ text item.title ]
+                      node "description" [] [ text item.description ]
+                      node "pubDate" [] [ text item.pubDate ] ])
+            |> List.ofSeq
+
+        node
+            "rss"
+            [ attr.value ("version", "2.0")
+              attr.value ("xmlns:atom", "http://www.w3.org/2005/Atom") ]
+            [ node "channel" []
+              <| [ node
+                       "atom:link"
+                       [ attr.value ("href", $"{channel.link}{channel.xml}")
+                         attr.value ("rel", "self")
+                         attr.value ("type", "application/rss+xml") ]
+                       []
+                   node "title" [] [ text channel.title ]
+
+                   node "description" [] [ text channel.description ]
+                   node "link" [] [ text channel.link ]
+                   node "lastBuildDate" [] [ text channel.lastBuildDate ]
+                   node "generator" [] [ text channel.generator ] ]
+                 @ itemNodes ]
+        |> serializeXml
+        |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
+
 module String =
 
     let inline format pattern x =
