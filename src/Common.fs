@@ -141,18 +141,6 @@ module Misc =
     open System
     let argv = Process.argv
 
-    type NavItem =
-        | Text of string
-        | Element of string * Fable.React.ReactElement
-
-    let liA ref (title: NavItem) =
-        let children =
-            function
-            | Element (s, el) -> [ prop.title s; prop.children [ el ] ]
-            | Text (s) -> [ prop.title s; prop.text s ]
-
-        Html.li [ Html.a <| prop.href ref :: children title ]
-
     type Layout =
         | Post of string
         | Page
@@ -178,71 +166,6 @@ module Misc =
           date: string
           pubDate: string option }
 
-    type FrameConfiguration =
-        { lang: string
-          navbar: ReactElement
-          name: string
-          title: string
-          description: string
-          url: string
-          copyright: string
-          favicon: string
-          style: string
-          devInjection: string option }
-
-    let wrapContent (elm: Fable.React.ReactElement list) =
-        Html.div [ prop.className "content"
-                   prop.children elm ]
-
-    let frame (conf: FrameConfiguration) (content: Fable.React.ReactElement) =
-        let cssLink path integrity =
-            Html.link [ prop.rel "stylesheet"
-                        prop.type' "text/css"
-                        prop.href path
-                        prop.integrity integrity
-                        prop.crossOrigin.anonymous
-                        prop.referrerPolicy.noReferrer ]
-
-        Html.html [ prop.lang conf.lang
-                    prop.children [ Html.head [ Html.title [ prop.text conf.title ]
-                                                Html.meta [ prop.charset "utf-8" ]
-                                                Html.meta [ prop.name "description"
-                                                            prop.content conf.description ]
-                                                Html.meta [ prop.name "viewport"
-                                                            prop.content "width=device-width, initial-scale=1" ]
-                                                Html.meta [ prop.custom ("property", "og:site_name")
-                                                            prop.content conf.name ]
-                                                Html.meta [ prop.custom ("property", "og:title")
-                                                            prop.content conf.title ]
-                                                Html.meta [ prop.custom ("property", "og:description")
-                                                            prop.content conf.description ]
-                                                Html.meta [ prop.custom ("property", "og:url")
-                                                            prop.content conf.url ]
-                                                Html.link [ prop.rel "canonical"
-                                                            prop.href conf.url ]
-                                                Html.link [ prop.rel "icon"
-                                                            prop.href conf.favicon ]
-                                                Html.link [ prop.rel "stylesheet"
-                                                            prop.type' "text/css"
-                                                            prop.href conf.style ]
-                                                cssLink
-                                                    "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/solarized-dark.min.css"
-                                                    "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]
-                                    Html.body [ Html.nav [ prop.className "tabs"
-                                                           prop.children conf.navbar ]
-                                                Html.main [ prop.className "container"
-                                                            prop.children [ content ] ] ]
-                                    Html.footer [ prop.className "footer"
-                                                  prop.children [ Html.div [ prop.className "container"
-                                                                             prop.text (
-                                                                                 $"Copyright © %s{conf.copyright}"
-                                                                             ) ] ] ]
-                                    match conf.devInjection with
-                                    | Some src ->
-                                        Html.script [ prop.lang "javascript"
-                                                      prop.type' "text/javascript"
-                                                      prop.src src ]
-                                    | None -> null ] ]
 
     let getDestinationPath (source: string) (dir: string) =
         Directory.leaf source
@@ -269,23 +192,6 @@ module Misc =
         let leaf: string = Directory.leaf source
         let path = Directory.join3 "/" root <| Util.mdToHtml leaf
         path.Replace("\\", "/")
-
-    let metaToLi root meta =
-        let leaf = Directory.leaf meta.source
-
-        let prefix =
-            match meta.layout with
-            | Post (date) -> $"%s{date} - "
-            | _ -> ""
-
-        let title =
-            match meta.frontMatter with
-            | Some fm -> $"%s{prefix}%s{fm.title}"
-            | None -> leaf
-
-        let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
-
-        liA ref <| Text title
 
     let now = DateTime.Now
 
@@ -439,7 +345,21 @@ module DateTime =
 
     let toRFC3339Date (d: DateTime) = d |> String.format "yyyy-MM-dd"
 
+[<AutoOpen>]
 module Component =
+
+    type NavItem =
+        | Text of string
+        | Element of string * Fable.React.ReactElement
+
+    let liA ref (title: NavItem) =
+        let children =
+            function
+            | Element (s, el) -> [ prop.title s; prop.children [ el ] ]
+            | Text (s) -> [ prop.title s; prop.text s ]
+
+        Html.li [ Html.a <| prop.href ref :: children title ]
+
     let liAWithClass ref title classes =
         Html.li [ prop.classes classes
                   prop.children [ Html.a [ prop.href ref
@@ -455,6 +375,23 @@ module Component =
     let pathToLi root source =
         let leaf = Directory.leaf source
         let title = Regex.Replace(leaf, "\.(md|html)", "")
+        let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
+
+        liA ref <| Text title
+
+    let metaToLi root meta =
+        let leaf = Directory.leaf meta.source
+
+        let prefix =
+            match meta.layout with
+            | Post (date) -> $"%s{date} - "
+            | _ -> ""
+
+        let title =
+            match meta.frontMatter with
+            | Some fm -> $"%s{prefix}%s{fm.title}"
+            | None -> leaf
+
         let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
 
         liA ref <| Text title
@@ -487,6 +424,72 @@ module Component =
             | None -> []
 
         header
+
+    type FrameConfiguration =
+        { lang: string
+          navbar: ReactElement
+          name: string
+          title: string
+          description: string
+          url: string
+          copyright: string
+          favicon: string
+          style: string
+          devInjection: string option }
+
+    let wrapContent (elm: Fable.React.ReactElement list) =
+        Html.div [ prop.className "content"
+                   prop.children elm ]
+
+    let frame (conf: FrameConfiguration) (content: Fable.React.ReactElement) =
+        let cssLink path integrity =
+            Html.link [ prop.rel "stylesheet"
+                        prop.type' "text/css"
+                        prop.href path
+                        prop.integrity integrity
+                        prop.crossOrigin.anonymous
+                        prop.referrerPolicy.noReferrer ]
+
+        Html.html [ prop.lang conf.lang
+                    prop.children [ Html.head [ Html.title [ prop.text conf.title ]
+                                                Html.meta [ prop.charset "utf-8" ]
+                                                Html.meta [ prop.name "description"
+                                                            prop.content conf.description ]
+                                                Html.meta [ prop.name "viewport"
+                                                            prop.content "width=device-width, initial-scale=1" ]
+                                                Html.meta [ prop.custom ("property", "og:site_name")
+                                                            prop.content conf.name ]
+                                                Html.meta [ prop.custom ("property", "og:title")
+                                                            prop.content conf.title ]
+                                                Html.meta [ prop.custom ("property", "og:description")
+                                                            prop.content conf.description ]
+                                                Html.meta [ prop.custom ("property", "og:url")
+                                                            prop.content conf.url ]
+                                                Html.link [ prop.rel "canonical"
+                                                            prop.href conf.url ]
+                                                Html.link [ prop.rel "icon"
+                                                            prop.href conf.favicon ]
+                                                Html.link [ prop.rel "stylesheet"
+                                                            prop.type' "text/css"
+                                                            prop.href conf.style ]
+                                                cssLink
+                                                    "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/solarized-dark.min.css"
+                                                    "sha512-kBHeOXtsKtA97/1O3ebZzWRIwiWEOmdrylPrOo3D2+pGhq1m+1CroSOVErIlsqn1xmYowKfQNVDhsczIzeLpmg==" ]
+                                    Html.body [ Html.nav [ prop.className "tabs"
+                                                           prop.children conf.navbar ]
+                                                Html.main [ prop.className "container"
+                                                            prop.children [ content ] ] ]
+                                    Html.footer [ prop.className "footer"
+                                                  prop.children [ Html.div [ prop.className "container"
+                                                                             prop.text (
+                                                                                 $"Copyright © %s{conf.copyright}"
+                                                                             ) ] ] ]
+                                    match conf.devInjection with
+                                    | Some src ->
+                                        Html.script [ prop.lang "javascript"
+                                                      prop.type' "text/javascript"
+                                                      prop.src src ]
+                                    | None -> null ] ]
 
     let footer (postRoot: string) (prev: Meta option) (next: Meta option) =
         let button className meta =

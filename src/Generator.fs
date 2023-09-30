@@ -173,9 +173,7 @@ module Generation =
             | Title navi ->
                 liA $"%s{pathRoot}%s{navi.path}"
                 <| Element(navi.text, Html.h1 [ prop.text navi.text ])
-            | Link navi ->
-                liA $"%s{pathRoot}%s{navi.path}"
-                <| Misc.Text navi.text)
+            | Link navi -> liA $"%s{pathRoot}%s{navi.path}" <| Text navi.text)
         |> Html.ul,
         navs
         |> Seq.map toSitemap
