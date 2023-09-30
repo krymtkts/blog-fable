@@ -2,16 +2,10 @@ module StaticWebGenerator
 
 open Common
 open Feliz
-open Fable.SimpleXml.Generator
 
 [<AutoOpen>]
 module Generation =
     let generatorName = "blog-fable"
-
-    type SiteLocation =
-        { loc: string
-          lastmod: string
-          priority: string }
 
     let generatePostArchives (meta: Meta seq) root =
         promise {
@@ -23,10 +17,7 @@ module Generation =
                     let leaf = IO.leaf meta.source
                     leaf.Substring(0, 7))
                 |> Seq.map (fun (yearMonth, metas) ->
-                    let lis =
-                        metas
-                        |> Seq.map (fun meta -> metaToLi root meta)
-                        |> List.ofSeq
+                    let lis = metas |> Seq.map (metaToLi root) |> List.ofSeq
 
                     [ Html.li [ Html.h3 yearMonth ]
                       Html.ul lis ])
@@ -64,7 +55,7 @@ module Generation =
                         | Posts d -> generatePostArchives, d
                         | Pages d -> generatePageArchives, d
 
-                    let refs =
+                    let refs: Xml.SiteLocation seq =
                         def.metas
                         |> Seq.map (fun meta ->
                             { loc = sourceToSitemap $"%s{pathRoot}%s{def.root}" meta.source
@@ -137,7 +128,7 @@ module Generation =
                 [ Html.ul [ prop.children [ Html.li [ Html.h2 tag ]
                                             Html.ul lis ] ] ])
 
-        let locs =
+        let locs: Xml.SiteLocation seq =
             tagAndPage
             |> Map.toList
             |> Seq.map (fun (tag, _) ->
@@ -160,7 +151,6 @@ module Generation =
         | Title of NavItem
         | Link of NavItem
 
-
     let generateNavbar pathRoot (navs: Nav list) =
         let toSitemap =
             function
@@ -169,9 +159,9 @@ module Generation =
                 match navi.sitemap with
                 | Yes n ->
                     Some
-                        { loc = $"%s{pathRoot}%s{navi.path}"
-                          lastmod = now |> DateTime.toRFC3339Date
-                          priority = n }
+                        { Xml.SiteLocation.loc = $"%s{pathRoot}%s{navi.path}"
+                          Xml.SiteLocation.lastmod = now |> DateTime.toRFC3339Date
+                          Xml.SiteLocation.priority = n }
                 | No -> None
 
         navs
@@ -179,9 +169,7 @@ module Generation =
             | Title navi ->
                 liA $"%s{pathRoot}%s{navi.path}"
                 <| Element(navi.text, Html.h1 [ prop.text navi.text ])
-            | Link navi ->
-                liA $"%s{pathRoot}%s{navi.path}"
-                <| Misc.Text navi.text)
+            | Link navi -> liA $"%s{pathRoot}%s{navi.path}" <| Text navi.text)
         |> Html.ul,
         navs
         |> Seq.map toSitemap
@@ -194,44 +182,7 @@ module Generation =
         [ Html.h1 [ prop.text "404 Page not found" ]
           Html.p [ prop.text "Sorry! The page you're looking for does not exist." ] ]
 
-    let generateSitemap root locs =
-        let urls =
-            locs
-            |> Seq.map (fun loc ->
-                node
-                    "url"
-                    []
-                    [ node "loc" [] [ text $"{root}{loc.loc}" ]
-                      node "lastmod" [] [ text loc.lastmod ]
-                      //   node "changefreq" [] [ text "monthly" ]
-                      node "priority" [] [ text loc.priority ] ])
-            |> List.ofSeq
-
-        let urlSet =
-            node
-                "urlset"
-                [ attr.value ("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9")
-                  attr.value ("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance") ]
-                urls
-
-        urlSet
-        |> serializeXml
-        |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
-
-    type RssItem =
-        { guid: string
-          link: string
-          title: string
-          description: string
-          pubDate: string }
-
-    type RssChannel =
-        { title: string
-          description: string
-          link: string
-          xml: string
-          lastBuildDate: string
-          generator: string }
+    let generateSitemap = Xml.createSitemap
 
     type FeedConf =
         { title: string
@@ -242,90 +193,29 @@ module Generation =
           posts: Meta seq
           timeZone: string }
 
-    let createRss (channel: RssChannel) (items: RssItem seq) =
-        let itemNodes =
-            items
-            |> Seq.map (fun item ->
-                node
-                    "item"
-                    []
-                    [ node "guid" [] [ text item.guid ]
-                      node "link" [] [ text item.link ]
-                      node "title" [] [ text item.title ]
-                      node "description" [] [ text item.description ]
-                      node "pubDate" [] [ text item.pubDate ] ])
-            |> List.ofSeq
-
-        node
-            "rss"
-            [ attr.value ("version", "2.0")
-              attr.value ("xmlns:atom", "http://www.w3.org/2005/Atom") ]
-            [ node "channel" []
-              <| [ node
-                       "atom:link"
-                       [ attr.value ("href", $"{channel.link}{channel.xml}")
-                         attr.value ("rel", "self")
-                         attr.value ("type", "application/rss+xml") ]
-                       []
-                   node "title" [] [ text channel.title ]
-
-                   node "description" [] [ text channel.description ]
-                   node "link" [] [ text channel.link ]
-                   node "lastBuildDate" [] [ text channel.lastBuildDate ]
-                   node "generator" [] [ text channel.generator ] ]
-                 @ itemNodes ]
-
     let generateFeed (conf: FeedConf) =
         let items =
             conf.posts
             |> Seq.rev
-            |> Seq.map (fun meta ->
-                let link = $"{conf.link}{conf.postRoot}/{meta.leaf}"
+            |> Seq.map (Xml.metaToRssItem conf.timeZone $"{conf.link}{conf.postRoot}")
 
-                let pubDate =
-                    match meta.frontMatter with
-                    | Some fm ->
-                        match fm.date with
-                        | Some d -> d
-                        | None -> meta.date
-                    | None -> meta.date
-                    |> DateTime.parseToRFC822DateTimeString conf.timeZone
-
-                { guid = link
-                  link = link
-                  title =
-                    match meta.frontMatter with
-                    | Some fm -> fm.title
-                    | None -> meta.leaf
-                  description =
-                    meta.content
-                    |> Parser.parseReactStaticMarkup
-                    |> simpleEscape
-                  pubDate = pubDate })
-
-
-        let rss =
-            createRss
-                { title = conf.title
-                  description = conf.description
-                  link = conf.link
-                  xml = conf.feed
-                  lastBuildDate =
-                    now
-                    |> DateTime.toRFC822DateTimeString conf.timeZone
-                  generator = generatorName }
-                items
-
-        rss
-        |> serializeXml
-        |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
+        Xml.createRss
+            { title = conf.title
+              description = conf.description
+              link = conf.link
+              xml = conf.feed
+              lastBuildDate =
+                now
+                |> DateTime.toRFC822DateTimeString conf.timeZone
+              generator = generatorName }
+            items
 
 [<AutoOpen>]
 module Rendering =
     let argv = Misc.argv
 
-    type FixedSiteContent =
-        { pathRoot: string
+    type PathConfiguration =
+        { siteRoot: string
           postRoot: string
           pageRoot: string
           tagRoot: string }
@@ -369,12 +259,19 @@ module Rendering =
                   pubDate = pubDate }
         }
 
-    let private writeContent (conf: FrameConfiguration) (site: FixedSiteContent) (meta: Meta) (dest: string) prev next =
+    let private writeContent
+        (conf: FrameConfiguration)
+        (root: PathConfiguration)
+        (meta: Meta)
+        (dest: string)
+        prev
+        next
+        =
         promise {
             let path =
                 dest
                     .Replace("\\", "/")
-                    .Split($"%s{site.pathRoot}/")
+                    .Split($"%s{root.siteRoot}/")
                 |> Seq.last
 
             let title =
@@ -382,22 +279,18 @@ module Rendering =
                 | Some fm -> $"%s{conf.title} - %s{fm.title}"
                 | None -> conf.title
 
-            let tagToElement tag =
-                Component.liAWithClass $"%s{site.pathRoot}%s{site.tagRoot}/%s{tag}.html" tag [ "tag"; "is-medium" ]
-
-            let fmToHeader = Component.header <| tagToElement <| meta.pubDate
-            let header = fmToHeader meta.frontMatter
+            let header =
+                Component.header $"%s{root.siteRoot}%s{root.tagRoot}/" meta.pubDate meta.frontMatter
 
             let footer =
                 match meta.layout with
-                | Post _ -> Component.footer $"%s{site.pathRoot}%s{site.postRoot}/" prev next
+                | Post _ -> Component.footer $"%s{root.siteRoot}%s{root.postRoot}/" prev next
                 | _ -> []
 
             let page =
                 List.concat [ header
                               [ meta.content ]
                               footer ]
-                |> wrapContent
                 |> frame
                     { conf with
                         title = title
@@ -409,7 +302,7 @@ module Rendering =
             do! IO.writeFile dest page
         }
 
-    let renderMarkdowns (conf: FrameConfiguration) (site: FixedSiteContent) sourceDir destDir =
+    let renderMarkdowns (conf: FrameConfiguration) (site: PathConfiguration) sourceDir destDir =
         promise {
             let! files = getMarkdownFiles sourceDir
             let! metas = files |> List.map readSource |> Promise.all
@@ -432,43 +325,33 @@ module Rendering =
         }
 
     let renderIndex conf site metaPosts dest =
-        let posts =
-            metaPosts
-            |> Seq.map (fun m -> m.source)
-            |> getLatest2Posts
-            |> List.ofSeq
-
-        let latest, prev =
-            match posts with
-            | [ latest; prev ] -> latest, Some(prev)
-            | [ latest ] -> latest, None
-            | _ -> failwith "requires at least one post."
+        let meta, metaPrev =
+            match metaPosts
+                  |> Seq.sortBy (fun m -> IO.leaf m.source)
+                  |> Seq.rev
+                  |> Seq.take 2
+                  |> List.ofSeq
+                with
+            | [ post ] -> post, None
+            | [ post; prev ] -> post, Some(prev)
+            | _ -> failwith "requires at last one post."
 
         promise {
-            let! meta = readSource latest
-
-            let! metaPrev =
-                match prev with
-                | Some prev -> readSource prev |> Promise.map Some
-                | _ -> Promise.lift None
-
             let dest = IO.resolve dest
-
             do! writeContent conf site meta dest metaPrev None
         }
 
     let renderArchives conf site archives dest =
         promise {
             printfn "Rendering archives..."
-            let! archives, locs = generateArchives site.pathRoot archives
+            let! archives, locs = generateArchives site.siteRoot archives
 
             let content =
                 archives
-                |> wrapContent
                 |> frame
                     { conf with
                         title = $"%s{conf.title} - Archives"
-                        url = $"%s{conf.url}%s{site.pathRoot}/%s{IO.leaf dest}" }
+                        url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing archives %s{dest}..."
@@ -477,7 +360,7 @@ module Rendering =
             return locs
         }
 
-    let renderTags (conf: FrameConfiguration) (site: FixedSiteContent) def dest =
+    let renderTags (conf: FrameConfiguration) (site: PathConfiguration) def dest =
         let tagsContent, tagPageContents, locs = generateTagsContent def
 
         promise {
@@ -486,11 +369,10 @@ module Rendering =
 
             let content =
                 tagsContent
-                |> wrapContent
                 |> frame
                     { conf with
                         title = title
-                        url = $"%s{conf.url}%s{site.pathRoot}/%s{IO.leaf dest}" }
+                        url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing tags %s{dest}..."
@@ -506,11 +388,10 @@ module Rendering =
 
                     let content =
                         tagPageContent
-                        |> wrapContent
                         |> frame
                             { conf with
                                 title = $"%s{title} - %s{tag}"
-                                url = $"%s{conf.url}%s{site.pathRoot}/%s{parent}/%s{IO.leaf dest}" }
+                                url = $"%s{conf.url}%s{site.siteRoot}/%s{parent}/%s{IO.leaf dest}" }
                         |> Parser.parseReactStaticHtml
 
                     IO.writeFile dest content |> Promise.map ignore)
@@ -526,11 +407,10 @@ module Rendering =
 
             let content =
                 generate404
-                |> wrapContent
                 |> frame
                     { conf with
                         title = $"%s{conf.title} - 404"
-                        url = $"%s{conf.url}%s{site.pathRoot}/%s{IO.leaf dest}" }
+                        url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing 404 {dest}..."
@@ -538,7 +418,7 @@ module Rendering =
             do! IO.writeFile dest content
         }
 
-    let renderSitemap root dest (locs: SiteLocation seq) =
+    let renderSitemap root dest (locs: Xml.SiteLocation seq) =
         promise {
             printfn "Rendering sitemap..."
             let sitemap = generateSitemap root locs
@@ -699,8 +579,8 @@ let render (opts: RenderOptions) =
 
         let devInjection, devScript = buildDevScript opts
 
-        let site: FixedSiteContent =
-            { pathRoot = opts.pathRoot
+        let site: PathConfiguration =
+            { siteRoot = opts.pathRoot
               postRoot = opts.posts.root
               pageRoot = opts.pages.root
               tagRoot = opts.tags.root }
