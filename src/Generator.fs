@@ -294,7 +294,6 @@ module Rendering =
                 List.concat [ header
                               [ meta.content ]
                               footer ]
-                |> wrapContent
                 |> frame
                     { conf with
                         title = title
@@ -352,7 +351,6 @@ module Rendering =
 
             let content =
                 archives
-                |> wrapContent
                 |> frame
                     { conf with
                         title = $"%s{conf.title} - Archives"
@@ -374,7 +372,6 @@ module Rendering =
 
             let content =
                 tagsContent
-                |> wrapContent
                 |> frame
                     { conf with
                         title = title
@@ -394,7 +391,6 @@ module Rendering =
 
                     let content =
                         tagPageContent
-                        |> wrapContent
                         |> frame
                             { conf with
                                 title = $"%s{title} - %s{tag}"
@@ -414,7 +410,6 @@ module Rendering =
 
             let content =
                 generate404
-                |> wrapContent
                 |> frame
                     { conf with
                         title = $"%s{conf.title} - 404"

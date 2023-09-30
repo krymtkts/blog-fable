@@ -17,7 +17,7 @@ module IO =
 
 module String =
 
-    let inline format pattern x =
+    let inline format (pattern: string) x =
         (^a: (member ToString: string -> string) (x, pattern))
 
 module DateTime =
@@ -40,7 +40,7 @@ module DateTime =
         Intl.DateTimeFormat.Create "en-US"
         <| options timeZone
 
-    let toRFC822DateTimeString timeZone (d: DateTime) =
+    let toRFC822DateTimeString (timeZone: string) (d: DateTime) =
         let formatter = datetimeFormat timeZone
         let parts = formatter.formatToParts (d)
         let p: string [] = parts |> Array.map (fun x -> x.value)
@@ -60,7 +60,7 @@ module DateTime =
 
         $"%s{d} %s{t} %s{z}"
 
-    let parseToRFC822DateTimeString timeZone str =
+    let parseToRFC822DateTimeString (timeZone: string) (str: string) =
         DateTime.Parse(str)
         |> toRFC822DateTimeString timeZone
 
@@ -216,7 +216,6 @@ module Misc =
           leaf: string
           date: string
           pubDate: string option }
-
 
     let getDestinationPath (source: string) (dir: string) =
         Directory.leaf source
@@ -460,11 +459,7 @@ module Component =
           style: string
           devInjection: string option }
 
-    let wrapContent (elm: Fable.React.ReactElement list) =
-        Html.div [ prop.className "content"
-                   prop.children elm ]
-
-    let frame (conf: FrameConfiguration) (content: Fable.React.ReactElement) =
+    let frame (conf: FrameConfiguration) (content: Fable.React.ReactElement list) =
         let cssLink path integrity =
             Html.link [ prop.rel "stylesheet"
                         prop.type' "text/css"
@@ -501,7 +496,8 @@ module Component =
                                     Html.body [ Html.nav [ prop.className "tabs"
                                                            prop.children conf.navbar ]
                                                 Html.main [ prop.className "container"
-                                                            prop.children [ content ] ] ]
+                                                            prop.children [ Html.div [ prop.className "content"
+                                                                                       prop.children content ] ] ] ]
                                     Html.footer [ prop.className "footer"
                                                   prop.children [ Html.div [ prop.className "container"
                                                                              prop.text (
