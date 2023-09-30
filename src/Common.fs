@@ -15,6 +15,57 @@ module IO =
     let leaf = Directory.leaf
     let parent = Directory.dirname
 
+module String =
+
+    let inline format pattern x =
+        (^a: (member ToString: string -> string) (x, pattern))
+
+module DateTime =
+    open System
+
+    let options (timeZone: string) =
+        jsOptions<Intl.DateTimeFormatOptions> (fun o ->
+            o.weekday <- "short"
+            o.year <- "numeric"
+            o.month <- "short"
+            o.day <- "2-digit"
+            o.hour <- "numeric"
+            o.minute <- "numeric"
+            o.second <- "numeric"
+            o.hourCycle <- "h23"
+            o.timeZone <- timeZone
+            o.timeZoneName <- "short")
+
+    let datetimeFormat timeZone =
+        Intl.DateTimeFormat.Create "en-US"
+        <| options timeZone
+
+    let toRFC822DateTimeString timeZone (d: DateTime) =
+        let formatter = datetimeFormat timeZone
+        let parts = formatter.formatToParts (d)
+        let p: string [] = parts |> Array.map (fun x -> x.value)
+        let d = $"%s{p.[0]}%s{p.[1]}%s{p.[4]} %s{p.[2]} %s{p.[6]}"
+        let t = (p.[8..12] |> String.concat "")
+
+        let z =
+            match p.[14] with
+            | "UTC" -> "+0000"
+            | z ->
+                let item = Regex.Matches(z, @"GMT([+-])(\d+)")
+                let group = item.Item 0
+                let op = (group.Groups.Item 1).Value
+                let offset = int (group.Groups.Item 2).Value
+
+                $"%s{op}%02d{offset}00"
+
+        $"%s{d} %s{t} %s{z}"
+
+    let parseToRFC822DateTimeString timeZone str =
+        DateTime.Parse(str)
+        |> toRFC822DateTimeString timeZone
+
+    let toRFC3339Date (d: DateTime) = d |> String.format "yyyy-MM-dd"
+
 module private Util =
     open HighlightJs
     open Marked
@@ -211,7 +262,6 @@ module Misc =
 
     let leafHtml source = source |> IO.leaf |> Util.mdToHtml
 
-[<AutoOpen>]
 module Xml =
     open Fable.SimpleXml.Generator
 
@@ -250,6 +300,30 @@ module Xml =
           title: string
           description: string
           pubDate: string }
+
+    let metaToRssItem (timeZone: string) (pathRoot: string) (meta: Meta) =
+        let link = $"{pathRoot}/{meta.leaf}"
+
+        let pubDate =
+            match meta.frontMatter with
+            | Some fm ->
+                match fm.date with
+                | Some d -> d
+                | None -> meta.date
+            | None -> meta.date
+            |> DateTime.parseToRFC822DateTimeString timeZone
+
+        { guid = link
+          link = link
+          title =
+            match meta.frontMatter with
+            | Some fm -> fm.title
+            | None -> meta.leaf
+          description =
+            meta.content
+            |> Parser.parseReactStaticMarkup
+            |> simpleEscape
+          pubDate = pubDate }
 
     type RssChannel =
         { title: string
@@ -293,57 +367,6 @@ module Xml =
                  @ itemNodes ]
         |> serializeXml
         |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
-
-module String =
-
-    let inline format pattern x =
-        (^a: (member ToString: string -> string) (x, pattern))
-
-module DateTime =
-    open System
-
-    let options (timeZone: string) =
-        jsOptions<Intl.DateTimeFormatOptions> (fun o ->
-            o.weekday <- "short"
-            o.year <- "numeric"
-            o.month <- "short"
-            o.day <- "2-digit"
-            o.hour <- "numeric"
-            o.minute <- "numeric"
-            o.second <- "numeric"
-            o.hourCycle <- "h23"
-            o.timeZone <- timeZone
-            o.timeZoneName <- "short")
-
-    let datetimeFormat timeZone =
-        Intl.DateTimeFormat.Create "en-US"
-        <| options timeZone
-
-    let toRFC822DateTimeString timeZone (d: DateTime) =
-        let formatter = datetimeFormat timeZone
-        let parts = formatter.formatToParts (d)
-        let p: string [] = parts |> Array.map (fun x -> x.value)
-        let d = $"%s{p.[0]}%s{p.[1]}%s{p.[4]} %s{p.[2]} %s{p.[6]}"
-        let t = (p.[8..12] |> String.concat "")
-
-        let z =
-            match p.[14] with
-            | "UTC" -> "+0000"
-            | z ->
-                let item = Regex.Matches(z, @"GMT([+-])(\d+)")
-                let group = item.Item 0
-                let op = (group.Groups.Item 1).Value
-                let offset = int (group.Groups.Item 2).Value
-
-                $"%s{op}%02d{offset}00"
-
-        $"%s{d} %s{t} %s{z}"
-
-    let parseToRFC822DateTimeString timeZone str =
-        DateTime.Parse(str)
-        |> toRFC822DateTimeString timeZone
-
-    let toRFC3339Date (d: DateTime) = d |> String.format "yyyy-MM-dd"
 
 [<AutoOpen>]
 module Component =

@@ -55,7 +55,7 @@ module Generation =
                         | Posts d -> generatePostArchives, d
                         | Pages d -> generatePageArchives, d
 
-                    let refs =
+                    let refs: Xml.SiteLocation seq =
                         def.metas
                         |> Seq.map (fun meta ->
                             { loc = sourceToSitemap $"%s{pathRoot}%s{def.root}" meta.source
@@ -128,7 +128,7 @@ module Generation =
                 [ Html.ul [ prop.children [ Html.li [ Html.h2 tag ]
                                             Html.ul lis ] ] ])
 
-        let locs =
+        let locs: Xml.SiteLocation seq =
             tagAndPage
             |> Map.toList
             |> Seq.map (fun (tag, _) ->
@@ -159,9 +159,9 @@ module Generation =
                 match navi.sitemap with
                 | Yes n ->
                     Some
-                        { loc = $"%s{pathRoot}%s{navi.path}"
-                          lastmod = now |> DateTime.toRFC3339Date
-                          priority = n }
+                        { Xml.SiteLocation.loc = $"%s{pathRoot}%s{navi.path}"
+                          Xml.SiteLocation.lastmod = now |> DateTime.toRFC3339Date
+                          Xml.SiteLocation.priority = n }
                 | No -> None
 
         navs
@@ -182,7 +182,7 @@ module Generation =
         [ Html.h1 [ prop.text "404 Page not found" ]
           Html.p [ prop.text "Sorry! The page you're looking for does not exist." ] ]
 
-    let generateSitemap = createSitemap
+    let generateSitemap = Xml.createSitemap
 
     type FeedConf =
         { title: string
@@ -197,31 +197,9 @@ module Generation =
         let items =
             conf.posts
             |> Seq.rev
-            |> Seq.map (fun meta ->
-                let link = $"{conf.link}{conf.postRoot}/{meta.leaf}"
+            |> Seq.map (Xml.metaToRssItem conf.timeZone $"{conf.link}{conf.postRoot}")
 
-                let pubDate =
-                    match meta.frontMatter with
-                    | Some fm ->
-                        match fm.date with
-                        | Some d -> d
-                        | None -> meta.date
-                    | None -> meta.date
-                    |> DateTime.parseToRFC822DateTimeString conf.timeZone
-
-                { guid = link
-                  link = link
-                  title =
-                    match meta.frontMatter with
-                    | Some fm -> fm.title
-                    | None -> meta.leaf
-                  description =
-                    meta.content
-                    |> Parser.parseReactStaticMarkup
-                    |> simpleEscape
-                  pubDate = pubDate })
-
-        createRss
+        Xml.createRss
             { title = conf.title
               description = conf.description
               link = conf.link
@@ -448,7 +426,7 @@ module Rendering =
             do! IO.writeFile dest content
         }
 
-    let renderSitemap root dest (locs: SiteLocation seq) =
+    let renderSitemap root dest (locs: Xml.SiteLocation seq) =
         promise {
             printfn "Rendering sitemap..."
             let sitemap = generateSitemap root locs
