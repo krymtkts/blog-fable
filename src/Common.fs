@@ -382,12 +382,6 @@ module Component =
 
         Html.li [ Html.a <| prop.href ref :: children title ]
 
-    let liAWithClass ref title classes =
-        Html.li [ prop.classes classes
-                  prop.children [ Html.a [ prop.href ref
-                                           prop.title title
-                                           prop.text title ] ] ]
-
     let liSpanA (span: string) ref title =
         Html.li [ Html.span [ prop.text span ]
                   Html.a [ prop.href ref
@@ -418,7 +412,7 @@ module Component =
 
         liA ref <| Text title
 
-    let header (tagToElement: string -> ReactElement) pubDate (fm: Parser.FrontMatter option) =
+    let header (tagRoot: string) (pubDate: string option) (fm: Parser.FrontMatter option) =
         let date pubDate fmDate =
             let date =
                 match pubDate, fmDate with
@@ -436,13 +430,17 @@ module Component =
                 [ date pubDate fm.date
                   Html.h1 [ prop.className [ "title" ]
                             prop.text fm.title ]
-                  Html.ul [ prop.className [ "tags" ]
-                            prop.children (
-                                match fm.tags with
-                                | Some tags -> tags
-                                | None -> [||]
-                                |> Seq.map tagToElement
-                            ) ] ]
+                  Html.div [ prop.className [ "tags" ]
+                             prop.children (
+                                 match fm.tags with
+                                 | Some tags -> tags
+                                 | None -> [||]
+                                 |> Seq.map (fun tag ->
+                                     Html.a [ prop.href $"%s{tagRoot}%s{tag}.html"
+                                              prop.title tag
+                                              prop.className "tag is-medium"
+                                              prop.text tag ])
+                             ) ] ]
             | None -> []
 
         header

@@ -279,11 +279,8 @@ module Rendering =
                 | Some fm -> $"%s{conf.title} - %s{fm.title}"
                 | None -> conf.title
 
-            let tagToElement tag =
-                Component.liAWithClass $"%s{root.siteRoot}%s{root.tagRoot}/%s{tag}.html" tag [ "tag"; "is-medium" ]
-
-            let fmToHeader = Component.header <| tagToElement <| meta.pubDate
-            let header = fmToHeader meta.frontMatter
+            let header =
+                Component.header $"%s{root.siteRoot}%s{root.tagRoot}/" meta.pubDate meta.frontMatter
 
             let footer =
                 match meta.layout with
