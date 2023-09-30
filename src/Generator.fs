@@ -17,10 +17,7 @@ module Generation =
                     let leaf = IO.leaf meta.source
                     leaf.Substring(0, 7))
                 |> Seq.map (fun (yearMonth, metas) ->
-                    let lis =
-                        metas
-                        |> Seq.map (fun meta -> metaToLi root meta)
-                        |> List.ofSeq
+                    let lis = metas |> Seq.map (metaToLi root) |> List.ofSeq
 
                     [ Html.li [ Html.h3 yearMonth ]
                       Html.ul lis ])
@@ -153,7 +150,6 @@ module Generation =
     type Nav =
         | Title of NavItem
         | Link of NavItem
-
 
     let generateNavbar pathRoot (navs: Nav list) =
         let toSitemap =
