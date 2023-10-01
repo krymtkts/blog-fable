@@ -18,8 +18,8 @@ $blue: #268bd2;
 $cyan: #2aa198;
 $green: #859900;
 
-@use "../node_modules/bulma/bulma.sass" with (
-  // NOTE: Solarized.
+@use "../node_modules/bulma/bulma.sass" as bulma with (
+  // // NOTE: Solarized Light.
   // $black: $base03,
   // $black-bis: $base02,
   // $black-ter: $base02,
@@ -32,6 +32,9 @@ $green: #859900;
   // $white-ter: $base2,
   // $white-bis: $base2,
   // $white: $base3,
+  // $background: $base3,
+  // $code: $base01,
+  // $tag-background-color: $base3,
   // NOTE: Solarized Dark.
   $black: $base3,
   $black-bis: $base2,
@@ -45,6 +48,10 @@ $green: #859900;
   $white-ter: $base02,
   $white-bis: $base02,
   $white: $base03,
+  $background: $base03,
+  $code: $base0,
+  $tag-background-color: $base03,
+
   $orange: $orange,
   $yellow: $yellow,
   $green: $green,
@@ -54,10 +61,7 @@ $green: #859900;
   $purple: $violet,
   $red: $red,
 
-  $background: $base03,
-  $code: $base0,
   $code-size: 1em,
-  $tag-background-color: $base03,
   $link-hover: $violet,
   $section-padding: 1.5rem,
   $section-padding-desktop: 1.5rem
@@ -68,7 +72,7 @@ $green: #859900;
   text-decoration: underline;
 }
 a:visited {
-  color: $violet;
+  color: bulma.$purple;
 }
 .checkbox {
   margin-right: 0.5em;
@@ -82,7 +86,7 @@ code {
 code,
 pre,
 .tag:not(body) {
-  border: 1px solid $base01;
+  border: 1px solid bulma.$grey-lighter;
   border-radius: bulma.$radius;
 }
 pre code {
