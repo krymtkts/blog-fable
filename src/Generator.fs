@@ -252,6 +252,7 @@ module Rendering =
             return
                 { frontMatter = fm
                   content = content
+                  description = content |> Parser.parseReact |> summarizeHtml 120
                   layout = layout
                   source = source
                   leaf = leafHtml source
@@ -294,6 +295,7 @@ module Rendering =
                 |> frame
                     { conf with
                         title = title
+                        description = meta.description
                         url = $"%s{conf.url}/%s{path}" }
                 |> Parser.parseReactStaticHtml
 

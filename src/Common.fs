@@ -20,6 +20,11 @@ module String =
     let inline format (pattern: string) x =
         (^a: (member ToString: string -> string) (x, pattern))
 
+    let inline truncate (length: int) x =
+        match x with
+        | x when String.length x <= length -> x
+        | x -> x.[.. (length - 4)] + "..."
+
 module DateTime =
     open System
 
@@ -211,6 +216,7 @@ module Misc =
     type Meta =
         { frontMatter: Parser.FrontMatter option
           content: ReactElement
+          description: string
           layout: Layout
           source: string
           leaf: string
@@ -258,6 +264,11 @@ module Misc =
                 | "\"" -> "&quot;"
                 | x -> x)
         )
+
+    let summarizeHtml (length: int) (s: string) =
+        Regex.Replace(s, """(<[^>]+>)""", "")
+        |> fun s -> Regex.Replace(s, "\s+", " ")
+        |> String.truncate length
 
     let leafHtml source = source |> IO.leaf |> Util.mdToHtml
 
