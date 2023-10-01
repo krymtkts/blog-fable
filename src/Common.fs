@@ -244,6 +244,19 @@ module Misc =
             return files
         }
 
+    let getImagePathPairs src dest =
+        promise {
+            let! paths = IO.getFiles src
+
+            return
+                paths
+                |> List.map (fun path ->
+                    let src = Directory.join2 src path
+                    let dest = Directory.join2 dest path
+
+                    src, dest)
+        }
+
     let sourceToSitemap root source =
         let leaf: string = Directory.leaf source
         let path = Directory.join3 "/" root <| Util.mdToHtml leaf
