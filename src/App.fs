@@ -21,6 +21,7 @@ render
       archives =
         { root = "/archives"
           title = "Archives" }
+      images = "/img"
 
       feedName = "feed"
 

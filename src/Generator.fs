@@ -478,6 +478,7 @@ type RenderOptions =
       pages: Content
       tags: Content
       archives: Content
+      images: string
 
       additionalNavs: AdditionalNav list
 
@@ -504,7 +505,7 @@ module RenderOptions =
 
     let pagesSourceRoot opts = $"%s{opts.src}%s{opts.pages.root}"
     let devScriptSourcePath = "src/Dev.fs.js"
-    let imagesSourcePath opts = $"%s{opts.src}/img"
+    let imagesSourcePath opts = $"%s{opts.src}/%s{opts.images}"
 
     let destinationRoot opts = $"%s{opts.dst}%s{opts.pathRoot}"
 
@@ -532,7 +533,8 @@ module RenderOptions =
 
     let devScriptDestinationPath opts = $"%s{opts.dst}%s{devScriptPath opts}"
 
-    let imagesDestinationPath opts = $"%s{destinationRoot opts}/img"
+    let imagesDestinationPath opts =
+        $"%s{destinationRoot opts}/%s{opts.images}"
 
 let private buildNavList opts =
     let feed = RenderOptions.feedPath opts
