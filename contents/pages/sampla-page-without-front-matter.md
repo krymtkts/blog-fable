@@ -8,4 +8,4 @@ Recommend specifying the `title` in front matter.
 
 If a page does not have a `title`, the generated link will look like this.
 
-[sample-page-without-front-matter.md](/pages/sampla-page-without-front-matter.html)
+[sample-page-without-front-matter.md](/blog-fable/pages/sampla-page-without-front-matter.html)

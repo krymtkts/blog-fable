@@ -19,4 +19,4 @@ date: 2023-09-01
 
 You can define a page without front matter if you want.
 
-See [sample-page-without-front-matter.md](/pages/sampla-page-without-front-matter.html)
+See [sample-page-without-front-matter.md](/blog-fable/pages/sampla-page-without-front-matter.html)
