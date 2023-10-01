@@ -6,6 +6,7 @@ Use React with [Feliz](https://zaid-ajaj.github.io/Feliz/#/).
 This repository re-creates a subset of [fable-compiler/static-web-generator](https://github.com/fable-compiler/static-web-generator) with the latest dependencies.
 
 GitHub Pages deployment is [here](https://krymtkts.github.io/blog-fable/index.html).
+You can view the sample pages on this site.
 
 ## Motivation
 
@@ -29,7 +30,7 @@ GitHub Pages deployment is [here](https://krymtkts.github.io/blog-fable/index.ht
     - Build pages: `npm run build-fable`
     - Build styles: `npm run build-css`
 - Build pages and start a development server: `npm run dev`
-  - After finished the first compilation, open: `http://localhost:8080/`
+  - After finished the first compilation, open: `http://localhost:8080/` automatically
   - The simplest way to build and start a server
 
 ## Credits

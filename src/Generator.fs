@@ -252,6 +252,7 @@ module Rendering =
             return
                 { frontMatter = fm
                   content = content
+                  description = content |> Parser.parseReact |> summarizeHtml 120
                   layout = layout
                   source = source
                   leaf = leafHtml source
@@ -294,6 +295,7 @@ module Rendering =
                 |> frame
                     { conf with
                         title = title
+                        description = meta.description
                         url = $"%s{conf.url}/%s{path}" }
                 |> Parser.parseReactStaticHtml
 
@@ -476,14 +478,13 @@ type RenderOptions =
       pages: Content
       tags: Content
       archives: Content
+      images: string
 
       additionalNavs: AdditionalNav list
 
       feedName: string
 
-      timeZone: string
-
-     }
+      timeZone: string }
 
 module RenderOptions =
     let indexPath = "/index.html"
@@ -504,7 +505,7 @@ module RenderOptions =
 
     let pagesSourceRoot opts = $"%s{opts.src}%s{opts.pages.root}"
     let devScriptSourcePath = "src/Dev.fs.js"
-    let faviconSourcePath opts = $"%s{opts.src}%s{opts.favicon}"
+    let imagesSourcePath opts = $"%s{opts.src}/%s{opts.images}"
 
     let destinationRoot opts = $"%s{opts.dst}%s{opts.pathRoot}"
 
@@ -532,8 +533,8 @@ module RenderOptions =
 
     let devScriptDestinationPath opts = $"%s{opts.dst}%s{devScriptPath opts}"
 
-    let faviconDestinationPath opts =
-        $"%s{destinationRoot opts}%s{opts.favicon}"
+    let imagesDestinationPath opts =
+        $"%s{destinationRoot opts}/%s{opts.images}"
 
 let private buildNavList opts =
     let feed = RenderOptions.feedPath opts
@@ -663,10 +664,12 @@ let render (opts: RenderOptions) =
                   timeZone = opts.timeZone }
             <| RenderOptions.feedDestinationPath opts
 
-        do!
-            copyResources
-            <| [ (RenderOptions.faviconSourcePath opts, RenderOptions.faviconDestinationPath opts) ]
-               @ devScript
+        let! paths =
+            getImagePathPairs
+            <| RenderOptions.imagesSourcePath opts
+            <| RenderOptions.imagesDestinationPath opts
+
+        do! copyResources <| devScript @ paths
 
         printfn "Render complete!"
     }
