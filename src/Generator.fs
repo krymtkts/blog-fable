@@ -461,6 +461,13 @@ type Content = { root: string; title: string }
 
 type AdditionalNav = { text: string; path: string }
 
+type sitemap =
+    { index: float
+      archives: float
+      tags: float
+      posts: float
+      pages: float }
+
 type RenderOptions =
     { stage: Mode
       siteName: string
@@ -484,7 +491,9 @@ type RenderOptions =
 
       feedName: string
 
-      timeZone: string }
+      timeZone: string
+
+      sitemap: sitemap }
 
 module RenderOptions =
     let indexPath = "/index.html"
@@ -543,15 +552,15 @@ let private buildNavList opts =
     List.concat [ [ Title
                         { text = opts.siteName
                           path = RenderOptions.indexPath
-                          sitemap = Yes "1.0" }
+                          sitemap = Yes <| string opts.sitemap.index }
                     Link
                         { text = opts.archives.title
                           path = RenderOptions.archivesPath opts
-                          sitemap = Yes "0.9" }
+                          sitemap = Yes <| string opts.sitemap.archives }
                     Link
                         { text = opts.tags.title
                           path = RenderOptions.tagsPath opts
-                          sitemap = Yes "0.9" } ]
+                          sitemap = Yes <| string opts.sitemap.tags } ]
                   List.map
                       (fun n ->
                           Link
@@ -619,12 +628,12 @@ let render (opts: RenderOptions) =
                   { title = opts.posts.title
                     metas = metaPosts
                     root = opts.posts.root
-                    priority = "0.8" }
+                    priority = string opts.sitemap.posts }
               Pages
                   { title = opts.pages.title
                     metas = metaPages
                     root = opts.pages.root
-                    priority = "0.8" } ]
+                    priority = string opts.sitemap.pages } ]
 
         let! archiveLocs =
             renderArchives conf site archiveDefs
@@ -636,7 +645,7 @@ let render (opts: RenderOptions) =
               postRoot = RenderOptions.postsRootPath opts
               pageRoot = RenderOptions.pagesRootPath opts
               metas = Seq.concat [ metaPosts; metaPages ]
-              priority = "0.9" }
+              priority = string opts.sitemap.tags }
 
         let! tagLocs =
             renderTags conf site tagDef
