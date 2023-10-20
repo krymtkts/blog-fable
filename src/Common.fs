@@ -120,11 +120,16 @@ module private Util =
                 // NOTE: checkbox generation is handled by listitem.
                 ""
 
+            let image (href: string) (title: string) (text: string) =
+                // NOTE: add lazy loading attribute.
+                $"""<img src="%s{href}" title="%s{title}" alt="%s{text}" loading="lazy" />"""
+
             let mops =
                 !!{| heading = heading
                      link = link
                      listitem = listitem
-                     checkbox = checkbox |}
+                     checkbox = checkbox
+                     image = image |}
 
 
             jsOptions<Marked.MarkedExtension> (fun o ->
