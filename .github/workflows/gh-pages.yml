@@ -26,6 +26,8 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           global-json-file: ./global.json
+          cache: true
+          cache-dependency-path: src/packages.lock.json
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
