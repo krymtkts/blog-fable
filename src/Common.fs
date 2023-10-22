@@ -87,9 +87,10 @@ module private Util =
 
                 $"""<h%d{l}><a name="%s{escapedText}" href="#%s{escapedText}">%s{text}</a></h%d{l}>"""
 
-            let link href title text =
+            let link (href: string option) title text =
                 let ref =
                     match href with
+                    | Some s when s.StartsWith("http") -> s
                     | Some s -> mdToHtml s
                     | None -> ""
 
