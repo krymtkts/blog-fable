@@ -28,9 +28,9 @@
       },
       "Fable.Core": {
         "type": "Direct",
-        "requested": "[4.0.0, )",
-        "resolved": "4.0.0",
-        "contentHash": "crDLkyN4xADgnCqIneMUGVDo2oS92W4oufbIH/jwc8Fk7nIH6pS/Ds1rBB4R1jUfU1WM1k9GEPa4Up8cNj5VYw=="
+        "requested": "[4.1.1, )",
+        "resolved": "4.1.1",
+        "contentHash": "V+P50mP76FoyblYWSOunRlxMS+dCpAlDnSOzRTjsQ8t4q2SYqD1Z+dzybfgrf0AueWedq/11ZAzcyk10VJ2K7Q=="
       },
       "Fable.Node": {
         "type": "Direct",
@@ -65,9 +65,9 @@
       },
       "Feliz": {
         "type": "Direct",
-        "requested": "[2.6.0, )",
-        "resolved": "2.6.0",
-        "contentHash": "xtBdL75Im3ffhPnCURe5rC7Ry03U0haoJG7oxB+mmlzGOOWgTyK+BUq6teD9t0me1/QPxzgz0IRxEMF8pJLsfw==",
+        "requested": "[2.7.0, )",
+        "resolved": "2.7.0",
+        "contentHash": "J5QXU2fzLJzVGWPcdnALTpTJkOm2Mlwfb08UvlGk666PaQguXYbn7ZcjPsaU7c0iDDoM/9H8YuxHNCHNjsBaaQ==",
         "dependencies": {
           "FSharp.Core": "4.7.2",
           "Fable.ReactDom.Types": "18.2.0",
