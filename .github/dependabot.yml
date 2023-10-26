@@ -46,7 +46,7 @@ updates:
       time: "09:00"
       timezone: "Asia/Tokyo"
     groups:
-      marked:
+      dependencies:
         dependency-type: "production"
         exclude-patterns:
           - "react*" # NOTE: react should be updated with Fable.
