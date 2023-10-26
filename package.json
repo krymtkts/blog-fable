@@ -13,15 +13,15 @@
   "version": "1.0.0",
   "devDependencies": {
     "bulma": "^0.9.4",
+    "sass": "^1.69.4",
+    "ts2fable": "^0.7.1"
+  },
+  "dependencies": {
     "highlight.js": "^11.9.0",
     "marked": "^9.1.2",
     "marked-highlight": "^2.0.6",
-    "sass": "^1.69.4",
-    "ts2fable": "^0.7.1",
-    "yaml": "^2.3.3"
-  },
-  "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "yaml": "^2.3.3"
   }
 }

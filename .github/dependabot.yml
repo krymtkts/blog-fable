@@ -8,6 +8,14 @@ updates:
       day: "friday"
       time: "09:00"
       timezone: "Asia/Tokyo"
+    groups:
+      workflow:
+        patterns:
+          - "*"
+    assignees:
+      - "krymtkts"
+    reviewers:
+      - "krymtkts"
   # Maintain dependencies for NuGet
   - package-ecosystem: "nuget"
     directory: "/"
@@ -16,12 +24,19 @@ updates:
       day: "friday"
       time: "09:00"
       timezone: "Asia/Tokyo"
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
-    labels:
-      - "maintenance"
-
+    groups:
+      dotnet-tools:
+        patterns:
+          - "fable"
+          - "femto"
+      fable:
+        patterns:
+          - "Fable.*"
+          - "Feliz"
+    assignees:
+      - "krymtkts"
+    reviewers:
+      - "krymtkts"
   # Maintain dependencies for npm
   - package-ecosystem: "npm"
     directory: "/"
@@ -30,8 +45,14 @@ updates:
       day: "friday"
       time: "09:00"
       timezone: "Asia/Tokyo"
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
-    labels:
-      - "maintenance"
+    groups:
+      marked:
+        dependency-type: "production"
+        exclude-patterns:
+          - "react*" # NOTE: react should be updated with Fable.
+      dev-dependencies:
+        dependency-type: "development"
+    assignees:
+      - "krymtkts"
+    reviewers:
+      - "krymtkts"
