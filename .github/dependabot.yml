@@ -50,9 +50,6 @@ updates:
         dependency-type: "production"
         exclude-patterns:
           - "react*" # NOTE: react should be updated with Fable.
-        exclude-patterns:
-          - "marked*"
-          - "highlight.js"
       dev-dependencies:
         dependency-type: "development"
     assignees:
