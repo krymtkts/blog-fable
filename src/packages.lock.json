@@ -28,9 +28,9 @@
       },
       "Fable.Core": {
         "type": "Direct",
-        "requested": "[4.1.1, )",
-        "resolved": "4.1.1",
-        "contentHash": "V+P50mP76FoyblYWSOunRlxMS+dCpAlDnSOzRTjsQ8t4q2SYqD1Z+dzybfgrf0AueWedq/11ZAzcyk10VJ2K7Q=="
+        "requested": "[4.2.0, )",
+        "resolved": "4.2.0",
+        "contentHash": "ikacgHRLZpNVS33oBzl4uDHXZJDH660SaNPYCDGvFb7Hhm4WCXq0qTik8bpPJAhCnLDVrXLCAIoGKsKQ5pfx2A=="
       },
       "Fable.Node": {
         "type": "Direct",
@@ -73,6 +73,12 @@
           "Fable.ReactDom.Types": "18.2.0",
           "Feliz.CompilerPlugins": "2.2.0"
         }
+      },
+      "FSharp.Core": {
+        "type": "Direct",
+        "requested": "[7.0.401, )",
+        "resolved": "7.0.401",
+        "contentHash": "ZL16YHLJnkosMooVXjvJH0vGf7O4RSNtCpA/qw6OAHYxPCYSZRc5pKFTpDeDLdSWpOJDaZlveKcn42F0UDo77A=="
       },
       "Fable.AST": {
         "type": "Transitive",
@@ -153,11 +159,6 @@
           "FSharp.Core": "4.7.2",
           "Fable.AST": "4.2.1"
         }
-      },
-      "FSharp.Core": {
-        "type": "Transitive",
-        "resolved": "5.0.0",
-        "contentHash": "iHoYXA0VaSQUONGENB1aVafjDDZDZpwu39MtaRCTrmwFW/cTcK0b2yKNVYneFHJMc3ChtsSoM9lNtJ1dYXkHfA=="
       }
     }
   }
