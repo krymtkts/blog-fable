@@ -1,0 +1,20 @@
+name: "Composite Action"
+description: "[Test] Composite Action"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        global-json-file: ./global.json
+        cache: true
+        cache-dependency-path: src/packages.lock.json
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+    - name: Install dependencies
+      run: npm install
+    - name: Build pages
+      run: npm run build
