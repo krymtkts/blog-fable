@@ -1,5 +1,5 @@
-name: "Composite Action"
-description: "[Test] Composite Action"
+name: "Build pages Action"
+description: "Setup .NET and Node.js, install dependencies and build pages."
 
 runs:
   using: "composite"
