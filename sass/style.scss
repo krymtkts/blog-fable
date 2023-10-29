@@ -65,7 +65,8 @@ $green: #859900;
   $code-size: 1em,
   $link-hover: $violet,
   $section-padding: 1.5rem,
-  $section-padding-desktop: 1.5rem
+  $section-padding-desktop: 1.5rem,
+  $body-line-height: 1.7
 );
 
 // NOTE: adjust non-parameterized styles.
@@ -92,6 +93,7 @@ pre,
 }
 pre code {
   border: none;
+  line-height: 1.5;
 }
 .content {
   li:first-child {
