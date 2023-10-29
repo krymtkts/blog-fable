@@ -59,7 +59,7 @@ let handleWatcherEvents, socketHandler =
             Error false
 
     let buildMd () =
-        Npm.run "build-md" id
+        Npm.run "build-md dev" id
         Ok true
 
     let buildStyle () =
