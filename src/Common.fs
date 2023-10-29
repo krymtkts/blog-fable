@@ -418,12 +418,12 @@ module Component =
                            prop.title title
                            prop.text title ] ]
 
-    let pathToLi root source =
-        let leaf = Directory.leaf source
+    let tagToLi root tag count =
+        let leaf = Directory.leaf $"{tag}.html"
         let title = Regex.Replace(leaf, "\.(md|html)", "")
         let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
 
-        liA ref <| Text title
+        liA ref <| Text $"{title} ({count})"
 
     let metaToLi root meta =
         let leaf = Directory.leaf meta.source
