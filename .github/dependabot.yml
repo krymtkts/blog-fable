@@ -6,7 +6,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "friday"
-      time: "09:00"
+      time: "06:00"
       timezone: "Asia/Tokyo"
     groups:
       workflow:
@@ -22,7 +22,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "friday"
-      time: "09:00"
+      time: "06:00"
       timezone: "Asia/Tokyo"
     groups:
       dotnet-tools:
@@ -43,7 +43,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "friday"
-      time: "09:00"
+      time: "06:00"
       timezone: "Asia/Tokyo"
     groups:
       dependencies:
