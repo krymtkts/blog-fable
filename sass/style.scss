@@ -18,63 +18,63 @@ $blue: #268bd2;
 $cyan: #2aa198;
 $green: #859900;
 
-@use "../node_modules/bulma/bulma.sass" as bulma with (
-  // // NOTE: Solarized Light.
-  // $black: $base03,
-  // $black-bis: $base02,
-  // $black-ter: $base02,
-  // $grey-darker: $base00,
-  // $grey-dark: $base00,
-  // $grey: $base01,
-  // $grey-light: $base0,
-  // $grey-lighter: $base1,
-  // $grey-lightest: $base1,
-  // $white-ter: $base2,
-  // $white-bis: $base2,
-  // $white: $base3,
-  // $background: $base3,
-  // $code: $base01,
-  // $tag-background-color: $base3,
-  // NOTE: Solarized Dark.
-  $black: $base3,
-  $black-bis: $base2,
-  $black-ter: $base2,
-  $grey-darker: $base1,
-  $grey-dark: $base1,
-  $grey: $base0,
-  $grey-light: $base00,
-  $grey-lighter: $base01,
-  $grey-lightest: $base01,
-  $white-ter: $base02,
-  $white-bis: $base02,
-  $white: $base03,
-  $background: $base03,
-  $code: $base0,
-  $tag-background-color: $base03,
-  $hr-background-color: $base01,
+// // NOTE: Solarized Light.
+// $black: $base03,
+// $black-bis: $base02,
+// $black-ter: $base02,
+// $grey-darker: $base00,
+// $grey-dark: $base00,
+// $grey: $base01,
+// $grey-light: $base0,
+// $grey-lighter: $base1,
+// $grey-lightest: $base1,
+// $white-ter: $base2,
+// $white-bis: $base2,
+// $white: $base3,
+// $background: $base3,
+// $code: $base01,
+// $tag-background-color: $base3,
+// NOTE: Solarized Dark.
+$black: $base3;
+$black-bis: $base2;
+$black-ter: $base2;
+$grey-darker: $base1;
+$grey-dark: $base1;
+$grey: $base0;
+$grey-light: $base00;
+$grey-lighter: $base01;
+$grey-lightest: $base01;
+$white-ter: $base02;
+$white-bis: $base02;
+$white: $base03;
+$background: $base03;
+$code: $base0;
+$tag-background-color: $base03;
+$hr-background-color: $base01;
 
-  $orange: $orange,
-  $yellow: $yellow,
-  $green: $green,
-  $turquoise: $cyan,
-  $cyan: $cyan,
-  $blue: $blue,
-  $purple: $violet,
-  $red: $red,
+$orange: $orange;
+$yellow: $yellow;
+$green: $green;
+$turquoise: $cyan;
+$cyan: $cyan;
+$blue: $blue;
+$purple: $violet;
+$red: $red;
 
-  $code-size: 1em,
-  $link-hover: $violet,
-  $section-padding: 1.5rem,
-  $section-padding-desktop: 1.5rem,
-  $body-line-height: 1.7
-);
+$code-size: 1em;
+$link-hover: $violet;
+$section-padding: 1.5rem;
+$section-padding-desktop: 1.5rem;
+$body-line-height: 1.7;
+
+@import "../node_modules/bulma/bulma.sass";
 
 // NOTE: adjust non-parameterized styles.
 .content a {
   text-decoration: underline;
 }
 a:visited {
-  color: bulma.$purple;
+  color: $purple;
 }
 .checkbox {
   margin-right: 0.5em;
@@ -88,8 +88,8 @@ code {
 code,
 pre,
 .tag:not(body) {
-  border: 1px solid bulma.$grey-lighter;
-  border-radius: bulma.$radius;
+  border: 1px solid $grey-lighter;
+  border-radius: $radius;
 }
 pre code {
   border: none;
