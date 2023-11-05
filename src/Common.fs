@@ -139,8 +139,19 @@ module private Util =
 
         let highlighter =
             let highlight (code: string) (lang: string) =
-                (hljs.highlight code !!{| language = lang |} false)
-                    .value
+                let code =
+                    (hljs.highlight code !!{| language = lang |} false)
+                        .value
+
+                Regex.Replace(
+                    code,
+                    """[\n\t]""",
+                    (fun s ->
+                        match s.Value with
+                        | "\n" -> "<br />"
+                        | "\t" -> "&emsp;"
+                        | x -> x)
+                )
 
             markedHighlight !!{| highlight = highlight |}
 
