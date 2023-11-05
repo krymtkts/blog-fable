@@ -19,7 +19,7 @@ module Generation =
                 |> Seq.map (fun (yearMonth, metas) ->
                     let lis = metas |> Seq.map (metaToLi root) |> List.ofSeq
 
-                    [ Html.li [ Html.h3 yearMonth ]
+                    [ Html.li [ Html.h3 $"{yearMonth} ({List.length lis})" ]
                       Html.ul lis ])
 
             return Html.ul [ prop.children (List.concat archives) ]
