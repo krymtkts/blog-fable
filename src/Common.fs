@@ -549,16 +549,26 @@ module Component =
                                                       prop.src src ]
                                     | None -> null ] ]
 
+    type FooterButton =
+        | Prev
+        | Next
+
     let footer (postRoot: string) (prev: Meta option) (next: Meta option) =
-        let button className meta =
+
+        let button button meta =
             match meta with
             | Some meta ->
                 let ref = $"%s{postRoot}%s{meta.leaf}"
 
-                let text =
-                    match meta.frontMatter with
-                    | Some fm -> $"%s{meta.date} %s{fm.title}"
-                    | None -> $"%s{meta.date} %s{meta.leaf}"
+                let text, className =
+                    let t =
+                        match meta.frontMatter with
+                        | Some fm -> $"%s{meta.date} %s{fm.title}"
+                        | None -> $"%s{meta.date} %s{meta.leaf}"
+
+                    match button with
+                    | Prev -> $"<< %s{t}", "prev"
+                    | Next -> $"%s{t} >>", "next"
 
                 Html.a [ prop.classes [ className; "button" ]
                          prop.href ref
@@ -566,8 +576,8 @@ module Component =
                          prop.children [ Html.span [ prop.text text ] ] ]
             | None -> null
 
-        let prev = button "prev" prev
-        let next = button "next" next
+        let prev = button Prev prev
+        let next = button Next next
 
         [ Html.div [ prop.className "buttons"
                      prop.children [ prev; next ] ] ]
