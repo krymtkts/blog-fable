@@ -567,8 +567,8 @@ module Component =
                         | None -> $"%s{meta.date} %s{meta.leaf}"
 
                     match button with
-                    | Prev _ -> $"<< %s{t}", "prev"
-                    | Next _ -> $"%s{t} >>", "next"
+                    | Prev -> $"<< %s{t}", "prev"
+                    | Next -> $"%s{t} >>", "next"
 
                 Html.a [ prop.classes [ className; "button" ]
                          prop.href ref
