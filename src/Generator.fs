@@ -448,7 +448,7 @@ module Rendering =
                 resources
                 |> List.map (fun (source, dest) ->
                     promise {
-                        printfn $"Copying %s{source}..."
+                        printfn $"Copying %s{source} %s{dest}..."
                         do! IO.copy source dest
                     })
                 |> Promise.all
@@ -495,7 +495,9 @@ type RenderOptions =
 
       timeZone: string
 
-      sitemap: sitemap }
+      sitemap: sitemap
+
+      highlightStyle: string }
 
 module RenderOptions =
     let indexPath = "/index.html"
@@ -503,6 +505,10 @@ module RenderOptions =
     let archivesPath opts = $"%s{opts.archives.root}.html"
     let tagsPath opts = $"%s{opts.tags.root}.html"
     let stylePath opts = $"%s{opts.pathRoot}/css/style.css"
+
+    let highlightStylePath opts =
+        $"%s{opts.pathRoot}/css/%s{IO.leaf opts.highlightStyle}"
+
     let devScriptPath opts = $"%s{opts.pathRoot}/js/dev.js"
     let faviconPath opts = $"%s{opts.pathRoot}%s{opts.favicon}"
 
@@ -547,6 +553,9 @@ module RenderOptions =
     let imagesDestinationPath opts =
         $"%s{destinationRoot opts}/%s{opts.images}"
 
+    let highlightStyleDestinationPath opts =
+        $"%s{destinationRoot opts}/css/%s{IO.leaf opts.highlightStyle}"
+
 let private buildNavList opts =
     let feed = RenderOptions.feedPath opts
 
@@ -582,6 +591,9 @@ let private buildDevScript opts =
         [ (RenderOptions.devScriptSourcePath, RenderOptions.devScriptDestinationPath opts) ]
     | Production -> None, []
 
+let private buildHighlightStyle opts =
+    RenderOptions.highlightStylePath opts, [ (opts.highlightStyle, RenderOptions.highlightStyleDestinationPath opts) ]
+
 let render (opts: RenderOptions) =
     promise {
         let feed, navs = buildNavList opts
@@ -590,6 +602,7 @@ let render (opts: RenderOptions) =
             generateNavbar opts.pathRoot navs
 
         let devInjection, devScript = buildDevScript opts
+        let highlightInjection, highlightStyle = buildHighlightStyle opts
 
         let site: PathConfiguration =
             { siteRoot = opts.pathRoot
@@ -607,6 +620,7 @@ let render (opts: RenderOptions) =
               copyright = opts.copyright
               favicon = RenderOptions.faviconPath opts
               style = RenderOptions.stylePath opts
+              highlightStyle = highlightInjection
               devInjection = devInjection }
 
         let renderPostAndPages = renderMarkdowns conf site
@@ -680,7 +694,9 @@ let render (opts: RenderOptions) =
             <| RenderOptions.imagesSourcePath opts
             <| RenderOptions.imagesDestinationPath opts
 
-        do! copyResources <| devScript @ paths
+        do!
+            copyResources
+            <| devScript @ paths @ highlightStyle
 
         printfn "Render complete!"
     }

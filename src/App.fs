@@ -11,6 +11,7 @@ render
       pathRoot = "/blog-fable"
       copyright = "2023 krymtkts"
       favicon = "/img/favicon.ico"
+      highlightStyle = "node_modules/highlight.js/styles/base16/solarized-dark.min.css"
 
       src = "contents"
       dst = "docs"
