@@ -79,6 +79,7 @@ module private Util =
 
     let private me: ResizeArray<Marked.MarkedExtension> =
         let markedHighlight: obj -> Marked.MarkedExtension = importMember "marked-highlight"
+        let markedFootnote: obj -> Marked.MarkedExtension = importDefault "marked-footnote"
 
         let renderer =
             let heading text level =
@@ -155,7 +156,9 @@ module private Util =
 
             markedHighlight !!{| highlight = highlight |}
 
-        let mes = [ renderer; highlighter ]
+        let footNote = markedFootnote !!{| description = "<hr />" |}
+
+        let mes = [ renderer; highlighter; footNote ]
         ResizeArray mes
 
     marked.``use`` me
