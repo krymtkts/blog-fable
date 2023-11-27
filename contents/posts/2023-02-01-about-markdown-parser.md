@@ -26,9 +26,10 @@ plain _italic_ **bold** `code` ~~strikethrough~~
 
 Recommends to start Markdown headings from h2 because it render the blog title as h1.
 
-footnote like this[^1]
+footnote like this[^1] [^2]
 
 [^1]: footnote line requires blank line before.
+[^2]: footnote with [link](https://github.com/krymtkts/blog-fable)
 
 ## blockquote
 
