@@ -4,9 +4,9 @@
     "net7.0": {
       "Fable.Browser.Dom": {
         "type": "Direct",
-        "requested": "[2.14.0, )",
-        "resolved": "2.14.0",
-        "contentHash": "R85V6jNb/xTwe47hHLYevsu4l8ZZrU4Nfg9CxD4vj33eXqwZa6W0l0MsyKh3+8cPV7yiZgegrRWVfr7axY0rzA==",
+        "requested": "[2.15.0, )",
+        "resolved": "2.15.0",
+        "contentHash": "274qw1RqyslWgneVIF6/e02GQ3IZ3M6BRXIZ9HEj1igmmHt7zW3WHZq8UsxCN5kzomo5qJImrgjRqvrZhkXPwQ==",
         "dependencies": {
           "FSharp.Core": "4.7.2",
           "Fable.Browser.Blob": "1.3.0",
