@@ -238,11 +238,13 @@ module Rendering =
                 |> Parser.parseMarkdownAsReactEl
                 |> fun (fm, c) -> fm, c
 
+            let today = DateTime.toRFC3339Date now
+
             let chooseDate (fm: Parser.FrontMatter option) alt =
                 let date =
                     match alt with
                     | Some date -> date
-                    | _ -> DateTime.toRFC3339Date now
+                    | _ -> today
 
                 match fm with
                 | Some fm ->
@@ -251,6 +253,8 @@ module Rendering =
                     | Some date -> date
                 | None -> date
 
+            let date = chooseDate fm pubDate
+
             return
                 { frontMatter = fm
                   content = content
@@ -258,8 +262,9 @@ module Rendering =
                   layout = layout
                   source = source
                   leaf = leafHtml source
-                  date = chooseDate fm pubDate
-                  pubDate = pubDate }
+                  date = date
+                  pubDate = pubDate
+                  publish = date <= today }
         }
 
     let private writeContent
@@ -313,6 +318,7 @@ module Rendering =
 
             return!
                 metas
+                |> Seq.filter (fun x -> x.publish)
                 |> Seq.mapi (fun i meta ->
                     promise {
                         let prev, next =
