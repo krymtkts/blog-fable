@@ -315,7 +315,7 @@ module Rendering =
         promise {
             let! files = getMarkdownFiles sourceDir
             let! metas = files |> List.map readSource |> Promise.all
-            let metas = metas |> Array.filter (fun m -> m.publish)
+            let metas = metas |> Array.filter _.publish
 
             return!
                 metas
