@@ -315,10 +315,10 @@ module Rendering =
         promise {
             let! files = getMarkdownFiles sourceDir
             let! metas = files |> List.map readSource |> Promise.all
+            let metas = metas |> Array.filter (fun m -> m.publish)
 
             return!
                 metas
-                |> Seq.filter (fun x -> x.publish)
                 |> Seq.mapi (fun i meta ->
                     promise {
                         let prev, next =
