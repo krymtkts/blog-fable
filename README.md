@@ -1,5 +1,7 @@
 # [Blog Fable](https://krymtkts.github.io/blog-fable/index.html)
 
+![Deploy GitHub Pages](https://github.com/krymtkts/blog-fable/actions/workflows/gh-pages.yml/badge.svg)
+
 This is a small [Fable](https://fable.io/) app project to generate static pages.
 Use React with [Feliz](https://zaid-ajaj.github.io/Feliz/#/).
 
