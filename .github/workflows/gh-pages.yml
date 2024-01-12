@@ -32,7 +32,7 @@ jobs:
           command: test
           args: --all-projects --exclude=fable_modules --sarif-file-output=snyk.sarif
       - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk.sarif
       - name: Setup Pages
