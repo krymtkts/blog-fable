@@ -242,7 +242,8 @@ module Misc =
           leaf: string
           date: string
           pubDate: string option
-          publish: bool }
+          publish: bool
+          index: bool }
 
     let getDestinationPath (source: string) (dir: string) =
         Directory.leaf source
