@@ -264,7 +264,8 @@ module Rendering =
                   leaf = leafHtml source
                   date = date
                   pubDate = pubDate
-                  publish = date <= today }
+                  publish = date <= today
+                  index = false }
         }
 
     let private writeContent
@@ -283,9 +284,9 @@ module Rendering =
                 |> Seq.last
 
             let title =
-                match meta.frontMatter with
-                | Some fm -> $"%s{conf.title} - %s{fm.title}"
-                | None -> conf.title
+                match meta.index, meta.frontMatter with
+                | false, Some fm -> $"%s{conf.title} - %s{fm.title}"
+                | _ -> conf.title
 
             let header =
                 Component.header $"%s{root.siteRoot}%s{root.tagRoot}/" meta.pubDate meta.frontMatter
@@ -335,6 +336,7 @@ module Rendering =
         }
 
     let renderIndex conf site metaPosts dest =
+        let index m = { m with index = true }
         let meta, metaPrev =
             match metaPosts
                   |> Seq.sortBy (fun m -> IO.leaf m.source)
@@ -348,7 +350,7 @@ module Rendering =
 
         promise {
             let dest = IO.resolve dest
-            do! writeContent conf site meta dest metaPrev None
+            do! writeContent conf site (index meta) dest metaPrev None
         }
 
     let renderArchives conf site archives dest =
