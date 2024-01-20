@@ -48,7 +48,7 @@ module DateTime =
     let toRFC822DateTimeString (timeZone: string) (d: DateTime) =
         let formatter = datetimeFormat timeZone
         let parts = formatter.formatToParts (d)
-        let p: string [] = parts |> Array.map (fun x -> x.value)
+        let p: string [] = parts |> Array.map _.value
         let d = $"%s{p.[0]}%s{p.[1]}%s{p.[4]} %s{p.[2]} %s{p.[6]}"
         let t = (p.[8..12] |> String.concat "")
 
