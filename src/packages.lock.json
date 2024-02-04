@@ -74,6 +74,12 @@
           "Feliz.CompilerPlugins": "2.2.0"
         }
       },
+      "FSharp.Core": {
+        "type": "Direct",
+        "requested": "[8.0.101, )",
+        "resolved": "8.0.101",
+        "contentHash": "sOLz3O4BOxnTKfd5OChdRmDUy4Id0GfoEClRG4nzIod8LY1LJZcNyygKAV0A78XOLh8yvhA5hsDYKZXGCR9blw=="
+      },
       "Fable.AST": {
         "type": "Transitive",
         "resolved": "4.2.1",
@@ -153,11 +159,6 @@
           "FSharp.Core": "4.7.2",
           "Fable.AST": "4.2.1"
         }
-      },
-      "FSharp.Core": {
-        "type": "Transitive",
-        "resolved": "5.0.0",
-        "contentHash": "iHoYXA0VaSQUONGENB1aVafjDDZDZpwu39MtaRCTrmwFW/cTcK0b2yKNVYneFHJMc3ChtsSoM9lNtJ1dYXkHfA=="
       }
     }
   }
