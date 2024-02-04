@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <RestoreLockedMode>true</RestoreLockedMode>
+    <!-- TODO: transient FSharp.Core dependency was changed to Direct by fable 4.11.0 ? -->
+    <!-- <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode>true</RestoreLockedMode> -->
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="bindings/HighlightJs.fs" />
