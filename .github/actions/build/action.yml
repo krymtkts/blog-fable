@@ -8,8 +8,9 @@ runs:
       uses: actions/setup-dotnet@v3
       with:
         global-json-file: ./global.json
-        cache: true
-        cache-dependency-path: src/packages.lock.json
+        # TODO: transient Fsharp.Core dependency changed to Direct by fable 4.11.0 ?
+        # cache: true
+        # cache-dependency-path: src/packages.lock.json
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
