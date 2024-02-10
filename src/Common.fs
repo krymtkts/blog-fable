@@ -233,6 +233,9 @@ module Misc =
             | _ -> Page
         | _ -> Page
 
+    let filterInvalidSymbols (ss: string list) =
+        ss |> List.filter (fun s -> Regex.IsMatch (s, @"[^a-zA-Z0-9-.\s]"))
+
     type Meta =
         { frontMatter: Parser.FrontMatter option
           content: ReactElement

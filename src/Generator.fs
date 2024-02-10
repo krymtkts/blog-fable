@@ -315,6 +315,17 @@ module Rendering =
     let renderMarkdowns (conf: FrameConfiguration) (site: PathConfiguration) sourceDir destDir =
         promise {
             let! files = getMarkdownFiles sourceDir
+
+            files
+            |> List.map IO.leaf
+            |> filterInvalidSymbols
+            |> function
+               | [] -> ()
+               | x ->
+                    x
+                    |> String.concat " "
+                    |> failwithf "Invalid file names: %s"
+
             let! metas = files |> List.map readSource |> Promise.all
             let metas = metas |> Array.filter _.publish
 
