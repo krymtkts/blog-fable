@@ -233,6 +233,12 @@ module Misc =
             | _ -> Page
         | _ -> Page
 
+    let isInvalidMarkdownFilenamePattern (s: string) =
+        Regex.IsMatch (s, @"^[a-zA-Z0-9-.\s]+\.md$") |> not
+
+    let isInvalidPostsFilenamePattern (s: string) =
+        Regex.IsMatch (s, @"^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9-.\s]+\.md$") |> not
+
     type Meta =
         { frontMatter: Parser.FrontMatter option
           content: ReactElement
