@@ -312,19 +312,37 @@ module Rendering =
             do! IO.writeFile dest page
         }
 
+    let private checkFilenamePattern (files: string list) =
+        files
+        |> List.map IO.leaf
+        |> List.filter isInvalidMarkdownFilenamePattern
+        |> function
+           | [] -> ()
+           | x ->
+                x
+                |> String.concat " "
+                |> failwithf "Invalid filename patterns: %s"
+
+    let private checkPostsFilenamePattern (postRoot: string) (files: string list) =
+        // TODO: dirty path manipulation.
+        let postRoot = postRoot.Replace("\\", "/")
+        files
+        |> List.filter (fun s -> s.Replace("\\", "/").Contains(postRoot))
+        |> List.map IO.leaf
+        |> List.filter isInvalidPostsFilenamePattern
+        |> function
+           | [] -> ()
+           | x ->
+                x
+                |> String.concat " "
+                |> failwithf "Invalid posts filename patterns: %s"
+
     let renderMarkdowns (conf: FrameConfiguration) (site: PathConfiguration) sourceDir destDir =
         promise {
             let! files = getMarkdownFiles sourceDir
 
-            files
-            |> List.map IO.leaf
-            |> filterInvalidSymbols
-            |> function
-               | [] -> ()
-               | x ->
-                    x
-                    |> String.concat " "
-                    |> failwithf "Invalid file names: %s"
+            files |> checkFilenamePattern
+            files |> checkPostsFilenamePattern site.postRoot
 
             let! metas = files |> List.map readSource |> Promise.all
             let metas = metas |> Array.filter _.publish
