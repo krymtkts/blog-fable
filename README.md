@@ -25,6 +25,16 @@ You can view the sample pages on this site.
 - [x] Dev server
 - [x] Color scheme
 
+## Constraints
+
+The filename for pages should follow the pattern below.
+
+`^[a-zA-Z0-9-.\s]+\.md$`
+
+The filename for posts should follow the pattern below.
+
+`^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9-.\s]+\.md$`
+
 ## Building and running the app
 
 - Install dependencies: `npm install`
