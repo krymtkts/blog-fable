@@ -347,15 +347,20 @@ module Rendering =
             let! metas = files |> List.map readSource |> Promise.all
             let metas = metas |> Array.filter _.publish
 
+            let getMeta i =
+                match i >= Seq.length metas with
+                | true -> None
+                | _ -> Some(metas.[i])
+
             return!
                 metas
                 |> Seq.mapi (fun i meta ->
                     promise {
                         let prev, next =
                             match i with
-                            | 0 -> None, Some(metas.[i + 1])
+                            | 0 -> None, getMeta <| i + 1
                             | i when (i = Seq.length metas - 1) -> Some(metas.[i - 1]), None
-                            | i -> Some(metas.[i - 1]), Some(metas.[i + 1])
+                            | i -> Some(metas.[i - 1]), getMeta <| i + 1
 
                         let dest = getDestinationPath meta.source destDir
                         do! writeContent conf site meta dest prev next
