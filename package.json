@@ -23,6 +23,6 @@
     "marked-highlight": "^2.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "yaml": "^2.3.4"
+    "yaml": "^2.4.0"
   }
 }
