@@ -171,8 +171,7 @@ module Generation =
             | Title navi ->
                 liA $"%s{pathRoot}%s{navi.path}"
                 <| Element(navi.text, Html.h1 [ prop.text navi.text ])
-            | Link navi -> liA $"%s{pathRoot}%s{navi.path}" <| Text navi.text)
-        |> Html.ul,
+            | Link navi -> liA $"%s{pathRoot}%s{navi.path}" <| Text navi.text),
         navs
         |> Seq.map toSitemap
         |> Seq.filter (function
@@ -552,6 +551,7 @@ module RenderOptions =
         $"%s{opts.pathRoot}/css/%s{IO.leaf opts.highlightStyle}"
 
     let devScriptPath opts = $"%s{opts.pathRoot}/js/dev.js"
+    let handlerScriptPath opts = $"%s{opts.pathRoot}/js/handler.js"
     let faviconPath opts = $"%s{opts.pathRoot}%s{opts.favicon}"
 
     let postsRootPath opts = $"%s{opts.pathRoot}%s{opts.posts.root}"
@@ -564,6 +564,7 @@ module RenderOptions =
 
     let pagesSourceRoot opts = $"%s{opts.src}%s{opts.pages.root}"
     let devScriptSourcePath = "src/Dev.fs.js"
+    let handlerScriptSourcePath = "src/Handler.fs.js"
     let imagesSourcePath opts = $"%s{opts.src}/%s{opts.images}"
 
     let destinationRoot opts = $"%s{opts.dst}%s{opts.pathRoot}"
@@ -591,6 +592,7 @@ module RenderOptions =
         $"%s{destinationRoot opts}%s{feedPath opts}"
 
     let devScriptDestinationPath opts = $"%s{opts.dst}%s{devScriptPath opts}"
+    let handlerScriptDestinationPath opts = $"%s{opts.dst}%s{handlerScriptPath opts}"
 
     let imagesDestinationPath opts =
         $"%s{destinationRoot opts}/%s{opts.images}"
@@ -626,12 +628,16 @@ let private buildNavList opts =
                           path = feed
                           sitemap = No } ] ]
 
-let private buildDevScript opts =
+let private buildBundledScripts opts =
     match opts.stage with
     | Development ->
-        Some(RenderOptions.devScriptPath opts),
-        [ (RenderOptions.devScriptSourcePath, RenderOptions.devScriptDestinationPath opts) ]
-    | Production -> None, []
+        [ RenderOptions.devScriptPath opts
+          RenderOptions.handlerScriptPath opts ],
+        [ (RenderOptions.devScriptSourcePath, RenderOptions.devScriptDestinationPath opts)
+          (RenderOptions.handlerScriptSourcePath, RenderOptions.handlerScriptDestinationPath opts) ]
+    | Production ->
+        [ RenderOptions.handlerScriptPath opts],
+        [ (RenderOptions.handlerScriptSourcePath, RenderOptions.handlerScriptDestinationPath opts) ]
 
 let private buildHighlightStyle opts =
     RenderOptions.highlightStylePath opts, [ (opts.highlightStyle, RenderOptions.highlightStyleDestinationPath opts) ]
@@ -640,10 +646,10 @@ let render (opts: RenderOptions) =
     promise {
         let feed, navs = buildNavList opts
 
-        let (navbar: Fable.React.ReactElement), navSitemap =
+        let navItems, navSitemap =
             generateNavbar opts.pathRoot navs
 
-        let devInjection, devScript = buildDevScript opts
+        let jsInjection, scripts = buildBundledScripts opts
         let highlightInjection, highlightStyle = buildHighlightStyle opts
 
         let site: PathConfiguration =
@@ -654,7 +660,7 @@ let render (opts: RenderOptions) =
 
         let conf: FrameConfiguration =
             { lang = opts.lang
-              navbar = navbar
+              navItems = navItems
               name = opts.siteName
               title = opts.siteName
               description = opts.description
@@ -663,7 +669,7 @@ let render (opts: RenderOptions) =
               favicon = RenderOptions.faviconPath opts
               style = RenderOptions.stylePath opts
               highlightStyle = highlightInjection
-              devInjection = devInjection }
+              scriptInjection = jsInjection }
 
         let renderPostAndPages = renderMarkdowns conf site
 
@@ -738,7 +744,7 @@ let render (opts: RenderOptions) =
 
         do!
             copyResources
-            <| devScript @ paths @ highlightStyle
+            <| scripts @ paths @ highlightStyle
 
         printfn "Render complete!"
     }
