@@ -499,7 +499,7 @@ module Component =
 
     type FrameConfiguration =
         { lang: string
-          navbar: ReactElement
+          navItems: ReactElement list
           name: string
           title: string
           description: string
@@ -508,50 +508,72 @@ module Component =
           favicon: string
           style: string
           highlightStyle: string
-          devInjection: string option }
+          scriptInjection: string list }
 
     let frame (conf: FrameConfiguration) (content: Fable.React.ReactElement list) =
-        Html.html [ prop.lang conf.lang
-                    prop.children [ Html.head [ Html.title [ prop.text conf.title ]
-                                                Html.meta [ prop.charset "utf-8" ]
-                                                Html.meta [ prop.name "description"
-                                                            prop.content conf.description ]
-                                                Html.meta [ prop.name "viewport"
-                                                            prop.content "width=device-width, initial-scale=1" ]
-                                                Html.meta [ prop.custom ("property", "og:site_name")
-                                                            prop.content conf.name ]
-                                                Html.meta [ prop.custom ("property", "og:title")
-                                                            prop.content conf.title ]
-                                                Html.meta [ prop.custom ("property", "og:description")
-                                                            prop.content conf.description ]
-                                                Html.meta [ prop.custom ("property", "og:url")
-                                                            prop.content conf.url ]
-                                                Html.link [ prop.rel "canonical"
-                                                            prop.href conf.url ]
-                                                Html.link [ prop.rel "icon"
-                                                            prop.href conf.favicon ]
-                                                Html.link [ prop.rel "stylesheet"
-                                                            prop.type' "text/css"
-                                                            prop.href conf.style ]
-                                                Html.link [ prop.rel "stylesheet"
-                                                            prop.type' "text/css"
-                                                            prop.href conf.highlightStyle ] ]
-                                    Html.body [ Html.nav [ prop.className "tabs"
-                                                           prop.children conf.navbar ]
-                                                Html.main [ prop.className "container"
-                                                            prop.children [ Html.div [ prop.className "content"
-                                                                                       prop.children content ] ] ] ]
-                                    Html.footer [ prop.className "footer"
-                                                  prop.children [ Html.div [ prop.className "container"
-                                                                             prop.text (
-                                                                                 $"Copyright © %s{conf.copyright}"
-                                                                             ) ] ] ]
-                                    match conf.devInjection with
-                                    | Some src ->
+        let themeSelector = [
+            Html.li [
+                prop.children [
+                    Html.button [
+                        prop.className "theme-toggle"
+                        prop.custom ("data-theme", "light")
+                        prop.text "🌞"
+                        prop.title "Light theme" ]
+                    Html.button [
+                        prop.className "theme-toggle"
+                        prop.custom ("data-theme", "dark")
+                        prop.text "🌙"
+                        prop.title "Dark theme"]
+                    Html.button [
+                        prop.className "theme-toggle"
+                        prop.custom ("data-theme", "system")
+                        prop.text "🖥️"
+                        prop.title "System Default" ] ] ] ]
+
+        let navbar = Html.ul [
+            prop.children (conf.navItems @ themeSelector)
+        ]
+
+        let main =[ Html.head [ Html.title [ prop.text conf.title ]
+                                Html.meta [ prop.charset "utf-8" ]
+                                Html.meta [ prop.name "description"
+                                            prop.content conf.description ]
+                                Html.meta [ prop.name "viewport"
+                                            prop.content "width=device-width, initial-scale=1" ]
+                                Html.meta [ prop.custom ("property", "og:site_name")
+                                            prop.content conf.name ]
+                                Html.meta [ prop.custom ("property", "og:title")
+                                            prop.content conf.title ]
+                                Html.meta [ prop.custom ("property", "og:description")
+                                            prop.content conf.description ]
+                                Html.meta [ prop.custom ("property", "og:url")
+                                            prop.content conf.url ]
+                                Html.link [ prop.rel "canonical"
+                                            prop.href conf.url ]
+                                Html.link [ prop.rel "icon"
+                                            prop.href conf.favicon ]
+                                Html.link [ prop.rel "stylesheet"
+                                            prop.type' "text/css"
+                                            prop.href conf.style ]
+                                Html.link [ prop.rel "stylesheet"
+                                            prop.type' "text/css"
+                                            prop.href conf.highlightStyle ] ]
+                    Html.body [ Html.nav [ prop.className "tabs"
+                                           prop.children [ navbar ] ]
+                                Html.main [ prop.className "container"
+                                            prop.children [ Html.div [ prop.className "content"
+                                                                       prop.children content ] ] ] ]
+                    Html.footer [ prop.className "footer"
+                                  prop.children [ Html.div [ prop.className "container"
+                                                             prop.text (
+                                                                 $"Copyright © %s{conf.copyright}"
+                                                             ) ] ] ] ]
+        let scripts = conf.scriptInjection |> List.map (fun src ->
                                         Html.script [ prop.lang "javascript"
                                                       prop.type' "text/javascript"
-                                                      prop.src src ]
-                                    | None -> null ] ]
+                                                      prop.src src ])
+        Html.html [ prop.lang conf.lang
+                    prop.children  (main @ scripts) ]
 
     type FooterButton =
         | Prev
