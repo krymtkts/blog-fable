@@ -573,7 +573,7 @@ module Component =
                                                       prop.type' "text/javascript"
                                                       prop.src src ])
         Html.html [ prop.lang conf.lang
-                    prop.children  (main @ scripts) ]
+                    prop.children  (scripts @ main ) ]
 
     type FooterButton =
         | Prev

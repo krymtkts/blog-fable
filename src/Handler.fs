@@ -19,10 +19,7 @@ let private setThemeMode (t: string) =
         localStorage.removeItem themeKey
         document.documentElement.removeAttribute themeAttributeName
 
-let private restoreThemeMode _ =
-    localStorage.getItem "theme-mode" |> setThemeMode
-    ()
-
+localStorage.getItem "theme-mode" |> setThemeMode
 
 let private init () =
     let els = document.querySelectorAll (".theme-toggle")
@@ -31,7 +28,5 @@ let private init () =
         let el = els.item (i)
         let themeMode = el.getAttribute "data-theme"
         el.addEventListener ("click", (fun _ -> setThemeMode themeMode))
-
-    window.addEventListener ("load", restoreThemeMode)
 
 init ()
