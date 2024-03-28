@@ -18,7 +18,7 @@ $sl-blue: #268bd2;
 $sl-cyan: #2aa198;
 $sl-green: #859900;
 
-@use "../node_modules/bulma/sass" as * with (
+@use "../node_modules/bulma/sass/utilities" as * with (
   $orange: $sl-orange,
   $yellow: $sl-yellow,
   $green: $sl-green,
@@ -26,12 +26,25 @@ $sl-green: #859900;
   $cyan: $sl-cyan,
   $blue: $sl-blue,
   $purple: $sl-violet,
-  $red: $sl-red,
-
+  $red: $sl-red
+);
+@use "../node_modules/bulma/sass/base" with (
   $code-size: 1em,
-
-  $body-line-height: 1.7,
-
+  $body-line-height: 1.7
+);
+@use "../node_modules/bulma/sass/themes";
+@use "../node_modules/bulma/sass/components/navbar.scss";
+@use "../node_modules/bulma/sass/components/tabs.scss";
+@use "../node_modules/bulma/sass/elements/button.scss";
+@use "../node_modules/bulma/sass/elements/content.scss";
+@use "../node_modules/bulma/sass/elements/image.scss";
+@use "../node_modules/bulma/sass/elements/tag.scss";
+@use "../node_modules/bulma/sass/elements/title.scss";
+@use "../node_modules/bulma/sass/form/shared.scss";
+@use "../node_modules/bulma/sass/form/checkbox-radio.scss";
+@use "../node_modules/bulma/sass/layout/container.scss";
+@use "../node_modules/bulma/sass/layout/footer.scss";
+@use "../node_modules/bulma/sass/layout/section.scss" with (
   $section-padding: 1.5rem,
   $section-padding-desktop: 1.5rem
 );
