@@ -156,8 +156,14 @@ $sl-green: #859900;
 .content a {
   text-decoration: underline;
 }
-a:visited {
+a:visited,
+a.button:visited,
+a.tag:visited {
   color: $purple;
+}
+a.button,
+a.tag {
+  color: $blue;
 }
 .checkbox {
   margin-right: 0.5em;
