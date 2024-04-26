@@ -22,7 +22,7 @@
     "marked-footnote": "^1.2.2",
     "marked-highlight": "^2.1.1",
     "react": "^18.3.0",
-    "react-dom": "^18.2.0",
+    "react-dom": "^18.3.0",
     "yaml": "^2.4.1"
   }
 }
