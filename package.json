@@ -13,7 +13,7 @@
   "version": "1.0.0",
   "devDependencies": {
     "bulma": "^1.0.0",
-    "sass": "^1.77.0",
+    "sass": "^1.77.1",
     "ts2fable": "^0.7.1"
   },
   "dependencies": {
