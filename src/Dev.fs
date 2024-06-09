@@ -3,7 +3,7 @@ module Dev
 open Browser.Dom
 open Browser.WebSocket
 
-let private init _ =
+let private initLiveReloading _ =
     let ws = WebSocket.Create $"ws://%s{window.location.host}/websocket"
 
     ws.onmessage <-
@@ -13,4 +13,4 @@ let private init _ =
 
     window.addEventListener ("unload", (fun _ -> ws.close ()))
 
-window.addEventListener ("load", init)
+window.addEventListener ("load", initLiveReloading)
