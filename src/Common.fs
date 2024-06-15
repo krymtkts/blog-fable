@@ -82,33 +82,39 @@ module private Util =
         let markedFootnote: obj -> Marked.MarkedExtension = importDefault "marked-footnote"
 
         let renderer =
-            let heading text level =
+            let heading (item: Marked.Tokens.Heading) =
+                let text = marked.Parser.parse <| U2.Case1 item.tokens
+
                 let escapedText = Regex.Replace(text, @"[^\w]+", "-")
-                let l = level
+                let l = (int)item.depth + 1
 
                 $"""<h%d{l}><a name="%s{escapedText}" href="#%s{escapedText}">%s{text}</a></h%d{l}>"""
 
-            let link (href: string option) title text =
+            let link (item: Marked.Tokens.Link) =
                 let ref =
-                    match href with
-                    | Some s when s.StartsWith("http") -> s
-                    | Some s -> mdToHtml s
-                    | None -> ""
+                    match item.href with
+                    | null  -> ""
+                    | s when s.StartsWith("http") -> s
+                    | s -> mdToHtml s
+
+                let text = marked.Parser.parseInline item.tokens
 
                 let title =
-                    match title with
+                    match item.title with
                     | null -> text
-                    | _ -> title
+                    | x -> x
 
                 $"""<a href="%s{ref}" title="%s{title}">%s{text}</a>"""
 
-            let listitem (text: string) task check =
+            let listitem (item: Marked.Tokens.ListItem) =
                 let checkState =
-                    match check with
-                    | true -> "checked"
-                    | false -> ""
+                    match item.``checked`` with
+                    | None
+                    | Some false -> ""
+                    | _ -> "checked"
 
-                match task with
+                let text: string = marked.Parser.parse <| U2.Case1 item.tokens
+                match item.task with
                 | true ->
                     let str, rst =
                         match text.IndexOf("<") with
@@ -122,20 +128,26 @@ module private Util =
                 // NOTE: checkbox generation is handled by listitem.
                 ""
 
-            let image (href: string) (title: string) (text: string) =
+            let image (item: Marked.Tokens.Image) =
                 // NOTE: add lazy loading attribute.
-                $"""<img src="%s{href}" title="%s{title}" alt="%s{text}" loading="lazy" />"""
+                let title =
+                    match item.title with
+                    | "" -> item.text
+                    | x -> x
+                $"""<img src="%s{item.href}" title="%s{title}" alt="%s{item.text}" loading="lazy" />"""
 
             let mops =
                 !!{| heading = heading
                      link = link
                      listitem = listitem
                      checkbox = checkbox
-                     image = image |}
+                     image = image
+                     |}
 
 
             jsOptions<Marked.MarkedExtension> (fun o ->
-                o.renderer <- Some <| U2.Case2 mops
+                o.useNewRenderer <- Some true
+                o.renderer <- Some <| U2.Case1 mops
                 o.gfm <- Some true)
 
         let highlighter =
