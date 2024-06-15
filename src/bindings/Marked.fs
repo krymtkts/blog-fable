@@ -34,21 +34,21 @@ type IExports =
     /// <param name="callback">Function called when the markdownString has been fully parsed when using async highlighting</param>
     abstract marked: src: string * options: Marked.MarkedOptions * callback: (obj option -> string -> unit) -> unit
 
-    abstract Lexer: LexerStatic
+    // abstract Lexer: LexerStatic
     abstract Parser: ParserStatic
-    abstract Tokenizer: TokenizerStatic
+    // abstract Tokenizer: TokenizerStatic
     abstract Renderer: RendererStatic
     abstract TextRenderer: TextRendererStatic
-    abstract Slugger: SluggerStatic
+// abstract Slugger: SluggerStatic
 
-[<AllowNullLiteral>]
-type Lexer =
-    inherit Marked.Lexer
+// [<AllowNullLiteral>]
+// type Lexer =
+//     inherit Marked.Lexer
 
-[<AllowNullLiteral>]
-type LexerStatic =
-    [<Emit "new $0($1...)">]
-    abstract Create: unit -> Lexer
+// [<AllowNullLiteral>]
+// type LexerStatic =
+//     [<Emit "new $0($1...)">]
+//     abstract Create: unit -> Lexer
 
 [<AllowNullLiteral>]
 type Parser =
@@ -59,16 +59,16 @@ type ParserStatic =
     [<Emit "new $0($1...)">]
     abstract Create: unit -> Parser
 
-type Tokenizer = Tokenizer<obj>
+// type Tokenizer = Tokenizer<obj>
 
-[<AllowNullLiteral>]
-type Tokenizer<'T> =
-    inherit Marked.Tokenizer<'T>
+// [<AllowNullLiteral>]
+// type Tokenizer<'T> =
+//     inherit Marked.Tokenizer<'T>
 
-[<AllowNullLiteral>]
-type TokenizerStatic =
-    [<Emit "new $0($1...)">]
-    abstract Create: unit -> Tokenizer<'T>
+// [<AllowNullLiteral>]
+// type TokenizerStatic =
+//     [<Emit "new $0($1...)">]
+//     abstract Create: unit -> Tokenizer<'T>
 
 type Renderer = Renderer<obj>
 
@@ -90,14 +90,14 @@ type TextRendererStatic =
     [<Emit "new $0($1...)">]
     abstract Create: unit -> TextRenderer
 
-[<AllowNullLiteral>]
-type Slugger =
-    inherit Marked.Slugger
+// [<AllowNullLiteral>]
+// type Slugger =
+//     inherit Marked.Slugger
 
-[<AllowNullLiteral>]
-type SluggerStatic =
-    [<Emit "new $0($1...)">]
-    abstract Create: unit -> Slugger
+// [<AllowNullLiteral>]
+// type SluggerStatic =
+//     [<Emit "new $0($1...)">]
+//     abstract Create: unit -> Slugger
 
 module Marked =
 
@@ -152,53 +152,53 @@ module Marked =
         abstract walkTokens: tokens: U2<ResizeArray<Token>, TokensList> * callback: (Token -> unit) -> obj
         /// Use Extension
         abstract ``use``: [<ParamArray>] extensions: ResizeArray<MarkedExtension> -> unit
-        abstract Tokenizer: TokenizerStatic
+        // abstract Tokenizer: TokenizerStatic
         abstract Renderer: RendererStatic
         abstract TextRenderer: TextRendererStatic
         abstract Parser: ParserStatic
-        abstract Lexer: LexerStatic
-        abstract Slugger: SluggerStatic
+    // abstract Lexer: LexerStatic
+    // abstract Slugger: SluggerStatic
 
-    type Tokenizer = Tokenizer<obj>
+    // type Tokenizer = Tokenizer<obj>
 
-    [<AllowNullLiteral>]
-    type Tokenizer<'T> =
-        abstract options: MarkedOptions with get, set
-        abstract space: this: obj * src: string -> U2<Tokens.Space, 'T>
-        abstract code: this: obj * src: string -> U2<Tokens.Code, 'T>
-        abstract fences: this: obj * src: string -> U2<Tokens.Code, 'T>
-        abstract heading: this: obj * src: string -> U2<Tokens.Heading, 'T>
-        abstract hr: this: obj * src: string -> U2<Tokens.Hr, 'T>
-        abstract blockquote: this: obj * src: string -> U2<Tokens.Blockquote, 'T>
-        abstract list: this: obj * src: string -> U2<Tokens.List, 'T>
-        abstract html: this: obj * src: string -> U2<Tokens.HTML, 'T>
-        abstract def: this: obj * src: string -> U2<Tokens.Def, 'T>
-        abstract table: this: obj * src: string -> U2<Tokens.Table, 'T>
-        abstract lheading: this: obj * src: string -> U2<Tokens.Heading, 'T>
-        abstract paragraph: this: obj * src: string -> U2<Tokens.Paragraph, 'T>
-        abstract text: this: obj * src: string -> U2<Tokens.Text, 'T>
-        abstract escape: this: obj * src: string -> U2<Tokens.Escape, 'T>
-        abstract tag: this: obj * src: string -> U2<Tokens.Tag, 'T>
-        abstract link: this: obj * src: string -> U3<Tokens.Image, Tokens.Link, 'T>
+    // [<AllowNullLiteral>]
+    // type Tokenizer<'T> =
+    //     abstract options: MarkedOptions with get, set
+    //     abstract space: this: obj * src: string -> U2<Tokens.Space, 'T>
+    //     abstract code: this: obj * src: string -> U2<Tokens.Code, 'T>
+    //     abstract fences: this: obj * src: string -> U2<Tokens.Code, 'T>
+    //     abstract heading: this: obj * src: string -> U2<Tokens.Heading, 'T>
+    //     abstract hr: this: obj * src: string -> U2<Tokens.Hr, 'T>
+    //     abstract blockquote: this: obj * src: string -> U2<Tokens.Blockquote, 'T>
+    //     abstract list: this: obj * src: string -> U2<Tokens.List, 'T>
+    //     abstract html: this: obj * src: string -> U2<Tokens.HTML, 'T>
+    //     abstract def: this: obj * src: string -> U2<Tokens.Def, 'T>
+    //     abstract table: this: obj * src: string -> U2<Tokens.Table, 'T>
+    //     abstract lheading: this: obj * src: string -> U2<Tokens.Heading, 'T>
+    //     abstract paragraph: this: obj * src: string -> U2<Tokens.Paragraph, 'T>
+    //     abstract text: this: obj * src: string -> U2<Tokens.Text, 'T>
+    //     abstract escape: this: obj * src: string -> U2<Tokens.Escape, 'T>
+    //     abstract tag: this: obj * src: string -> U2<Tokens.Tag, 'T>
+    //     abstract link: this: obj * src: string -> U3<Tokens.Image, Tokens.Link, 'T>
 
-        abstract reflink:
-            this: obj * src: string * links: U2<ResizeArray<Tokens.Link>, ResizeArray<Tokens.Image>> ->
-                U4<Tokens.Link, Tokens.Image, Tokens.Text, 'T>
+    //     abstract reflink:
+    //         this: obj * src: string * links: U2<ResizeArray<Tokens.Link>, ResizeArray<Tokens.Image>> ->
+    //             U4<Tokens.Link, Tokens.Image, Tokens.Text, 'T>
 
-        abstract emStrong:
-            this: obj * src: string * maskedSrc: string * prevChar: string -> U3<Tokens.Em, Tokens.Strong, 'T>
+    //     abstract emStrong:
+    //         this: obj * src: string * maskedSrc: string * prevChar: string -> U3<Tokens.Em, Tokens.Strong, 'T>
 
-        abstract codespan: this: obj * src: string -> U2<Tokens.Codespan, 'T>
-        abstract br: this: obj * src: string -> U2<Tokens.Br, 'T>
-        abstract del: this: obj * src: string -> U2<Tokens.Del, 'T>
-        abstract autolink: this: obj * src: string * mangle: (string -> string) -> U2<Tokens.Link, 'T>
-        abstract url: this: obj * src: string * mangle: (string -> string) -> U2<Tokens.Link, 'T>
-        abstract inlineText: this: obj * src: string * smartypants: (string -> string) -> U2<Tokens.Text, 'T>
+    //     abstract codespan: this: obj * src: string -> U2<Tokens.Codespan, 'T>
+    //     abstract br: this: obj * src: string -> U2<Tokens.Br, 'T>
+    //     abstract del: this: obj * src: string -> U2<Tokens.Del, 'T>
+    //     abstract autolink: this: obj * src: string * mangle: (string -> string) -> U2<Tokens.Link, 'T>
+    //     abstract url: this: obj * src: string * mangle: (string -> string) -> U2<Tokens.Link, 'T>
+    //     abstract inlineText: this: obj * src: string * smartypants: (string -> string) -> U2<Tokens.Text, 'T>
 
-    [<AllowNullLiteral>]
-    type TokenizerStatic =
-        [<Emit "new $0($1...)">]
-        abstract Create: ?options: MarkedOptions -> Tokenizer<'T>
+    // [<AllowNullLiteral>]
+    // type TokenizerStatic =
+    //     [<Emit "new $0($1...)">]
+    //     abstract Create: ?options: MarkedOptions -> Tokenizer<'T>
 
     type TokenizerObject = obj
 
@@ -216,11 +216,7 @@ module Marked =
         abstract html: this: U2<Renderer, RendererThis> * html: string -> U2<string, 'T>
 
         abstract heading:
-            this: U2<Renderer, RendererThis> *
-            text: string *
-            level: RendererHeadingLevel *
-            raw: string *
-            slugger: Slugger ->
+            this: U2<Renderer, RendererThis> * text: string * level: RendererHeadingLevel * raw: string * slugger: obj ->
                 U2<string, 'T>
 
         abstract hr: this: U2<Renderer, RendererThis> -> U2<string, 'T>
@@ -265,7 +261,7 @@ module Marked =
     [<AllowNullLiteral>]
     type RendererTablecellFlags =
         abstract header: bool with get, set
-        abstract align: RendererTablecellFlagsAlign with get, set
+        abstract align: obj with get, set
 
     [<AllowNullLiteral>]
     type RendererStatic =
@@ -298,7 +294,7 @@ module Marked =
         abstract options: MarkedOptions with get, set
         abstract renderer: Renderer with get, set
         abstract textRenderer: TextRenderer with get, set
-        abstract slugger: Slugger with get, set
+        // abstract slugger: Slugger with get, set
         abstract parse: src: U2<ResizeArray<Token>, TokensList> -> string
         abstract parseInline: src: ResizeArray<Token> * ?renderer: Renderer -> string
         abstract next: unit -> Token
@@ -311,45 +307,45 @@ module Marked =
         abstract parse: src: U2<ResizeArray<Token>, TokensList> * ?options: MarkedOptions -> string
         abstract parseInline: src: ResizeArray<Token> * ?options: MarkedOptions -> string
 
-    [<AllowNullLiteral>]
-    type Lexer =
-        abstract tokens: TokensList with get, set
-        abstract options: MarkedOptions with get, set
-        abstract rules: Rules with get, set
-        abstract lex: src: string -> TokensList
-        abstract blockTokens: src: string * tokens: ResizeArray<Token> -> ResizeArray<Token>
-        abstract blockTokens: src: string * tokens: TokensList -> TokensList
-        abstract ``inline``: src: string * ?tokens: ResizeArray<Token> -> ResizeArray<Token>
-        abstract inlineTokens: src: string * ?tokens: ResizeArray<Token> -> ResizeArray<Token>
-        abstract state: LexerState with get, set
+    // [<AllowNullLiteral>]
+    // type Lexer =
+    //     abstract tokens: TokensList with get, set
+    //     abstract options: MarkedOptions with get, set
+    //     abstract rules: Rules with get, set
+    //     abstract lex: src: string -> TokensList
+    //     abstract blockTokens: src: string * tokens: ResizeArray<Token> -> ResizeArray<Token>
+    //     abstract blockTokens: src: string * tokens: TokensList -> TokensList
+    //     abstract ``inline``: src: string * ?tokens: ResizeArray<Token> -> ResizeArray<Token>
+    //     abstract inlineTokens: src: string * ?tokens: ResizeArray<Token> -> ResizeArray<Token>
+    //     abstract state: LexerState with get, set
 
-    [<AllowNullLiteral>]
-    type LexerStatic =
-        [<Emit "new $0($1...)">]
-        abstract Create: ?options: MarkedOptions -> Lexer
+    // [<AllowNullLiteral>]
+    // type LexerStatic =
+    //     [<Emit "new $0($1...)">]
+    //     abstract Create: ?options: MarkedOptions -> Lexer
 
-        abstract rules: Rules with get, set
-        abstract lex: src: string * ?options: MarkedOptions -> TokensList
-        abstract lexInline: src: string * ?options: MarkedOptions -> ResizeArray<Token>
+    //     abstract rules: Rules with get, set
+    //     abstract lex: src: string * ?options: MarkedOptions -> TokensList
+    //     abstract lexInline: src: string * ?options: MarkedOptions -> ResizeArray<Token>
 
-    [<AllowNullLiteral>]
-    type Slugger =
-        abstract seen: SluggerSeen with get, set
-        abstract slug: value: string * ?options: SluggerOptions -> string
+    // [<AllowNullLiteral>]
+    // type Slugger =
+    //     abstract seen: SluggerSeen with get, set
+    //     abstract slug: value: string * ?options: SluggerOptions -> string
 
-    [<AllowNullLiteral>]
-    type SluggerStatic =
-        [<Emit "new $0($1...)">]
-        abstract Create: unit -> Slugger
+    // [<AllowNullLiteral>]
+    // type SluggerStatic =
+    //     [<Emit "new $0($1...)">]
+    //     abstract Create: unit -> Slugger
 
-    [<AllowNullLiteral>]
-    type SluggerOptions =
-        abstract dryrun: bool with get, set
+    // [<AllowNullLiteral>]
+    // type SluggerOptions =
+    //     abstract dryrun: bool with get, set
 
-    [<AllowNullLiteral>]
-    type Rules =
-        [<Emit "$0[$1]{{=$2}}">]
-        abstract Item: ruleName: string -> U2<Regex, Rules> with get, set
+    // [<AllowNullLiteral>]
+    // type Rules =
+    //     [<Emit "$0[$1]{{=$2}}">]
+    //     abstract Item: ruleName: string -> U2<Regex, Rules> with get, set
 
     [<AllowNullLiteral>]
     type TokensList =
@@ -546,15 +542,13 @@ module Marked =
 
     [<AllowNullLiteral>]
     type TokenizerThis =
-        abstract lexer: Lexer with get, set
+        interface
+        end
 
     [<AllowNullLiteral>]
     type TokenizerExtension =
-        abstract name: string with get, set
-        abstract level: TokenizerExtensionLevel with get, set
-        abstract start: (TokenizerThis -> string -> U2<float, unit>) option with get, set
-        abstract tokenizer: (TokenizerThis -> string -> U2<ResizeArray<Token>, TokensList> -> U2<Tokens.Generic, unit>) with get, set
-        abstract childTokens: ResizeArray<string> option with get, set
+        interface
+        end
 
     [<AllowNullLiteral>]
     type RendererThis =
@@ -578,10 +572,7 @@ module Marked =
         /// Enable GitHub flavored markdown.
         abstract gfm: bool option with get, set
 
-        /// Hooks are methods that hook into some part of marked.
-        /// preprocess is called to process markdown before sending it to marked.
-        /// postprocess is called to process html after marked has finished parsing.
-        abstract hooks: MarkedExtensionHooks option with get, set
+        // abstract hooks: MarkedExtensionHooks option with get, set
 
         /// Conform to obscure parts of markdown.pl as much as possible. Don't fix any of the original markdown bugs or poor behavior.
         abstract pedantic: bool option with get, set
@@ -593,8 +584,7 @@ module Marked =
 
         /// Shows an HTML error message when rendering fails.
         abstract silent: bool option with get, set
-        /// The tokenizer defines how to turn markdown text into tokens.
-        abstract tokenizer: U2<Tokenizer, TokenizerObject> option with get, set
+        // abstract tokenizer: U2<Tokenizer, TokenizerObject> option with get, set
 
         /// The walkTokens function gets called with every token.
         /// Child tokens are called before moving on to sibling tokens.
@@ -610,34 +600,4 @@ module Marked =
         /// An object containing functions to render tokens to HTML.
         abstract renderer: Renderer option with get, set
 
-        /// The tokenizer defines how to turn markdown text into tokens.
-        abstract tokenizer: Tokenizer option with get, set
-
-    [<StringEnum>]
-    [<RequireQualifiedAccess>]
-    type RendererTablecellFlagsAlign =
-        | Center
-        | Left
-        | Right
-
-    [<AllowNullLiteral>]
-    type LexerState =
-        abstract inLink: bool with get, set
-        abstract inRawBlock: bool with get, set
-        abstract top: bool with get, set
-
-    [<AllowNullLiteral>]
-    type SluggerSeen =
-        [<Emit "$0[$1]{{=$2}}">]
-        abstract Item: slugValue: string -> float with get, set
-
-    [<StringEnum>]
-    [<RequireQualifiedAccess>]
-    type TokenizerExtensionLevel =
-        | Block
-        | Inline
-
-    [<AllowNullLiteral>]
-    type MarkedExtensionHooks =
-        abstract preprocess: (string -> string) option with get, set
-        abstract postprocess: (string -> string) option with get, set
+// abstract tokenizer: Tokenizer option with get, set
