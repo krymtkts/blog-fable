@@ -208,46 +208,26 @@ module Marked =
     type Renderer<'T> =
         abstract options: MarkedOptions with get, set
 
-        abstract code:
-            this: U2<Renderer, RendererThis> * code: string * language: string option * isEscaped: bool ->
-                U2<string, 'T>
-
-        abstract blockquote: this: U2<Renderer, RendererThis> * quote: string -> U2<string, 'T>
-        abstract html: this: U2<Renderer, RendererThis> * html: string -> U2<string, 'T>
-
-        abstract heading:
-            this: U2<Renderer, RendererThis> * token: Token[] * depth: int ->
-                U2<string, 'T>
-
-        abstract hr: this: U2<Renderer, RendererThis> -> U2<string, 'T>
-        abstract list: this: U2<Renderer, RendererThis> * body: string * ordered: bool * start: float -> U2<string, 'T>
-
-        abstract listitem:
-            this: U2<Renderer, RendererThis> * item: Tokens.ListItem -> U2<string, 'T>
-
-        abstract checkbox: this: U2<Renderer, RendererThis> * ``checked``: bool -> U2<string, 'T>
-        abstract paragraph: this: U2<Renderer, RendererThis> * text: string -> U2<string, 'T>
-        abstract table: this: U2<Renderer, RendererThis> * header: string * body: string -> U2<string, 'T>
-        abstract tablerow: this: U2<Renderer, RendererThis> * content: string -> U2<string, 'T>
-
-        abstract tablecell:
-            this: U2<Renderer, RendererThis> * content: string * flags: RendererTablecellFlags -> U2<string, 'T>
-
-        abstract strong: this: U2<Renderer, RendererThis> * text: string -> U2<string, 'T>
-        abstract em: this: U2<Renderer, RendererThis> * text: string -> U2<string, 'T>
-        abstract codespan: this: U2<Renderer, RendererThis> * code: string -> U2<string, 'T>
-        abstract br: this: U2<Renderer, RendererThis> -> U2<string, 'T>
-        abstract del: this: U2<Renderer, RendererThis> * text: string -> U2<string, 'T>
-
-        abstract link:
-            this: U2<Renderer, RendererThis> * href: string option * title: string option * tokens: Token[] ->
-                U2<string, 'T>
-
-        abstract image:
-            this: U2<Renderer, RendererThis> * href: string option * title: string option * text: string ->
-                U2<string, 'T>
-
-        abstract text: this: U2<Renderer, RendererThis> * text: string -> U2<string, 'T>
+        abstract code: item: Tokens.Code -> string
+        abstract blockquote:  item: Tokens.Blockquote -> string
+        abstract html:  item: Tokens.HTML -> string
+        abstract heading: item: Tokens.Heading -> string
+        abstract hr:  item: Tokens.Hr -> string
+        abstract list:  item: Tokens.List -> string
+        abstract listitem: item: Tokens.ListItem -> string
+        abstract checkbox:  item: Tokens.Checkbox -> string
+        abstract paragraph:  item: Tokens.Paragraph -> string
+        abstract table:  item: Tokens.Table -> string
+        abstract tablerow:  item: Tokens.TableRow -> string
+        abstract tablecell: item: Tokens.TableCell -> string
+        abstract strong:  item: Tokens.Strong -> string
+        abstract em:  item: Tokens.Em -> string
+        abstract codespan:  item: Tokens.Codespan -> string
+        abstract br:  item: Tokens.Br -> string
+        abstract del:  item: Tokens.Del -> string
+        abstract link: item: Tokens.Link -> string
+        abstract image: item: Tokens.Image -> string
+        abstract text:  item: Tokens.Text -> string
 
     [<RequireQualifiedAccess>]
     type RendererHeadingLevel =
@@ -391,6 +371,10 @@ module Marked =
             abstract tokens: ResizeArray<Token> with get, set
 
         [<AllowNullLiteral>]
+        type TableRow =
+            abstract text: string with get, set
+
+        [<AllowNullLiteral>]
         type Hr =
             abstract ``type``: string with get, set
             abstract raw: string with get, set
@@ -420,6 +404,10 @@ module Marked =
             abstract loose: bool with get, set
             abstract text: string with get, set
             abstract tokens: ResizeArray<Token> with get, set
+
+        [<AllowNullLiteral>]
+        type Checkbox =
+            abstract ``checked``: bool option with get, set
 
         [<AllowNullLiteral>]
         type Paragraph =
