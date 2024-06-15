@@ -216,14 +216,14 @@ module Marked =
         abstract html: this: U2<Renderer, RendererThis> * html: string -> U2<string, 'T>
 
         abstract heading:
-            this: U2<Renderer, RendererThis> * text: string * level: RendererHeadingLevel * raw: string * slugger: obj ->
+            this: U2<Renderer, RendererThis> * token: Token[] * depth: int ->
                 U2<string, 'T>
 
         abstract hr: this: U2<Renderer, RendererThis> -> U2<string, 'T>
         abstract list: this: U2<Renderer, RendererThis> * body: string * ordered: bool * start: float -> U2<string, 'T>
 
         abstract listitem:
-            this: U2<Renderer, RendererThis> * text: string * task: bool * ``checked``: bool -> U2<string, 'T>
+            this: U2<Renderer, RendererThis> * item: Tokens.ListItem -> U2<string, 'T>
 
         abstract checkbox: this: U2<Renderer, RendererThis> * ``checked``: bool -> U2<string, 'T>
         abstract paragraph: this: U2<Renderer, RendererThis> * text: string -> U2<string, 'T>
@@ -240,7 +240,7 @@ module Marked =
         abstract del: this: U2<Renderer, RendererThis> * text: string -> U2<string, 'T>
 
         abstract link:
-            this: U2<Renderer, RendererThis> * href: string option * title: string option * text: string ->
+            this: U2<Renderer, RendererThis> * href: string option * title: string option * tokens: Token[] ->
                 U2<string, 'T>
 
         abstract image:
@@ -591,6 +591,10 @@ module Marked =
         /// Each token is passed by reference so updates are persisted when passed to the parser.
         /// The return value of the function is ignored.
         abstract walkTokens: (Token -> unit) option with get, set
+
+        // Use the new renderer that accepts an object instead of individual parameters.
+        // This option will be removed and default to true in the next major version.   
+        abstract useNewRenderer: bool option with get, set
 
     [<AllowNullLiteral>]
     type MarkedOptions =
