@@ -1,49 +1,8 @@
 /// Additional Node.js functionality.
 module rec Node
 
-open Fable.Core
 open Fable.Core.JsInterop
-
-module NodeTypes =
-    [<AllowNullLiteral>]
-    type Error =
-        abstract cause: string option with get, set
-        abstract message: string option with get, set
-
-    [<AllowNullLiteral>]
-    type Buffer =
-        abstract toString: unit -> string
-
-module Path =
-    open System
-
-    type IExports =
-        abstract basename: path: string -> string
-        abstract dirname: path: string -> string
-        abstract join: [<ParamArray>] paths: string [] -> string
-        abstract resolve: [<ParamArray>] paths: string [] -> string
-        abstract sep: string
-
-module Fs =
-    open NodeTypes
-
-    [<AllowNullLiteral>]
-    type Stats =
-        abstract isFile: unit -> bool
-        abstract isDirectory: unit -> bool
-
-    type IExports =
-        abstract existsSync: path: string -> bool
-        abstract readdir: path: string * ?callback: (Error option -> ResizeArray<string> -> unit) -> unit
-        abstract readFile: filename: string * options: obj * callback: (Error option -> Buffer -> unit) -> unit
-        abstract writeFile: filename: string * data: obj * ?callback: (Error option -> unit) -> unit
-        abstract statSync: path: string -> Stats
-
-[<Import("*", "path")>]
-let path: Path.IExports = jsNative
-
-[<Import("*", "fs")>]
-let fs: Fs.IExports = jsNative
+open Node.Min
 
 [<RequireQualifiedAccess>]
 module Directory =
@@ -159,49 +118,51 @@ module File =
     let absolutePath (dir: string) = path.resolve dir
     let statsSync (path: string) : Fs.Stats = fs.statSync path
 
-module Module =
-    let fileURLToPath: string -> string = importMember "url"
-
-    let inline __filename<'T> = fileURLToPath (emitJsExpr () "import.meta.url")
-    let inline __dirname<'T> = path.dirname (__filename)
-
 module Process =
-    [<AllowNullLiteral>]
-    type Process =
-        abstract argv: ResizeArray<string> with get, set
+    let argv = Process.process'.argv
 
-    [<Import("*", "process")>]
-    let process': Process = jsNative
+module DateTime =
+    open System
+    open System.Text.RegularExpressions
 
-    let argv = process'.argv
+    let options (timeZone: string) =
+        jsOptions<Intl.DateTimeFormatOptions> (fun o ->
+            o.weekday <- "short"
+            o.year <- "numeric"
+            o.month <- "short"
+            o.day <- "2-digit"
+            o.hour <- "numeric"
+            o.minute <- "numeric"
+            o.second <- "numeric"
+            o.hourCycle <- "h23"
+            o.timeZone <- timeZone
+            o.timeZoneName <- "short")
 
-// NOTE: minimum implementation for Intl.DateTimeFormat.formatToParts.
-[<RequireQualifiedAccess>]
-module Intl =
-    [<Global>]
-    let DateTimeFormat: DateTimeFormat = jsNative
+    let datetimeFormat timeZone =
+        Intl.DateTimeFormat.Create "en-US"
+        <| options timeZone
 
-    [<AllowNullLiteral>]
-    type DateTimeFormatOptions =
-        abstract weekday: string with get, set
-        abstract year: string with get, set
-        abstract month: string with get, set
-        abstract day: string with get, set
-        abstract hour: string with get, set
-        abstract minute: string with get, set
-        abstract second: string with get, set
-        abstract hourCycle: string with get, set
-        abstract timeZone: string with get, set
-        abstract timeZoneName: string with get, set
+    let toRFC822DateTimeString (timeZone: string) (d: DateTime) =
+        let formatter = datetimeFormat timeZone
+        let parts = formatter.formatToParts (d)
+        let p: string [] = parts |> Array.map _.value
+        let d = $"%s{p.[0]}%s{p.[1]}%s{p.[4]} %s{p.[2]} %s{p.[6]}"
+        let t = (p.[8..12] |> String.concat "")
 
-    [<AllowNullLiteral>]
-    type DateTimeFormatPart =
-        abstract ``type``: string with get, set
-        abstract value: string with get, set
+        let z =
+            match p.[14] with
+            | "UTC" -> "+0000"
+            | z ->
+                let item = Regex.Matches(z, @"GMT([+-])(\d+)")
+                let group = item.Item 0
+                let op = (group.Groups.Item 1).Value
+                let offset = int (group.Groups.Item 2).Value
 
-    [<AllowNullLiteral>]
-    type DateTimeFormat =
-        [<Emit "new Intl.$0($1, $2)">]
-        abstract Create: lang: string -> options: DateTimeFormatOptions -> DateTimeFormat
+                $"%s{op}%02d{offset}00"
 
-        abstract formatToParts: date: System.DateTime -> DateTimeFormatPart array
+        $"%s{d} %s{t} %s{z}"
+
+    let parseToRFC822DateTimeString (timeZone: string) (str: string) =
+        DateTime.Parse(str)
+        |> toRFC822DateTimeString timeZone
+

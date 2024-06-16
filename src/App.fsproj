@@ -6,6 +6,7 @@
     <Compile Include="bindings/HighlightJs.fs" />
     <Compile Include="bindings/Marked.fs" />
     <Compile Include="bindings/Yaml.fs" />
+    <Compile Include="Node.Min.fs" />
     <Compile Include="Node.Extra.fs" />
     <Compile Include="Common.fs" />
     <Compile Include="Dev.fs" />

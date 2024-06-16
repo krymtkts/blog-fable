@@ -1,5 +1,6 @@
 module Common
 
+open System
 open System.Text.RegularExpressions
 open Fable.Core
 open Fable.Core.JsInterop
@@ -26,49 +27,7 @@ module String =
         | x -> x.[.. (length - 4)] + "..."
 
 module DateTime =
-    open System
-
-    let options (timeZone: string) =
-        jsOptions<Intl.DateTimeFormatOptions> (fun o ->
-            o.weekday <- "short"
-            o.year <- "numeric"
-            o.month <- "short"
-            o.day <- "2-digit"
-            o.hour <- "numeric"
-            o.minute <- "numeric"
-            o.second <- "numeric"
-            o.hourCycle <- "h23"
-            o.timeZone <- timeZone
-            o.timeZoneName <- "short")
-
-    let datetimeFormat timeZone =
-        Intl.DateTimeFormat.Create "en-US"
-        <| options timeZone
-
-    let toRFC822DateTimeString (timeZone: string) (d: DateTime) =
-        let formatter = datetimeFormat timeZone
-        let parts = formatter.formatToParts (d)
-        let p: string [] = parts |> Array.map _.value
-        let d = $"%s{p.[0]}%s{p.[1]}%s{p.[4]} %s{p.[2]} %s{p.[6]}"
-        let t = (p.[8..12] |> String.concat "")
-
-        let z =
-            match p.[14] with
-            | "UTC" -> "+0000"
-            | z ->
-                let item = Regex.Matches(z, @"GMT([+-])(\d+)")
-                let group = item.Item 0
-                let op = (group.Groups.Item 1).Value
-                let offset = int (group.Groups.Item 2).Value
-
-                $"%s{op}%02d{offset}00"
-
-        $"%s{d} %s{t} %s{z}"
-
-    let parseToRFC822DateTimeString (timeZone: string) (str: string) =
-        DateTime.Parse(str)
-        |> toRFC822DateTimeString timeZone
-
+    let toRFC822DateTimeString = DateTime.toRFC822DateTimeString
     let toRFC3339Date (d: DateTime) = d |> String.format "yyyy-MM-dd"
 
 module private Util =
@@ -86,14 +45,14 @@ module private Util =
                 let text = marked.Parser.parseInline item.tokens
 
                 let escapedText = Regex.Replace(text, @"[^\w]+", "-")
-                let l = (int)item.depth + 1
+                let l = (int) item.depth + 1
 
                 $"""<h%d{l}><a name="%s{escapedText}" href="#%s{escapedText}">%s{text}</a></h%d{l}>"""
 
             let link (item: Marked.Tokens.Link) =
                 let ref =
                     match item.href with
-                    | null  -> ""
+                    | null -> ""
                     | s when s.StartsWith("http") -> s
                     | s -> mdToHtml s
 
@@ -108,13 +67,14 @@ module private Util =
 
             let listitem (item: Marked.Tokens.ListItem) =
                 let checkState =
-                    match item.``checked`` with
+                    match item.checked with
                     | None
                     | Some false -> ""
                     | _ -> "checked"
 
                 // NOTE: should use parse because listitem includes block level tokens.
                 let text: string = marked.Parser.parse <| U2.Case1 item.tokens
+
                 match item.task with
                 | true ->
                     let str, rst =
@@ -135,6 +95,7 @@ module private Util =
                     match item.title with
                     | "" -> item.text
                     | x -> x
+
                 $"""<img src="%s{item.href}" title="%s{title}" alt="%s{item.text}" loading="lazy" />"""
 
             let mops =
@@ -142,8 +103,7 @@ module private Util =
                      link = link
                      listitem = listitem
                      checkbox = checkbox
-                     image = image
-                     |}
+                     image = image |}
 
 
             jsOptions<Marked.MarkedExtension> (fun o ->
@@ -247,10 +207,11 @@ module Misc =
         | _ -> Page
 
     let isInvalidMarkdownFilenamePattern (s: string) =
-        Regex.IsMatch (s, @"^[a-zA-Z0-9-.\s]+\.md$") |> not
+        Regex.IsMatch(s, @"^[a-zA-Z0-9-.\s]+\.md$") |> not
 
     let isInvalidPostsFilenamePattern (s: string) =
-        Regex.IsMatch (s, @"^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9-.\s]+\.md$") |> not
+        Regex.IsMatch(s, @"^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9-.\s]+\.md$")
+        |> not
 
     type Meta =
         { frontMatter: Parser.FrontMatter option
@@ -524,69 +485,65 @@ module Component =
           scriptInjection: string list }
 
     let frame (conf: FrameConfiguration) (content: Fable.React.ReactElement list) =
-        let themeSelector = [
-            Html.li [
-                prop.children [
-                    Html.button [
-                        prop.className "theme-toggle"
-                        prop.custom ("data-theme", "light")
-                        prop.text "🌞"
-                        prop.title "Light theme" ]
-                    Html.button [
-                        prop.className "theme-toggle"
-                        prop.custom ("data-theme", "dark")
-                        prop.text "🌙"
-                        prop.title "Dark theme"]
-                    Html.button [
-                        prop.className "theme-toggle"
-                        prop.custom ("data-theme", "system")
-                        prop.text "🖥️"
-                        prop.title "System Default" ] ] ] ]
+        let themeSelector =
+            [ Html.li [ prop.children [ Html.button [ prop.className "theme-toggle"
+                                                      prop.custom ("data-theme", "light")
+                                                      prop.text "🌞"
+                                                      prop.title "Light theme" ]
+                                        Html.button [ prop.className "theme-toggle"
+                                                      prop.custom ("data-theme", "dark")
+                                                      prop.text "🌙"
+                                                      prop.title "Dark theme" ]
+                                        Html.button [ prop.className "theme-toggle"
+                                                      prop.custom ("data-theme", "system")
+                                                      prop.text "🖥️"
+                                                      prop.title "System Default" ] ] ] ]
 
-        let navbar = Html.ul [
-            prop.children (conf.navItems @ themeSelector)
-        ]
+        let navbar = Html.ul [ prop.children (conf.navItems @ themeSelector) ]
 
-        let main =[ Html.head [ Html.title [ prop.text conf.title ]
-                                Html.meta [ prop.charset "utf-8" ]
-                                Html.meta [ prop.name "description"
-                                            prop.content conf.description ]
-                                Html.meta [ prop.name "viewport"
-                                            prop.content "width=device-width, initial-scale=1" ]
-                                Html.meta [ prop.custom ("property", "og:site_name")
-                                            prop.content conf.name ]
-                                Html.meta [ prop.custom ("property", "og:title")
-                                            prop.content conf.title ]
-                                Html.meta [ prop.custom ("property", "og:description")
-                                            prop.content conf.description ]
-                                Html.meta [ prop.custom ("property", "og:url")
-                                            prop.content conf.url ]
-                                Html.link [ prop.rel "canonical"
-                                            prop.href conf.url ]
-                                Html.link [ prop.rel "icon"
-                                            prop.href conf.favicon ]
-                                Html.link [ prop.rel "stylesheet"
-                                            prop.type' "text/css"
-                                            prop.href conf.style ]
-                                Html.link [ prop.rel "stylesheet"
-                                            prop.type' "text/css"
-                                            prop.href conf.highlightStyle ] ]
-                    Html.body [ Html.nav [ prop.className "tabs"
-                                           prop.children [ navbar ] ]
-                                Html.main [ prop.className "container"
-                                            prop.children [ Html.div [ prop.className "content"
-                                                                       prop.children content ] ] ] ]
-                    Html.footer [ prop.className "footer"
-                                  prop.children [ Html.div [ prop.className "container"
-                                                             prop.text (
-                                                                 $"Copyright © %s{conf.copyright}"
-                                                             ) ] ] ] ]
-        let scripts = conf.scriptInjection |> List.map (fun src ->
-                                        Html.script [ prop.lang "javascript"
-                                                      prop.type' "text/javascript"
-                                                      prop.src src ])
+        let main =
+            [ Html.head [ Html.title [ prop.text conf.title ]
+                          Html.meta [ prop.charset "utf-8" ]
+                          Html.meta [ prop.name "description"
+                                      prop.content conf.description ]
+                          Html.meta [ prop.name "viewport"
+                                      prop.content "width=device-width, initial-scale=1" ]
+                          Html.meta [ prop.custom ("property", "og:site_name")
+                                      prop.content conf.name ]
+                          Html.meta [ prop.custom ("property", "og:title")
+                                      prop.content conf.title ]
+                          Html.meta [ prop.custom ("property", "og:description")
+                                      prop.content conf.description ]
+                          Html.meta [ prop.custom ("property", "og:url")
+                                      prop.content conf.url ]
+                          Html.link [ prop.rel "canonical"
+                                      prop.href conf.url ]
+                          Html.link [ prop.rel "icon"
+                                      prop.href conf.favicon ]
+                          Html.link [ prop.rel "stylesheet"
+                                      prop.type' "text/css"
+                                      prop.href conf.style ]
+                          Html.link [ prop.rel "stylesheet"
+                                      prop.type' "text/css"
+                                      prop.href conf.highlightStyle ] ]
+              Html.body [ Html.nav [ prop.className "tabs"
+                                     prop.children [ navbar ] ]
+                          Html.main [ prop.className "container"
+                                      prop.children [ Html.div [ prop.className "content"
+                                                                 prop.children content ] ] ] ]
+              Html.footer [ prop.className "footer"
+                            prop.children [ Html.div [ prop.className "container"
+                                                       prop.text ($"Copyright © %s{conf.copyright}") ] ] ] ]
+
+        let scripts =
+            conf.scriptInjection
+            |> List.map (fun src ->
+                Html.script [ prop.lang "javascript"
+                              prop.type' "text/javascript"
+                              prop.src src ])
+
         Html.html [ prop.lang conf.lang
-                    prop.children  (scripts @ main ) ]
+                    prop.children (scripts @ main) ]
 
     type FooterButton =
         | Prev
