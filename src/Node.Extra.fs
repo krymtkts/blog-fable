@@ -3,15 +3,55 @@ module rec Node
 
 open Fable.Core
 open Fable.Core.JsInterop
-open Node
+
+module NodeTypes =
+    [<AllowNullLiteral>]
+    type Error =
+        abstract cause: string option with get, set
+        abstract message: string option with get, set
+
+    [<AllowNullLiteral>]
+    type Buffer =
+        abstract toString: unit -> string
+
+module Path =
+    open System
+
+    type IExports =
+        abstract basename: path: string -> string
+        abstract dirname: path: string -> string
+        abstract join: [<ParamArray>] paths: string [] -> string
+        abstract resolve: [<ParamArray>] paths: string [] -> string
+        abstract sep: string
+
+module Fs =
+    open NodeTypes
+
+    [<AllowNullLiteral>]
+    type Stats =
+        abstract isFile: unit -> bool
+        abstract isDirectory: unit -> bool
+
+    type IExports =
+        abstract existsSync: path: string -> bool
+        abstract readdir: path: string * ?callback: (Error option -> ResizeArray<string> -> unit) -> unit
+        abstract readFile: filename: string * options: obj * callback: (Error option -> Buffer -> unit) -> unit
+        abstract writeFile: filename: string * data: obj * ?callback: (Error option -> unit) -> unit
+        abstract statSync: path: string -> Stats
+
+[<Import("*", "path")>]
+let path: Path.IExports = jsNative
+
+[<Import("*", "fs")>]
+let fs: Fs.IExports = jsNative
 
 [<RequireQualifiedAccess>]
 module Directory =
+    open NodeTypes
+
     let join2 (pathA: string) (pathB: string) = path.join (pathA, pathB)
     let join3 (pathA: string) (pathB: string) (pathC: string) = path.join (pathA, pathB, pathC)
-
-    let exists (dir: string) =
-        Promise.create (fun resolve reject -> fs.exists ((U2.Case1 dir), (fun res -> resolve res)))
+    let exists = fs.existsSync
 
     let create (dir: string) =
         let options = createObj [ "recursive" ==> true ]
@@ -19,14 +59,14 @@ module Directory =
         Promise.create (fun resolve reject ->
             fs?mkdir (dir,
                       options,
-                      (fun (err: Base.ErrnoException option) ->
+                      (fun (err: Error option) ->
                           match err with
                           | Some err -> reject (err :?> System.Exception)
                           | None -> resolve ())))
 
     let ensure (dir: string) =
         promise {
-            match! exists dir with
+            match exists dir with
             | true -> return ()
             | false -> return! create dir
         }
@@ -38,8 +78,8 @@ module Directory =
     let getFiles (isRecursive: bool) (dir: string) =
         Promise.create (fun resolve reject ->
             fs.readdir (
-                U2.Case1 dir,
-                (fun (err: Base.ErrnoException option) (files: ResizeArray<string>) ->
+                dir,
+                (fun (err: Error option) (files: ResizeArray<string>) ->
                     match err with
                     | Some err -> reject (err :?> System.Exception)
                     | None ->
@@ -75,10 +115,11 @@ module File =
         Promise.create (fun resolve reject ->
             fs.readFile (
                 path,
+                null,
                 (fun err buffer ->
                     match err with
                     | Some err -> reject (err :?> System.Exception)
-                    | None -> resolve (buffer.ToString()))
+                    | None -> resolve (buffer.toString ()))
             ))
 
     let write (path: string) (content: string) =
@@ -115,23 +156,24 @@ module File =
                            | None -> resolve ()))
         }
 
-    let absolutePath (dir: string) = path.resolve (dir)
-    let statsSync (path: string) : Fs.Stats = fs.statSync (U2.Case1 path)
-    ()
+    let absolutePath (dir: string) = path.resolve dir
+    let statsSync (path: string) : Fs.Stats = fs.statSync path
 
 module Module =
-
     let fileURLToPath: string -> string = importMember "url"
 
     let inline __filename<'T> = fileURLToPath (emitJsExpr () "import.meta.url")
     let inline __dirname<'T> = path.dirname (__filename)
 
 module Process =
+    [<AllowNullLiteral>]
+    type Process =
+        abstract argv: ResizeArray<string> with get, set
+
     [<Import("*", "process")>]
-    let process': Process.Process = jsNative
+    let process': Process = jsNative
 
     let argv = process'.argv
-
 
 // NOTE: minimum implementation for Intl.DateTimeFormat.formatToParts.
 [<RequireQualifiedAccess>]
