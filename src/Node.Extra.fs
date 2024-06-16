@@ -19,7 +19,7 @@ module Directory =
         Promise.create (fun resolve reject ->
             fs?mkdir (dir,
                       options,
-                      (fun (err: Node.Base.ErrnoException option) ->
+                      (fun (err: Base.ErrnoException option) ->
                           match err with
                           | Some err -> reject (err :?> System.Exception)
                           | None -> resolve ())))
@@ -39,19 +39,19 @@ module Directory =
         Promise.create (fun resolve reject ->
             fs.readdir (
                 U2.Case1 dir,
-                (fun (err: Node.Base.ErrnoException option) (files: ResizeArray<string>) ->
+                (fun (err: Base.ErrnoException option) (files: ResizeArray<string>) ->
                     match err with
                     | Some err -> reject (err :?> System.Exception)
                     | None ->
                         files.ToArray()
-                        |> Array.map (fun file -> file, File.statsSync (Directory.join2 dir file))
+                        |> Array.map (fun file -> file, File.statsSync (join2 dir file))
                         |> Array.map (fun (filePath, fileInfo) ->
                             if fileInfo.isDirectory () then
                                 // If recursive then get the files from the others sub dirs
                                 if isRecursive then
                                     promise {
-                                        let! files = getFiles true (Directory.join2 dir filePath)
-                                        return files |> List.map (Directory.join2 filePath)
+                                        let! files = getFiles true (join2 dir filePath)
+                                        return files |> List.map (join2 filePath)
                                     }
                                 else
                                     // Else, we return an empty list and this will have the effect
@@ -116,7 +116,7 @@ module File =
         }
 
     let absolutePath (dir: string) = path.resolve (dir)
-    let statsSync (path: string) : Node.Fs.Stats = fs.statSync (U2.Case1 path)
+    let statsSync (path: string) : Fs.Stats = fs.statSync (U2.Case1 path)
     ()
 
 module Module =
