@@ -119,7 +119,7 @@ module File =
     let statsSync (path: string) : Fs.Stats = fs.statSync path
 
 module Process =
-    let argv = Process.process'.argv
+    let argv = process'.argv
 
 module DateTime =
     open System

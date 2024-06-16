@@ -53,11 +53,11 @@ module Module =
 
 module Process =
     [<AllowNullLiteral>]
-    type Process =
+    type IExports =
         abstract argv: ResizeArray<string> with get, set
 
-    [<Import("*", "process")>]
-    let process': Process = jsNative
+[<Import("*", "process")>]
+let process': Process.IExports = jsNative
 
 // NOTE: minimum implementation for Intl.DateTimeFormat.formatToParts.
 [<RequireQualifiedAccess>]
