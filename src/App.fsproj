@@ -6,6 +6,7 @@
     <Compile Include="bindings/HighlightJs.fs" />
     <Compile Include="bindings/Marked.fs" />
     <Compile Include="bindings/Yaml.fs" />
+    <Compile Include="Node.Min.fs" />
     <Compile Include="Node.Extra.fs" />
     <Compile Include="Common.fs" />
     <Compile Include="Dev.fs" />
@@ -18,7 +19,6 @@
     <PackageReference Include="Fable.Browser.WebSocket" Version="1.4.0" />
     <PackageReference Include="Fable.Browser.WebStorage" Version="1.3.0" />
     <PackageReference Include="Fable.Core" Version="4.3.0" />
-    <PackageReference Include="Fable.Node" Version="1.2.0" />
     <PackageReference Include="Fable.Promise" Version="3.2.0" />
     <PackageReference Include="Fable.SimpleXml" Version="3.4.0" />
     <PackageReference Include="Feliz" Version="2.7.0" />
