@@ -83,7 +83,7 @@ module private Util =
 
         let renderer =
             let heading (item: Marked.Tokens.Heading) =
-                let text = marked.Parser.parse <| U2.Case1 item.tokens
+                let text = marked.Parser.parseInline item.tokens
 
                 let escapedText = Regex.Replace(text, @"[^\w]+", "-")
                 let l = (int)item.depth + 1
@@ -113,6 +113,7 @@ module private Util =
                     | Some false -> ""
                     | _ -> "checked"
 
+                // NOTE: should use parse because listitem includes block level tokens.
                 let text: string = marked.Parser.parse <| U2.Case1 item.tokens
                 match item.task with
                 | true ->
