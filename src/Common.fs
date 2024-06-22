@@ -487,6 +487,8 @@ module Component =
           scriptInjection: string list }
 
     let frame (conf: FrameConfiguration) (content: Fable.React.ReactElement list) =
+        let searchBox = [ Html.li [ prop.children [ Html.div [ prop.id "search" ] ] ] ]
+
         let themeSelector =
             [ Html.li [ prop.children [ Html.button [ prop.className "theme-toggle"
                                                       prop.custom ("data-theme", "light")
@@ -501,7 +503,7 @@ module Component =
                                                       prop.text "🖥️"
                                                       prop.title "System Default" ] ] ] ]
 
-        let navbar = Html.ul [ prop.children (conf.navItems @ themeSelector) ]
+        let navbar = Html.ul [ prop.children (conf.navItems @ searchBox @ themeSelector) ]
 
         let main =
             [ Html.head [ Html.title [ prop.text conf.title ]
