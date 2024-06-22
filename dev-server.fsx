@@ -145,7 +145,16 @@ let cfg =
         homeFolder = Some(home)
         compressedFilesFolder = Some(home)
         bindings = [ HttpBinding.create HTTP IPAddress.Loopback port ]
-        listenTimeout = TimeSpan.FromMilliseconds 3000. }
+        listenTimeout = TimeSpan.FromMilliseconds 3000.
+        mimeTypesMap =
+            Writers.defaultMimeTypesMap
+            // NOTE: Add custom mime types for pagefind to prevent 404 error.
+            @@ ((function
+            | ".pagefind"
+            | ".pf_fragment"
+            | ".pf_index"
+            | ".pf_meta" -> Writers.createMimeType "application/octet-stream" false
+            | _ -> None)) }
 
 
 let root =
