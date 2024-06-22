@@ -10,7 +10,7 @@
     "build-dev": "npm run build-css && npm run build-fable dev && npm run build-index",
     "dev": "npm run build-dev && npm run serve",
     "build-md": "node ./src/App.fs.js",
-    "build-index": "pagefind --site ./docs/blog-fable"
+    "build-index": "pagefind"
   },
   "version": "1.0.0",
   "devDependencies": {
