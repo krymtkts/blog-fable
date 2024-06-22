@@ -525,7 +525,10 @@ module Component =
                                       prop.href conf.style ]
                           Html.link [ prop.rel "stylesheet"
                                       prop.type' "text/css"
-                                      prop.href conf.highlightStyle ] ]
+                                      prop.href conf.highlightStyle ]
+                          Html.link [ prop.rel "stylesheet"
+                                      prop.href "/blog-fable/pagefind/pagefind-ui.css" ]
+                          Html.script [ prop.src "/blog-fable/pagefind/pagefind-ui.js" ] ]
               Html.body [ Html.nav [ prop.className "tabs"
                                      prop.children [ navbar ] ]
                           Html.main [ prop.className "container"
