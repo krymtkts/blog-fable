@@ -72,7 +72,8 @@ module Generation =
             let a, refs = a |> List.ofSeq |> List.unzip
             let locs = refs |> Seq.concat
 
-            return [ Html.ul [ prop.children (List.concat a) ] ], locs
+            return [ Html.div [ prop.id "search" ]
+                     Html.ul [ prop.children (List.concat a) ] ], locs
         }
 
     type TagDef =

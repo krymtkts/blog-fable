@@ -487,8 +487,6 @@ module Component =
           scriptInjection: string list }
 
     let frame (conf: FrameConfiguration) (content: Fable.React.ReactElement list) =
-        let searchBox = [ Html.li [ prop.children [ Html.div [ prop.id "search" ] ] ] ]
-
         let themeSelector =
             [ Html.li [ prop.children [ Html.button [ prop.className "theme-toggle"
                                                       prop.custom ("data-theme", "light")
@@ -503,7 +501,7 @@ module Component =
                                                       prop.text "🖥️"
                                                       prop.title "System Default" ] ] ] ]
 
-        let navbar = Html.ul [ prop.children (conf.navItems @ searchBox @ themeSelector) ]
+        let navbar = Html.ul [ prop.children (conf.navItems @ themeSelector) ]
 
         let main =
             [ Html.head [ Html.title [ prop.text conf.title ]
@@ -525,14 +523,14 @@ module Component =
                           Html.link [ prop.rel "icon"
                                       prop.href conf.favicon ]
                           Html.link [ prop.rel "stylesheet"
+                                      prop.href conf.pagefindStyle ]
+                          Html.script [ prop.src conf.pagefindScript ]
+                          Html.link [ prop.rel "stylesheet"
                                       prop.type' "text/css"
                                       prop.href conf.style ]
                           Html.link [ prop.rel "stylesheet"
                                       prop.type' "text/css"
-                                      prop.href conf.highlightStyle ]
-                          Html.link [ prop.rel "stylesheet"
-                                      prop.href conf.pagefindStyle ]
-                          Html.script [ prop.src conf.pagefindScript ] ]
+                                      prop.href conf.highlightStyle ] ]
               Html.body [ Html.nav [ prop.className "tabs"
                                      prop.children [ navbar ] ]
                           Html.main [ prop.className "container"
