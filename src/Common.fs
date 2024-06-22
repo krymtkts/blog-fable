@@ -46,8 +46,9 @@ module private Util =
 
                 let escapedText = Regex.Replace(text, @"[^\w]+", "-")
                 let l = (int) item.depth + 1
+                let meta = if l = 2 then " data-pagefind-meta=\"title\" " else ""
 
-                $"""<h%d{l}><a name="%s{escapedText}" href="#%s{escapedText}">%s{text}</a></h%d{l}>"""
+                $"""<h%d{l} %s{meta}><a name="%s{escapedText}" href="#%s{escapedText}">%s{text}</a></h%d{l}>"""
 
             let link (item: Marked.Tokens.Link) =
                 let ref =
