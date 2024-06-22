@@ -482,6 +482,8 @@ module Component =
           favicon: string
           style: string
           highlightStyle: string
+          pagefindStyle: string
+          pagefindScript: string
           scriptInjection: string list }
 
     let frame (conf: FrameConfiguration) (content: Fable.React.ReactElement list) =
@@ -527,8 +529,8 @@ module Component =
                                       prop.type' "text/css"
                                       prop.href conf.highlightStyle ]
                           Html.link [ prop.rel "stylesheet"
-                                      prop.href "/blog-fable/pagefind/pagefind-ui.css" ]
-                          Html.script [ prop.src "/blog-fable/pagefind/pagefind-ui.js" ] ]
+                                      prop.href conf.pagefindStyle ]
+                          Html.script [ prop.src conf.pagefindScript ] ]
               Html.body [ Html.nav [ prop.className "tabs"
                                      prop.children [ navbar ] ]
                           Html.main [ prop.className "container"
