@@ -43,18 +43,23 @@ let PagefindUI: PagefindUI = jsNative
 window.addEventListener (
     "DOMContentLoaded",
     (fun _ ->
-        PagefindUI.Create(
-            !!{| element = "#search"
-                 baseUrl = "/blog-fable/"
-                 pageSize = 5
-                 translations =
-                  !!{| placeholder = "Search"
-                       clear_search = "Clear"
-                       load_more = "More"
-                       search_label = ""
-                       zero_results = "\"[SEARCH_TERM]\" now found."
-                       many_results = "\"[SEARCH_TERM]\" ([COUNT])"
-                       one_result = "\"[SEARCH_TERM]\" ([COUNT])"
-                       searching = "Searching \"[SEARCH_TERM]\"..." |} |}
-        ))
+        let elm = document.querySelector "#search"
+
+        if isNull elm then
+            ()
+        else
+            PagefindUI.Create(
+                !!{| element = "#search"
+                     baseUrl = "/blog-fable/"
+                     pageSize = 5
+                     translations =
+                      !!{| placeholder = "Search"
+                           clear_search = "Clear"
+                           load_more = "More"
+                           search_label = ""
+                           zero_results = "\"[SEARCH_TERM]\" now found."
+                           many_results = "\"[SEARCH_TERM]\" ([COUNT])"
+                           one_result = "\"[SEARCH_TERM]\" ([COUNT])"
+                           searching = "Searching \"[SEARCH_TERM]\"..." |} |}
+            ))
 )
