@@ -2,6 +2,8 @@ module Handler
 
 open Browser.Dom
 open Browser.WebStorage
+open Fable.Core
+open Fable.Core.JsInterop
 
 // NOTE: Don't use Fable library in this file because it is directly bundled int HTML files.
 //       This includes, discriminated union, List, etc.
@@ -30,3 +32,34 @@ let private initThemeModeHandler _ =
         el.addEventListener ("click", (fun _ -> setThemeMode themeMode))
 
 window.addEventListener ("load", initThemeModeHandler)
+
+type PagefindUI =
+    [<Emit "new $0($1, $2)">]
+    abstract Create: obj -> unit
+
+[<Global>]
+let PagefindUI: PagefindUI = jsNative
+
+window.addEventListener (
+    "DOMContentLoaded",
+    (fun _ ->
+        let elm = document.querySelector "#search"
+
+        if isNull elm then
+            ()
+        else
+            PagefindUI.Create(
+                !!{| element = "#search"
+                     baseUrl = "/blog-fable/"
+                     pageSize = 5
+                     translations =
+                      !!{| placeholder = "Search"
+                           clear_search = "Clear"
+                           load_more = "More"
+                           search_label = ""
+                           zero_results = "\"[SEARCH_TERM]\" now found."
+                           many_results = "\"[SEARCH_TERM]\" ([COUNT])"
+                           one_result = "\"[SEARCH_TERM]\" ([COUNT])"
+                           searching = "Searching \"[SEARCH_TERM]\"..." |} |}
+            ))
+)

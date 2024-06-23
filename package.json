@@ -3,16 +3,19 @@
   "type": "module",
   "scripts": {
     "postinstall": "dotnet tool restore",
-    "build-css": "sass --style=compressed --no-source-map ./sass/style.scss ./docs/blog-fable/css/style.css",
-    "serve": "dotnet fsi ./dev-server.fsx /blog-fable",
     "build-fable": "dotnet fable src --test:MSBuildCracker --runScript",
-    "build": "npm run build-css && npm run build-fable",
-    "dev": "npm run build dev && npm run serve",
-    "build-md": "node ./src/App.fs.js"
+    "build-md": "node ./src/App.fs.js",
+    "build-css": "sass --style=compressed --no-source-map ./sass/style.scss ./docs/blog-fable/css/style.css",
+    "build-index": "pagefind",
+    "build": "npm run build-css && npm run build-fable && npm run build-index",
+    "build-dev": "npm run build-css && npm run build-fable dev && npm run build-index",
+    "serve": "dotnet fsi ./dev-server.fsx /blog-fable",
+    "dev": "npm run build-dev && npm run serve"
   },
   "version": "1.0.0",
   "devDependencies": {
     "bulma": "^1.0.1",
+    "pagefind": "^1.1.0",
     "sass": "^1.77.6",
     "ts2fable": "^0.7.1"
   },

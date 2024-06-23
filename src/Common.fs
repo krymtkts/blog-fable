@@ -46,8 +46,9 @@ module private Util =
 
                 let escapedText = Regex.Replace(text, @"[^\w]+", "-")
                 let l = (int) item.depth + 1
+                let meta = if l = 2 then " data-pagefind-meta=\"title\" " else ""
 
-                $"""<h%d{l}><a name="%s{escapedText}" href="#%s{escapedText}">%s{text}</a></h%d{l}>"""
+                $"""<h%d{l} %s{meta}><a name="%s{escapedText}" href="#%s{escapedText}">%s{text}</a></h%d{l}>"""
 
             let link (item: Marked.Tokens.Link) =
                 let ref =
@@ -482,6 +483,8 @@ module Component =
           favicon: string
           style: string
           highlightStyle: string
+          pagefindStyle: string
+          pagefindScript: string
           scriptInjection: string list }
 
     let frame (conf: FrameConfiguration) (content: Fable.React.ReactElement list) =
@@ -520,6 +523,9 @@ module Component =
                                       prop.href conf.url ]
                           Html.link [ prop.rel "icon"
                                       prop.href conf.favicon ]
+                          Html.link [ prop.rel "stylesheet"
+                                      prop.href conf.pagefindStyle ]
+                          Html.script [ prop.src conf.pagefindScript ]
                           Html.link [ prop.rel "stylesheet"
                                       prop.type' "text/css"
                                       prop.href conf.style ]

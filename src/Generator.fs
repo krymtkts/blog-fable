@@ -72,7 +72,8 @@ module Generation =
             let a, refs = a |> List.ofSeq |> List.unzip
             let locs = refs |> Seq.concat
 
-            return [ Html.ul [ prop.children (List.concat a) ] ], locs
+            return [ Html.div [ prop.id "search" ]
+                     Html.ul [ prop.children (List.concat a) ] ], locs
         }
 
     type TagDef =
@@ -550,8 +551,12 @@ module RenderOptions =
     let highlightStylePath opts =
         $"%s{opts.pathRoot}/css/%s{IO.leaf opts.highlightStyle}"
 
+    let pagefindStylePath opts = $"%s{opts.pathRoot}/pagefind/pagefind-ui.css"
+
     let devScriptPath opts = $"%s{opts.pathRoot}/js/dev.js"
     let handlerScriptPath opts = $"%s{opts.pathRoot}/js/handler.js"
+    let pagefindScriptPath opts = $"%s{opts.pathRoot}/pagefind/pagefind-ui.js"
+
     let faviconPath opts = $"%s{opts.pathRoot}%s{opts.favicon}"
 
     let postsRootPath opts = $"%s{opts.pathRoot}%s{opts.posts.root}"
@@ -669,6 +674,8 @@ let render (opts: RenderOptions) =
               favicon = RenderOptions.faviconPath opts
               style = RenderOptions.stylePath opts
               highlightStyle = highlightInjection
+              pagefindStyle = RenderOptions.pagefindStylePath opts
+              pagefindScript = RenderOptions.pagefindScriptPath opts
               scriptInjection = jsInjection }
 
         let renderPostAndPages = renderMarkdowns conf site

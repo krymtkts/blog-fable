@@ -88,6 +88,17 @@ $sl-green: #859900;
   --bulma-hr-background-color: #{$sl-base1};
 
   --bulma-border: #{$sl-base1};
+
+  --pagefind-ui-scale: 0.8;
+  --pagefind-ui-primary: #{$sl-base01};
+  --pagefind-ui-text: #{$sl-base01};
+  --pagefind-ui-background: #{$sl-base3};
+  --pagefind-ui-border: #{$sl-base1};
+  --pagefind-ui-tag: #{$sl-base1};
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: 8px;
+  --pagefind-ui-image-border-radius: 8px;
+  --pagefind-ui-image-box-ratio: 3 / 2;
 }
 
 @mixin dark-theme {
@@ -130,6 +141,17 @@ $sl-green: #859900;
   --bulma-hr-background-color: #{$sl-base01};
 
   --bulma-border: #{$sl-base01};
+
+  --pagefind-ui-scale: 0.8;
+  --pagefind-ui-primary: #{$sl-base1};
+  --pagefind-ui-text: #{$sl-base1};
+  --pagefind-ui-background: #{$sl-base03};
+  --pagefind-ui-border: #{$sl-base01};
+  --pagefind-ui-tag: #{$sl-base01};
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: 8px;
+  --pagefind-ui-image-border-radius: 8px;
+  --pagefind-ui-image-box-ratio: 3 / 2;
 }
 
 @media (prefers-color-scheme: light) {

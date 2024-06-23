@@ -1,0 +1,4 @@
+site: ./docs/blog-fable
+root_selector: .content
+keep_index_url: true
+glob: "{posts,pages}/*.html"
