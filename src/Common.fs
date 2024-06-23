@@ -458,6 +458,7 @@ module Component =
                   Html.h1 [ prop.className [ "title" ]
                             prop.text fm.title ]
                   Html.div [ prop.className [ "tags" ]
+                             prop.custom ("data-pagefind-ignore", "all")
                              prop.children (
                                  match fm.tags with
                                  | Some tags -> tags
@@ -582,4 +583,5 @@ module Component =
         let next = button Next next
 
         [ Html.div [ prop.className "buttons"
+                     prop.custom ("data-pagefind-ignore", "all")
                      prop.children [ prev; next ] ] ]
