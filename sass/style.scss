@@ -99,6 +99,8 @@ $sl-green: #859900;
   --pagefind-ui-border-radius: 8px;
   --pagefind-ui-image-border-radius: 8px;
   --pagefind-ui-image-box-ratio: 3 / 2;
+
+  --mark-color: #{$sl-base3};
 }
 
 @mixin dark-theme {
@@ -152,6 +154,8 @@ $sl-green: #859900;
   --pagefind-ui-border-radius: 8px;
   --pagefind-ui-image-border-radius: 8px;
   --pagefind-ui-image-box-ratio: 3 / 2;
+
+  --mark-color: #{$sl-base03};
 }
 
 @media (prefers-color-scheme: light) {
@@ -220,4 +224,14 @@ pre code {
 }
 .next a:after {
   content: "\2192";
+}
+// NOTE: apply style directly without using PagefindHighlight.
+#search {
+  mark {
+    background-color: $sl-base00;
+    color: var(--mark-color);
+  }
+  input:focus {
+    outline-style: none;
+  }
 }
