@@ -144,6 +144,7 @@ module private Util =
 
     let parseMarkdown (content: string) : string = marked.parse $ (content)
 
+    let parseMarkdownInline (content: string) : string = marked.parseInline $ (content)
 
 module Parser =
     open Yaml
@@ -404,13 +405,15 @@ module Component =
 
     type NavItem =
         | Text of string
+        | Html of string
         | Element of string * Fable.React.ReactElement
 
     let liA ref (title: NavItem) =
         let children =
             function
-            | Element (s, el) -> [ prop.title s; prop.children [ el ] ]
             | Text (s) -> [ prop.title s; prop.text s ]
+            | Html (s) -> [ prop.dangerouslySetInnerHTML s ]
+            | Element (s, el) -> [ prop.title s; prop.children [ el ] ]
 
         Html.li [ Html.a <| prop.href ref :: children title ]
 
@@ -437,12 +440,12 @@ module Component =
 
         let title =
             match meta.frontMatter with
-            | Some fm -> $"%s{prefix}%s{fm.title}"
+            | Some fm -> $"%s{prefix}%s{fm.title |> Util.parseMarkdownInline}"
             | None -> leaf
 
         let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
 
-        liA ref <| Text title
+        liA ref <| Html title
 
     let header (tagRoot: string) (pubDate: string option) (fm: Parser.FrontMatter option) =
         let date pubDate fmDate =
@@ -461,7 +464,7 @@ module Component =
             | Some fm ->
                 [ date pubDate fm.date
                   Html.h1 [ prop.className [ "title" ]
-                            prop.text fm.title ]
+                            prop.dangerouslySetInnerHTML (fm.title |> Util.parseMarkdownInline) ]
                   Html.div [ prop.className [ "tags" ]
                              prop.custom ("data-pagefind-ignore", "all")
                              prop.children (
@@ -571,7 +574,7 @@ module Component =
                 let text, className =
                     let t =
                         match meta.frontMatter with
-                        | Some fm -> $"%s{meta.date} %s{fm.title}"
+                        | Some fm -> $"%s{meta.date} %s{fm.title |> Util.parseMarkdownInline}"
                         | None -> $"%s{meta.date} %s{meta.leaf}"
 
                     match button with
