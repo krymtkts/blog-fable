@@ -1,4 +1,4 @@
-# Sample page without front matter
+# Sample page without front matter `code sample`
 
 The page can omit front matter `title`, `date` and `tags`.
 

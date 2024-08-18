@@ -1,5 +1,5 @@
 ---
-title: About Markdown parser
+title: About Markdown parser `code sample`
 tags: [sample, markdown, fsharp]
 ---
 

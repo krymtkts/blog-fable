@@ -1,4 +1,4 @@
-# Sample post without front matter
+# Sample post without front matter `code sample`
 
 The post can omit front matter `title`, `date` and `tags`.
 
