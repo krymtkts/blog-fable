@@ -24,12 +24,55 @@ module Parser =
 
 [<AutoOpen>]
 module Misc =
+    open System
     open Feliz
     open Parser
 
-    // TODO: sample implementation. generating HTML table from Booklog list.
+    let datesInYear year =
+        let startDate =
+            let d = DateTime(year, 1, 1)
+            if d.DayOfWeek = DayOfWeek.Sunday then
+                d
+            else
+                d.AddDays(-(2.0 - (d.DayOfWeek |> float)))
+        let endDate =
+            let d = DateTime(year, 12, 31)
+            if d.DayOfWeek = DayOfWeek.Saturday then
+                d
+            else
+                d.AddDays(2.0 - (d.DayOfWeek |> float))
+        printfn "startDate: %A, endDate: %A" startDate endDate
+
+        List.unfold
+            (fun date ->
+                if date > endDate then
+                    None
+                else
+                    Some(date, date.AddDays(1.0)))
+            startDate
+
+    let generateCalendar (logs: Booklog list) =
+        let year = now.Year
+        let days = datesInYear year |> List.groupBy _.DayOfWeek
+        let calendar=
+            days |> List.map (fun (dow, dates) ->
+                dates |> List.map (fun d ->
+                    let d =
+                        if d.Year = year then
+                            d.Day |> string
+                        else
+                            ""
+
+                    Html.td [ Html.text d ]
+                )
+                |> Html.tr
+        )
+        Html.table calendar
+
+        // TODO: sample implementation. generating HTML table from Booklog list.
     let generateBooklogTable (logs: Booklog list) =
-        let rows =
+        let booklogCalendar = generateCalendar logs
+        let booklogRows =
             logs
             |> List.map (fun log ->
                 let tags =
@@ -48,7 +91,7 @@ module Misc =
                           Html.td [ Html.text tags ]
                           Html.td [ Html.text (log.notes |> Option.defaultValue "") ] ])
 
-        let table =
+        let booklogTable =
             Html.table [ Html.thead [ Html.tr [ Html.th [ Html.text "Date" ]
                                                 Html.th [ Html.text "Title" ]
                                                 Html.th [ Html.text "Author" ]
@@ -57,6 +100,6 @@ module Misc =
                                                 Html.th [ Html.text "Pages" ]
                                                 Html.th [ Html.text "Tags" ]
                                                 Html.th [ Html.text "Notes" ] ] ]
-                         Html.tbody rows ]
+                         Html.tbody booklogRows ]
 
-        [ table ]
+        [ booklogCalendar; booklogTable ]
