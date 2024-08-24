@@ -1,5 +1,5 @@
 ---
-title: Sample page
+title: Sample page `code sample`
 tags: [sample, yaml]
 date: 2023-09-01
 ---
@@ -11,7 +11,7 @@ The front matter for this post is as follows.
 
 ```yaml
 ---
-title: Sample page with front matter
+title: Sample page `code sample`
 tags: [sample, yaml]
 date: 2023-09-01
 ---
