@@ -9,6 +9,7 @@
     <Compile Include="Node.Min.fs" />
     <Compile Include="Node.Extra.fs" />
     <Compile Include="Common.fs" />
+    <Compile Include="Booklog.fs" />
     <Compile Include="Dev.fs" />
     <Compile Include="Handler.fs" />
     <Compile Include="Generator.fs" />

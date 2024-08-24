@@ -3,6 +3,8 @@ module StaticWebGenerator
 open Common
 open Feliz
 
+open Booklog
+
 [<AutoOpen>]
 module Generation =
     let generatorName = "blog-fable"
@@ -268,6 +270,14 @@ module Rendering =
                   index = false }
         }
 
+    let private readYamlSource source =
+        promise {
+            printfn $"Rendering %s{source}..."
+            let! yml = IO.readFile source
+
+            return Parser.parseBooklogs yml
+        }
+
     let private writeContent
         (conf: FrameConfiguration)
         (root: PathConfiguration)
@@ -447,6 +457,27 @@ module Rendering =
             return locs
         }
 
+    let renderBooklogs (conf: FrameConfiguration) (site: PathConfiguration) (sourceDir :string) (dest:string) =
+        let title = $"%s{conf.title} - Tags"
+
+        promise {
+            printfn "Getting booklogs from %s" sourceDir
+            let! files = getYamlFiles sourceDir
+            printfn "Getting %d booklogs..." (List.length files)
+            let! booklogs = files |> List.map readYamlSource |> Promise.all
+            let content =
+                booklogs |> List.ofArray |> List.concat |> generateBooklogTable
+                |> frame
+                    { conf with
+                        title = title
+                        url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}" }
+                |> Parser.parseReactStaticHtml
+
+            let destDir = dest.Replace(".html", "")
+            do! IO.writeFile dest content
+            ()
+        }
+
     let render404 conf site dest =
         promise {
             printfn "Rendering 404..."
@@ -510,7 +541,8 @@ type sitemap =
       archives: float
       tags: float
       posts: float
-      pages: float }
+      pages: float
+      booklogs: float }
 
 type RenderOptions =
     { stage: Mode
@@ -529,6 +561,7 @@ type RenderOptions =
       pages: Content
       tags: Content
       archives: Content
+      booklogs: Content
       images: string
 
       additionalNavs: AdditionalNav list
@@ -546,6 +579,7 @@ module RenderOptions =
     let feedPath opts = $"/%s{opts.feedName}.xml"
     let archivesPath opts = $"%s{opts.archives.root}.html"
     let tagsPath opts = $"%s{opts.tags.root}.html"
+    let booklogsPath opts = $"%s{opts.booklogs.root}.html"
     let stylePath opts = $"%s{opts.pathRoot}/css/style.css"
 
     let highlightStylePath opts =
@@ -568,6 +602,7 @@ module RenderOptions =
     let postsSourceRoot opts = $"%s{opts.src}%s{opts.posts.root}"
 
     let pagesSourceRoot opts = $"%s{opts.src}%s{opts.pages.root}"
+    let booklogsSourceRoot opts = $"%s{opts.src}%s{opts.booklogs.root}"
     let devScriptSourcePath = "src/Dev.fs.js"
     let handlerScriptSourcePath = "src/Handler.fs.js"
     let imagesSourcePath opts = $"%s{opts.src}/%s{opts.images}"
@@ -585,10 +620,10 @@ module RenderOptions =
 
     let archivesDestinationPath opts =
         $"%s{destinationRoot opts}%s{archivesPath opts}"
-
     let tagsDestinationPath opts =
         $"%s{destinationRoot opts}%s{tagsPath opts}"
-
+    let booklogsDestinationPath opts =
+        $"%s{destinationRoot opts}%s{booklogsPath opts}"
     let ``404DestinationPath`` opts = $"%s{destinationRoot opts}/404.html"
 
     let sitemapDestinationPath opts = $"%s{destinationRoot opts}/sitemap.xml"
@@ -620,7 +655,11 @@ let private buildNavList opts =
                     Link
                         { text = opts.tags.title
                           path = RenderOptions.tagsPath opts
-                          sitemap = Yes <| string opts.sitemap.tags } ]
+                          sitemap = Yes <| string opts.sitemap.tags }
+                    Link
+                        { text = opts.booklogs.title
+                          path = RenderOptions.booklogsPath opts
+                          sitemap = Yes <| string opts.sitemap.booklogs } ]
                   List.map
                       (fun n ->
                           Link
@@ -721,6 +760,12 @@ let render (opts: RenderOptions) =
         let! tagLocs =
             renderTags conf site tagDef
             <| RenderOptions.tagsDestinationPath opts
+
+        // TODO: organize.
+        renderBooklogs conf site
+        <| RenderOptions.booklogsSourceRoot opts
+        <| RenderOptions.booklogsDestinationPath opts
+        |> ignore
 
         do!
             render404 conf site

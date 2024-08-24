@@ -1,0 +1,14 @@
+- date: 2024-08-19
+  bookTitle: A book
+  bookAuthor: John Doe
+  readCount: 2
+  previouslyRead: true
+  pages: vi ~ 12
+  notes: |
+    read again.
+- date: 2024-08-20
+  bookTitle: A book
+  bookAuthor: John Doe
+  readCount: 2
+  previouslyRead: true
+  pages: 13 ~ 20

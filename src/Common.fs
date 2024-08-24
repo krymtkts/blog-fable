@@ -73,7 +73,7 @@ module private Util =
 
             let listitem (item: Marked.Tokens.ListItem) =
                 let checkState =
-                    match item.``checked`` with
+                    match item.checked with
                     | None
                     | Some false -> ""
                     | _ -> "checked"
@@ -173,6 +173,8 @@ module Parser =
     /// Parses a markdown string
     let parseMarkdown str = Util.parseMarkdown str
 
+    let parseYaml str : 'a = Yaml.parse str
+
     let parseMarkdownAsReactEl content =
         let (frontMatter, content) = extractFrontMatter content
 
@@ -240,18 +242,25 @@ module Misc =
 
     let isMarkdown (path: string) = path.EndsWith ".md"
 
-    let getMarkdownFiles dir =
+    let isYaml (path: string) =
+        path.EndsWith ".yml" || path.EndsWith ".yaml"
+
+    let getFiles predict dir =
         promise {
             let! paths = IO.getFiles dir
 
             let files =
                 paths
-                |> List.filter isMarkdown
+                |> List.filter predict
                 |> List.map (Directory.join2 dir)
                 |> List.map IO.resolve
 
             return files
         }
+
+    let getMarkdownFiles = getFiles isMarkdown
+
+    let getYamlFiles = getFiles isYaml
 
     let getImagePathPairs src dest =
         promise {

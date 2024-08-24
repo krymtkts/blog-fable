@@ -1,0 +1,19 @@
+- date: 2023-04-01
+  bookTitle: A book
+  bookAuthor: John Doe
+  readCount: 1
+  pages: vi ~ 12
+- date: 2023-04-03
+  bookTitle: A book
+  bookAuthor: John Doe
+  readCount: 1
+  pages: 13 ~ 48
+  notes: |
+    first note.
+- date: 2023-04-13
+  bookTitle: A book
+  bookAuthor: John Doe
+  readCount: 1
+  pages: 49 ~ 90
+  notes: |
+    second note.
