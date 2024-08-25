@@ -77,8 +77,16 @@ module Misc =
                             Html.tbody calendar
                      ] ]
 
-        // TODO: sample implementation. generating HTML table from Booklog list.
-    let generateBooklogTable (year: int)(logs: Booklog list) =
+    let generateBooklogLinks baseUrl years =
+        let links =
+            years
+            |> List.map (fun year ->
+                Html.li [
+                    Html.a [ prop.href $"{baseUrl}/{year}.html"; prop.children [ Html.text (year |> string) ]]])
+
+        Html.ul [ prop.className "booklog-links"; prop.children links ]
+
+    let generateBooklogTable links (year: int) (logs: Booklog list) =
         let header = Html.h1 [ Html.text $"Booklog {year}" ]
         let booklogCalendar =  generateCalendar year logs
         let booklogRows =
@@ -111,7 +119,7 @@ module Misc =
                                                 Html.th [ Html.text "Notes" ] ] ]
                          Html.tbody booklogRows ]
 
-        [ header; booklogCalendar; booklogTable ]
+        [ header; booklogCalendar; booklogTable; links; ]
 
     let groupBooklogs (booklogs: Booklog list) =
         let minYear = booklogs |> List.map (_.date >> DateTime.Parse >> _.Year) |> List.min

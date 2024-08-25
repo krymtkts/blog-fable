@@ -468,6 +468,10 @@ module Rendering =
             let destDir =dest.Replace(".html", "")
             let minYear, booklogPerYear = booklogs |> groupBooklogs
             let maxYear = now.Year
+            let years = [ minYear .. maxYear]
+            let basePath = $"%s{site.siteRoot}/%s{IO.leaf dest}".Replace(".html", "")
+            let links = generateBooklogLinks basePath years
+
             do!
                 [ minYear .. maxYear ] |> List.map (fun year ->
                     let logs =
@@ -476,11 +480,11 @@ module Rendering =
                         | Some(logs) -> logs
 
                     let content =
-                        logs |> generateBooklogTable year
+                        logs |> generateBooklogTable links year
                         |> frame
                             { conf with
                                 title = title
-                                url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}" }
+                                url = $"%s{conf.url}%s{basePath}" }
                         |> Parser.parseReactStaticHtml
 
                     let dest =  $"{destDir}/%d{year}.html"
@@ -496,11 +500,11 @@ module Rendering =
                     | Some(logs) -> logs
 
                 let content =
-                    logs |> generateBooklogTable maxYear
+                    logs |> generateBooklogTable links maxYear
                     |> frame
                         { conf with
                             title = title
-                            url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}" }
+                            url = $"%s{conf.url}%s{basePath}" }
                     |> Parser.parseReactStaticHtml
 
                 IO.writeFile dest content
