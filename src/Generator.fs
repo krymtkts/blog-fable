@@ -488,6 +488,7 @@ module Rendering =
                         |> Parser.parseReactStaticHtml
 
                     let dest =  $"{destDir}/%d{year}.html"
+                    printfn $"Writing booklog to %s{dest}..."
                     IO.writeFile dest content |> Promise.map ignore
 
                 )
@@ -507,6 +508,7 @@ module Rendering =
                             url = $"%s{conf.url}%s{basePath}" }
                     |> Parser.parseReactStaticHtml
 
+                printfn $"Writing booklog to %s{dest}..."
                 IO.writeFile dest content
         }
 
