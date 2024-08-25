@@ -459,24 +459,53 @@ module Rendering =
 
     let renderBooklogs (conf: FrameConfiguration) (site: PathConfiguration) (sourceDir :string) (dest:string) =
         let title = $"%s{conf.title} - Tags"
-
         promise {
             printfn "Getting booklogs from %s" sourceDir
             let! files = getYamlFiles sourceDir
             printfn "Getting %d booklogs..." (List.length files)
             let! booklogs = files |> List.map readYamlSource |> Promise.all
-            let content =
-                booklogs |> List.ofArray |> List.concat |> generateBooklogTable
-                |> frame
-                    { conf with
-                        title = title
-                        url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}" }
-                |> Parser.parseReactStaticHtml
+            let booklogs = booklogs |> List.ofArray |> List.concat
+            let destDir =dest.Replace(".html", "")
+            let minYear, booklogPerYear = booklogs |> groupBooklogs
+            let maxYear = now.Year
+            do!
+                [ minYear .. maxYear ] |> List.map (fun year ->
+                    let logs =
+                        match booklogPerYear |> Map.tryFind  year with
+                        | None -> []
+                        | Some(logs) -> logs
 
-            let destDir = dest.Replace(".html", "")
-            do! IO.writeFile dest content
-            ()
+                    let content =
+                        logs |> generateBooklogTable year
+                        |> frame
+                            { conf with
+                                title = title
+                                url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}" }
+                        |> Parser.parseReactStaticHtml
+
+                    let dest =  $"{destDir}/%d{year}.html"
+                    IO.writeFile dest content |> Promise.map ignore
+
+                )
+                |> Promise.all
+                |> Promise.map ignore
+            do!
+                let logs =
+                    match booklogPerYear |> Map.tryFind  maxYear with
+                    | None -> []
+                    | Some(logs) -> logs
+
+                let content =
+                    logs |> generateBooklogTable maxYear
+                    |> frame
+                        { conf with
+                            title = title
+                            url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}" }
+                    |> Parser.parseReactStaticHtml
+
+                IO.writeFile dest content
         }
+
 
     let render404 conf site dest =
         promise {

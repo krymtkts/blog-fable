@@ -21,7 +21,6 @@ module Parser =
 
         bs |> List.ofSeq
 
-
 [<AutoOpen>]
 module Misc =
     open System
@@ -51,9 +50,8 @@ module Misc =
                     Some(date, date.AddDays(1.0)))
             startDate
 
-    let generateCalendar (logs: Booklog list) =
+    let generateCalendar (year: int) (logs: Booklog list) =
         let map = logs |> List.map (_.date >> DateTime.Parse) |> Set.ofList
-        let year = now.Year
         let days = datesInYear year |> List.groupBy _.DayOfWeek
         let calendar=
             days |> List.map (fun (dow, dates) ->
@@ -80,8 +78,9 @@ module Misc =
                      ] ]
 
         // TODO: sample implementation. generating HTML table from Booklog list.
-    let generateBooklogTable (logs: Booklog list) =
-        let booklogCalendar = generateCalendar logs
+    let generateBooklogTable (year: int)(logs: Booklog list) =
+        let header = Html.h1 [ Html.text $"Booklog {year}" ]
+        let booklogCalendar =  generateCalendar year logs
         let booklogRows =
             logs
             |> List.map (fun log ->
@@ -112,4 +111,9 @@ module Misc =
                                                 Html.th [ Html.text "Notes" ] ] ]
                          Html.tbody booklogRows ]
 
-        [ booklogCalendar; booklogTable ]
+        [ header; booklogCalendar; booklogTable ]
+
+    let groupBooklogs (booklogs: Booklog list) =
+        let minYear = booklogs |> List.map (_.date >> DateTime.Parse >> _.Year) |> List.min
+        let booklogPerYear = booklogs |> List.groupBy (_.date >> DateTime.Parse >> _.Year) |> Map.ofList
+        (minYear, booklogPerYear)
