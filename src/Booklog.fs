@@ -52,22 +52,32 @@ module Misc =
             startDate
 
     let generateCalendar (logs: Booklog list) =
+        let map = logs |> List.map (_.date >> DateTime.Parse) |> Set.ofList
         let year = now.Year
         let days = datesInYear year |> List.groupBy _.DayOfWeek
         let calendar=
             days |> List.map (fun (dow, dates) ->
                 dates |> List.map (fun d ->
                     let d =
-                        if d.Year = year then
-                            d.Day |> string
+                        if Set.contains d map then
+                            "log"
+                        else if d.Year <> year then
+                            "other-year"
                         else
-                            ""
+                            "no-log"
 
-                    Html.td [ Html.text d ]
+                    Html.td [ prop.className [d] ]
                 )
                 |> Html.tr
         )
-        Html.table calendar
+        Html.table [ prop.className "calendar"
+                     prop.children [
+                            Html.thead [
+                                Html.tr [
+                                ]
+                            ]
+                            Html.tbody calendar
+                     ] ]
 
         // TODO: sample implementation. generating HTML table from Booklog list.
     let generateBooklogTable (logs: Booklog list) =
