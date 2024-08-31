@@ -1,14 +1,94 @@
-- date: 2024-08-19
-  bookTitle: A book
+- date: 2024-01-01
+  bookTitle: B book
   bookAuthor: John Doe
+  readCount: 1
+  pages: 71 ~ 80
+  notes: |
+    _**Markdown support**_.
+- date: 2024-02-01
+  bookTitle: B book
+  bookAuthor: John Doe
+  readCount: 1
+  pages: 81 ~ 90
+- date: 2024-02-29
+  bookTitle: B book
+  bookAuthor: John Doe
+  readCount: 1
+  pages: 91 ~ 100
+- date: 2024-03-01
+  bookTitle: B book
+  bookAuthor: John Doe
+  readCount: 1
+  pages: 101 ~ 110
+- date: 2024-04-01
+  bookTitle: B book
+  bookAuthor: John Doe
+  readCount: 1
+  pages: 121 ~ 130
+- date: 2024-04-30
+  bookTitle: B book
+  bookAuthor: John Doe
+  readCount: 1
+  pages: 131 ~ 140
+- date: 2024-05-01
+  bookTitle: B book
+  bookAuthor: John Doe
+  readCount: 1
+  pages: 141 ~ 150
+- date: 2024-06-01
+  bookTitle: B book
+  bookAuthor: John Doe
+  readCount: 1
+  pages: 151 ~ 160
+- date: 2024-06-30
+  bookTitle: B book
+  bookAuthor: John Doe
+  readCount: 1
+  pages: 161 ~ 170
+- date: 2024-08-01
+  bookTitle: A book
+  bookAuthor: Jane Doe
   readCount: 2
   previouslyRead: true
-  pages: vi ~ 12
+  pages: 1 ~ 20
   notes: |
     read again.
-- date: 2024-08-20
+- date: 2024-09-01
   bookTitle: A book
-  bookAuthor: John Doe
+  bookAuthor: Jane Doe
   readCount: 2
   previouslyRead: true
+  pages: 21 ~ 40
+- date: 2024-09-30
+  bookTitle: A book
+  bookAuthor: Jane Doe
+  readCount: 2
+  previouslyRead: true
+  pages: 41 ~ 60
+- date: 2024-10-01
+  bookTitle: A book
+  bookAuthor: Jane Doe
+  readCount: 2
+  previouslyRead: true
+  pages: 61 ~ 80
+- date: 2024-11-01
+  bookTitle: A book
+  bookAuthor: Jane Doe
+  readCount: 2
+  previouslyRead: true
+  pages: 81 ~ 99
+- date: 2024-11-30
+  bookTitle: C book
+  bookAuthor: No name
+  readCount: 1
+  pages: 1 ~ 12
+- date: 2024-12-01
+  bookTitle: C book
+  bookAuthor: No name
+  readCount: 1
   pages: 13 ~ 20
+- date: 2024-12-31
+  bookTitle: C book
+  bookAuthor: No name
+  readCount: 1
+  pages: 21 ~ 30
