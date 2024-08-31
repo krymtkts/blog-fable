@@ -55,31 +55,36 @@ module Misc =
         let days = datesInYear year |> List.groupBy _.DayOfWeek
         let calendar=
             days |> List.map (fun (dow, dates) ->
-                dates
-                |> List.groupBy id
-                |> List.map (fun (_, logs) ->
-                    logs |> List.mapi (fun i log -> (i,log))
-                )
-                |> List.concat
-                |> List.map (fun (i, d) ->
-                    let cls =
-                        if Set.contains d map then
-                            "log"
-                        else if d.Year <> year then
-                            "other-year"
-                        else
-                            "no-log"
-
-                    Html.td [
-                        prop.className cls
-                        prop.children [
-                            Html.a [
-                                prop.href $"#{d |> DateTime.toRFC3339Date}-{i+1}"
-                            ]
+                let dowCell =
+                    match dow with
+                    | DayOfWeek.Sunday
+                    | DayOfWeek.Wednesday
+                    | DayOfWeek.Friday -> Html.td [
+                            prop.className "dow"
+                            prop.children [Html.span (dow |> DateTime.toShortDayName)]
                         ]
-                    ]
-                )
-                |> Html.tr
+                    | _ -> Html.td []
+                let dowRows =
+                    dates
+                    |> List.map (fun d ->
+                        let cls, anchor =
+                            if Set.contains d map then
+                                "log",[
+                                    Html.a [
+                                        prop.href $"#{d |> DateTime.toRFC3339Date}-1"
+                                    ]
+                                ]
+                            else if d.Year <> year then
+                                "other-year", []
+                            else
+                                "no-log", []
+
+                        Html.td [
+                            prop.className cls
+                            prop.children anchor
+                        ]
+                    )
+                Html.tr [ prop.children (dowCell :: dowRows) ]
         )
         Html.div [
             prop.className "section calendar-container"

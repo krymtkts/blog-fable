@@ -237,14 +237,15 @@ pre code {
 }
 
 .calendar-container {
+  position: relative;
   overflow: auto;
 }
 
 .calendar {
-  border-spacing: 0.1em;
+  border-spacing: 2px;
   border-collapse: separate;
 
-  min-width: 760px;
+  min-width: 778px;
   overflow: hidden;
 
   > tbody > tr {
@@ -253,9 +254,17 @@ pre code {
       padding: 0;
       margin: 0;
 
-      height: 0.8em;
-      width: 0.8em;
+      height: 12px;
+      width: 12px;
       border-radius: 4px;
+
+      span {
+        font-size: small;
+        position: absolute;
+      }
+    }
+    td.dow {
+      width: 2em;
     }
     td.log {
       background-color: $sl-cyan;

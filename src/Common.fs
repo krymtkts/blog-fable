@@ -30,6 +30,18 @@ module DateTime =
     let toRFC822DateTimeString = DateTime.toRFC822DateTimeString
     let toRFC3339Date (d: DateTime) = d |> String.format "yyyy-MM-dd"
 
+    let toShortDayName (dayOfWeek: DayOfWeek) =
+        // NOTE: System.Globalization.DateTimeFormatInfo.GetAbbreviatedDayName is not supported by Fable.
+        match dayOfWeek with
+        | DayOfWeek.Sunday -> "Sun"
+        | DayOfWeek.Monday -> "Mon"
+        | DayOfWeek.Tuesday -> "Tue"
+        | DayOfWeek.Wednesday -> "Wed"
+        | DayOfWeek.Thursday -> "Thu"
+        | DayOfWeek.Friday -> "Fri"
+        | DayOfWeek.Saturday -> "Sat"
+        | _ -> ""
+
 module private Util =
     open HighlightJs
     open Marked
