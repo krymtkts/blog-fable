@@ -97,7 +97,7 @@ module private Util =
 
             let listitem (item: Marked.Tokens.ListItem) =
                 let checkState =
-                    match item.checked with
+                    match item.``checked`` with
                     | None
                     | Some false -> ""
                     | _ -> "checked"
