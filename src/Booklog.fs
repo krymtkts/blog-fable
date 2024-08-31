@@ -147,6 +147,7 @@ module Misc =
             )
             |> List.concat
             |> List.map (fun (i, log) ->
+                // TODO: add tags to booklog.
                 let tags =
                     log.tags
                     |> function
