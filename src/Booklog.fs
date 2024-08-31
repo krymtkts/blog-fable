@@ -51,7 +51,12 @@ module Misc =
             startDate
 
     let generateCalendar (year: int) (logs: Booklog list) =
-        let map = logs |> List.map (_.date >> DateTime.Parse) |> Set.ofList
+        let dateMap =
+            logs
+            |> List.map (_.date >> DateTime.Parse)
+            |> List.groupBy id
+            |> List.map (fun (d, logs) -> (d, logs |> List.length))
+            |> Map.ofList
         let days = datesInYear year |> List.groupBy _.DayOfWeek
         let empty = Html.th []
         let header =
@@ -86,16 +91,20 @@ module Misc =
                     dates
                     |> List.map (fun d ->
                         let cls, anchor =
-                            if Set.contains d map then
+                            match Map.tryFind d dateMap with
+                            | Some count ->
+                                let date = d |> DateTime.toRFC3339Date
                                 "log",[
                                     Html.a [
-                                        prop.href $"#{d |> DateTime.toRFC3339Date}-1"
+                                        prop.href $"#{date}-1"
+                                        prop.title $"{date} ({count})"
                                     ]
                                 ]
-                            else if d.Year <> year then
-                                "other-year", []
-                            else
-                                "no-log", []
+                            | None ->
+                                if d.Year <> year then
+                                    "other-year", []
+                                else
+                                    "no-log", []
 
                         Html.td [
                             prop.className cls
