@@ -16,4 +16,18 @@
   readCount: 1
   pages: 49 ~ 90
   notes: |
-    second note.
+    1st book in the same day.
+- date: 2023-04-13
+  bookTitle: C book
+  bookAuthor: John Doe
+  readCount: 1
+  pages: 1 ~ 10
+  notes: |
+    2nd book in the same day.
+- date: 2023-04-13
+  bookTitle: B book
+  bookAuthor: John Doe
+  readCount: 1
+  pages: 1 ~ 1
+  notes: |
+    3rd book in the same day.
