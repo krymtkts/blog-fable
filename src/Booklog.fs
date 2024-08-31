@@ -53,6 +53,24 @@ module Misc =
     let generateCalendar (year: int) (logs: Booklog list) =
         let map = logs |> List.map (_.date >> DateTime.Parse) |> Set.ofList
         let days = datesInYear year |> List.groupBy _.DayOfWeek
+        let empty = Html.th []
+        let header =
+            days
+            |> List.head
+            |> snd
+            |> List.map (fun d ->
+                let startOfWeek= d
+                let endOfWeek= d.AddDays(6)
+                if startOfWeek.Day = 1 then
+                    startOfWeek |> DateTime.toShortMonthName
+                else if endOfWeek.Year <> year then
+                    ""
+                else if startOfWeek.Month <> endOfWeek.Month then
+                    endOfWeek |> DateTime.toShortMonthName
+                else
+                    ""
+                )
+            |> List.map (fun m -> Html.th [ prop.children [Html.span m]])
         let calendar=
             days |> List.map (fun (dow, dates) ->
                 let dowCell =
@@ -93,8 +111,7 @@ module Misc =
                     prop.className "calendar"
                     prop.children [
                         Html.thead [
-                            Html.tr [
-                            ]
+                            Html.tr (empty :: header)
                         ]
                         Html.tbody calendar
                     ] ]

@@ -248,6 +248,23 @@ pre code {
   min-width: 778px;
   overflow: hidden;
 
+  > thead > tr {
+    th {
+      border: none;
+      padding: 0;
+      margin: 0;
+
+      height: 24px;
+      width: 12px;
+
+      span {
+        font-size: small;
+        font-weight: normal;
+        position: absolute;
+      }
+    }
+  }
+
   > tbody > tr {
     td {
       border: none;
