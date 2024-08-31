@@ -30,15 +30,15 @@ render
       feedName = "feed"
 
       additionalNavs =
-          [ { text = "About"
-              path = "/pages/about.html" } ]
+        [ { text = "About"
+            path = "/pages/about.html" } ]
 
       timeZone = "Asia/Tokyo"
 
       sitemap =
-          { index = 1.0
-            archives = 0.8
-            tags = 0.8
-            posts = 0.9
-            pages = 0.8
-            booklogs = 0.9 } }
+        { index = 1.0
+          archives = 0.8
+          tags = 0.8
+          posts = 0.9
+          pages = 0.8
+          booklogs = 0.9 } }

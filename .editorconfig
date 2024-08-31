@@ -1,0 +1,8 @@
+[*.{fs,fsi}]
+indent_size = 4
+end_of_line = lf
+fsharp_experimental_elmish = true
+
+[*.fsx]
+indent_size = 4
+end_of_line = lf

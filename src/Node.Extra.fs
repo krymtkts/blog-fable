@@ -16,12 +16,14 @@ module Directory =
         let options = createObj [ "recursive" ==> true ]
 
         Promise.create (fun resolve reject ->
-            fs?mkdir (dir,
-                      options,
-                      (fun (err: Error option) ->
-                          match err with
-                          | Some err -> reject (err :?> System.Exception)
-                          | None -> resolve ())))
+            fs?mkdir (
+                dir,
+                options,
+                (fun (err: Error option) ->
+                    match err with
+                    | Some err -> reject (err :?> System.Exception)
+                    | None -> resolve ())
+            ))
 
     let ensure (dir: string) =
         promise {
@@ -99,10 +101,7 @@ module File =
 
     let copy (source: string) (destination: string) =
         promise {
-            do!
-                destination
-                |> Directory.dirname
-                |> Directory.ensure
+            do! destination |> Directory.dirname |> Directory.ensure
 
             return!
                 Promise.create (fun resolve reject ->
@@ -139,13 +138,12 @@ module DateTime =
             o.timeZoneName <- "short")
 
     let datetimeFormat timeZone =
-        Intl.DateTimeFormat.Create "en-US"
-        <| options timeZone
+        Intl.DateTimeFormat.Create "en-US" <| options timeZone
 
     let toRFC822DateTimeString (timeZone: string) (d: DateTime) =
         let formatter = datetimeFormat timeZone
         let parts = formatter.formatToParts (d)
-        let p: string [] = parts |> Array.map _.value
+        let p: string[] = parts |> Array.map _.value
         let d = $"%s{p.[0]}%s{p.[1]}%s{p.[4]} %s{p.[2]} %s{p.[6]}"
         let t = (p.[8..12] |> String.concat "")
 
@@ -163,6 +161,4 @@ module DateTime =
         $"%s{d} %s{t} %s{z}"
 
     let parseToRFC822DateTimeString (timeZone: string) (str: string) =
-        DateTime.Parse(str)
-        |> toRFC822DateTimeString timeZone
-
+        DateTime.Parse(str) |> toRFC822DateTimeString timeZone

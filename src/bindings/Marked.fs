@@ -209,25 +209,25 @@ module Marked =
         abstract options: MarkedOptions with get, set
 
         abstract code: item: Tokens.Code -> string
-        abstract blockquote:  item: Tokens.Blockquote -> string
-        abstract html:  item: Tokens.HTML -> string
+        abstract blockquote: item: Tokens.Blockquote -> string
+        abstract html: item: Tokens.HTML -> string
         abstract heading: item: Tokens.Heading -> string
-        abstract hr:  item: Tokens.Hr -> string
-        abstract list:  item: Tokens.List -> string
+        abstract hr: item: Tokens.Hr -> string
+        abstract list: item: Tokens.List -> string
         abstract listitem: item: Tokens.ListItem -> string
-        abstract checkbox:  item: Tokens.Checkbox -> string
-        abstract paragraph:  item: Tokens.Paragraph -> string
-        abstract table:  item: Tokens.Table -> string
-        abstract tablerow:  item: Tokens.TableRow -> string
+        abstract checkbox: item: Tokens.Checkbox -> string
+        abstract paragraph: item: Tokens.Paragraph -> string
+        abstract table: item: Tokens.Table -> string
+        abstract tablerow: item: Tokens.TableRow -> string
         abstract tablecell: item: Tokens.TableCell -> string
-        abstract strong:  item: Tokens.Strong -> string
-        abstract em:  item: Tokens.Em -> string
-        abstract codespan:  item: Tokens.Codespan -> string
-        abstract br:  item: Tokens.Br -> string
-        abstract del:  item: Tokens.Del -> string
+        abstract strong: item: Tokens.Strong -> string
+        abstract em: item: Tokens.Em -> string
+        abstract codespan: item: Tokens.Codespan -> string
+        abstract br: item: Tokens.Br -> string
+        abstract del: item: Tokens.Del -> string
         abstract link: item: Tokens.Link -> string
         abstract image: item: Tokens.Image -> string
-        abstract text:  item: Tokens.Text -> string
+        abstract text: item: Tokens.Text -> string
 
     [<RequireQualifiedAccess>]
     type RendererHeadingLevel =
@@ -328,9 +328,7 @@ module Marked =
     //     abstract Item: ruleName: string -> U2<Regex, Rules> with get, set
 
     [<AllowNullLiteral>]
-    type TokensList =
-        interface
-        end
+    type TokensList = interface end
 
     type Token = obj
 
@@ -529,14 +527,10 @@ module Marked =
             | Html
 
     [<AllowNullLiteral>]
-    type TokenizerThis =
-        interface
-        end
+    type TokenizerThis = interface end
 
     [<AllowNullLiteral>]
-    type TokenizerExtension =
-        interface
-        end
+    type TokenizerExtension = interface end
 
     [<AllowNullLiteral>]
     type RendererThis =
@@ -581,7 +575,7 @@ module Marked =
         abstract walkTokens: (Token -> unit) option with get, set
 
         // Use the new renderer that accepts an object instead of individual parameters.
-        // This option will be removed and default to true in the next major version.   
+        // This option will be removed and default to true in the next major version.
         abstract useNewRenderer: bool option with get, set
 
     [<AllowNullLiteral>]
