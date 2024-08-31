@@ -116,9 +116,7 @@ module HighlightJs =
         abstract throwUnescapedHTML: bool option with get, set
 
     [<AllowNullLiteral>]
-    type Language =
-        interface
-        end
+    type Language = interface end
 
     [<AllowNullLiteral>]
     type Emitter =

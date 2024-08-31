@@ -75,11 +75,7 @@ module private Util =
                 let escapedText = Regex.Replace(text, @"[^\w]+", "-")
                 let l = (int) item.depth + 1
 
-                let meta =
-                    if l = 2 then
-                        " data-pagefind-meta=\"title\" "
-                    else
-                        ""
+                let meta = if l = 2 then " data-pagefind-meta=\"title\" " else ""
 
                 $"""<h%d{l} %s{meta}><a name="%s{escapedText}" href="#%s{escapedText}">%s{text}</a></h%d{l}>"""
 
@@ -147,9 +143,7 @@ module private Util =
 
         let highlighter =
             let highlight (code: string) (lang: string) =
-                let code =
-                    (hljs.highlight code !!{| language = lang |} false)
-                        .value
+                let code = (hljs.highlight code !!{| language = lang |} false).value
 
                 Regex.Replace(
                     code,
@@ -207,8 +201,10 @@ module Parser =
         let (frontMatter, content) = extractFrontMatter content
 
         let content =
-            Html.div [ prop.className "section"
-                       prop.dangerouslySetInnerHTML (parseMarkdown content) ]
+            Html.div [
+                prop.className "section"
+                prop.dangerouslySetInnerHTML (parseMarkdown content)
+            ]
 
         frontMatter, content
 
@@ -219,8 +215,7 @@ module Parser =
     let parseReactStaticMarkup el = ReactDOMServer.renderToStaticMarkup el
 
     let parseReactStaticHtml el =
-        @"<!DOCTYPE html>"
-        + ReactDOMServer.renderToStaticMarkup el
+        @"<!DOCTYPE html>" + ReactDOMServer.renderToStaticMarkup el
 
 [<AutoOpen>]
 module Misc =
@@ -247,8 +242,7 @@ module Misc =
         Regex.IsMatch(s, @"^[a-zA-Z0-9-.\s]+\.md$") |> not
 
     let isInvalidPostsFilenamePattern (s: string) =
-        Regex.IsMatch(s, @"^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9-.\s]+\.md$")
-        |> not
+        Regex.IsMatch(s, @"^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9-.\s]+\.md$") |> not
 
     type Meta =
         { frontMatter: Parser.FrontMatter option
@@ -263,10 +257,7 @@ module Misc =
           index: bool }
 
     let getDestinationPath (source: string) (dir: string) =
-        Directory.leaf source
-        |> Util.mdToHtml
-        |> Directory.join2 dir
-        |> IO.resolve
+        Directory.leaf source |> Util.mdToHtml |> Directory.join2 dir |> IO.resolve
 
     let isMarkdown (path: string) = path.EndsWith ".md"
 
@@ -343,13 +334,12 @@ module Xml =
         let urls =
             locs
             |> Seq.map (fun loc ->
-                node
-                    "url"
-                    []
-                    [ node "loc" [] [ text $"{root}{loc.loc}" ]
-                      node "lastmod" [] [ text loc.lastmod ]
-                      //   node "changefreq" [] [ text "monthly" ]
-                      node "priority" [] [ text loc.priority ] ])
+                node "url" [] [
+                    node "loc" [] [ text $"{root}{loc.loc}" ]
+                    node "lastmod" [] [ text loc.lastmod ]
+                    //   node "changefreq" [] [ text "monthly" ]
+                    node "priority" [] [ text loc.priority ]
+                ])
             |> List.ofSeq
 
         let urlSet =
@@ -359,9 +349,7 @@ module Xml =
                   attr.value ("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance") ]
                 urls
 
-        urlSet
-        |> serializeXml
-        |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
+        urlSet |> serializeXml |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
 
     type RssItem =
         { guid: string
@@ -388,10 +376,7 @@ module Xml =
             match meta.frontMatter with
             | Some fm -> fm.title
             | None -> meta.leaf
-          description =
-            meta.content
-            |> Parser.parseReactStaticMarkup
-            |> simpleEscape
+          description = meta.content |> Parser.parseReactStaticMarkup |> simpleEscape
           pubDate = pubDate }
 
     type RssChannel =
@@ -406,34 +391,33 @@ module Xml =
         let itemNodes =
             items
             |> Seq.map (fun item ->
-                node
-                    "item"
-                    []
-                    [ node "guid" [] [ text item.guid ]
-                      node "link" [] [ text item.link ]
-                      node "title" [] [ text item.title ]
-                      node "description" [] [ text item.description ]
-                      node "pubDate" [] [ text item.pubDate ] ])
+                node "item" [] [
+                    node "guid" [] [ text item.guid ]
+                    node "link" [] [ text item.link ]
+                    node "title" [] [ text item.title ]
+                    node "description" [] [ text item.description ]
+                    node "pubDate" [] [ text item.pubDate ]
+                ])
             |> List.ofSeq
 
-        node
-            "rss"
-            [ attr.value ("version", "2.0")
-              attr.value ("xmlns:atom", "http://www.w3.org/2005/Atom") ]
-            [ node "channel" []
-              <| [ node
-                       "atom:link"
-                       [ attr.value ("href", $"{channel.link}{channel.xml}")
-                         attr.value ("rel", "self")
-                         attr.value ("type", "application/rss+xml") ]
-                       []
-                   node "title" [] [ text channel.title ]
+        node "rss" [
+            attr.value ("version", "2.0")
+            attr.value ("xmlns:atom", "http://www.w3.org/2005/Atom")
+        ] [
+            node "channel" []
+            <| [ node "atom:link" [
+                     attr.value ("href", $"{channel.link}{channel.xml}")
+                     attr.value ("rel", "self")
+                     attr.value ("type", "application/rss+xml")
+                 ] []
+                 node "title" [] [ text channel.title ]
 
-                   node "description" [] [ text channel.description ]
-                   node "link" [] [ text channel.link ]
-                   node "lastBuildDate" [] [ text channel.lastBuildDate ]
-                   node "generator" [] [ text channel.generator ] ]
-                 @ itemNodes ]
+                 node "description" [] [ text channel.description ]
+                 node "link" [] [ text channel.link ]
+                 node "lastBuildDate" [] [ text channel.lastBuildDate ]
+                 node "generator" [] [ text channel.generator ] ]
+               @ itemNodes
+        ]
         |> serializeXml
         |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
 
@@ -448,17 +432,17 @@ module Component =
     let liA ref (title: NavItem) =
         let children =
             function
-            | Text (s) -> [ prop.title s; prop.text s ]
-            | Html (s) -> [ prop.dangerouslySetInnerHTML s ]
-            | Element (s, el) -> [ prop.title s; prop.children [ el ] ]
+            | Text(s) -> [ prop.title s; prop.text s ]
+            | Html(s) -> [ prop.dangerouslySetInnerHTML s ]
+            | Element(s, el) -> [ prop.title s; prop.children [ el ] ]
 
         Html.li [ Html.a <| prop.href ref :: children title ]
 
     let liSpanA (span: string) ref title =
-        Html.li [ Html.span [ prop.text span ]
-                  Html.a [ prop.href ref
-                           prop.title title
-                           prop.text title ] ]
+        Html.li [
+            Html.span [ prop.text span ]
+            Html.a [ prop.href ref; prop.title title; prop.text title ]
+        ]
 
     let tagToLi root tag count =
         let leaf = Directory.leaf $"{tag}.html"
@@ -472,7 +456,7 @@ module Component =
 
         let prefix =
             match meta.layout with
-            | Post (date) -> $"%s{date} - "
+            | Post(date) -> $"%s{date} - "
             | _ -> ""
 
         let title =
@@ -493,27 +477,32 @@ module Component =
                 | _, Some pub -> pub
                 | _ -> null
 
-            Html.div [ prop.className "date"
-                       prop.text date ]
+            Html.div [ prop.className "date"; prop.text date ]
 
         let header =
             match fm with
             | Some fm ->
                 [ date pubDate fm.date
-                  Html.h1 [ prop.className [ "title" ]
-                            prop.dangerouslySetInnerHTML (fm.title |> Util.parseMarkdownInline) ]
-                  Html.div [ prop.className [ "tags" ]
-                             prop.custom ("data-pagefind-ignore", "all")
-                             prop.children (
-                                 match fm.tags with
-                                 | Some tags -> tags
-                                 | None -> [||]
-                                 |> Seq.map (fun tag ->
-                                     Html.a [ prop.href $"%s{tagRoot}%s{tag}.html"
-                                              prop.title tag
-                                              prop.className "tag is-medium"
-                                              prop.text tag ])
-                             ) ] ]
+                  Html.h1 [
+                      prop.className [ "title" ]
+                      prop.dangerouslySetInnerHTML (fm.title |> Util.parseMarkdownInline)
+                  ]
+                  Html.div [
+                      prop.className [ "tags" ]
+                      prop.custom ("data-pagefind-ignore", "all")
+                      prop.children (
+                          match fm.tags with
+                          | Some tags -> tags
+                          | None -> [||]
+                          |> Seq.map (fun tag ->
+                              Html.a [
+                                  prop.href $"%s{tagRoot}%s{tag}.html"
+                                  prop.title tag
+                                  prop.className "tag is-medium"
+                                  prop.text tag
+                              ])
+                      )
+                  ] ]
             | None -> []
 
         header
@@ -535,67 +524,67 @@ module Component =
 
     let frame (conf: FrameConfiguration) (content: Fable.React.ReactElement list) =
         let themeSelector =
-            [ Html.li [ prop.children [ Html.button [ prop.className "theme-toggle"
-                                                      prop.custom ("data-theme", "light")
-                                                      prop.text "🌞"
-                                                      prop.title "Light theme" ]
-                                        Html.button [ prop.className "theme-toggle"
-                                                      prop.custom ("data-theme", "dark")
-                                                      prop.text "🌙"
-                                                      prop.title "Dark theme" ]
-                                        Html.button [ prop.className "theme-toggle"
-                                                      prop.custom ("data-theme", "system")
-                                                      prop.text "🖥️"
-                                                      prop.title "System Default" ] ] ] ]
+            [ Html.li [
+                  prop.children [
+                      Html.button [
+                          prop.className "theme-toggle"
+                          prop.custom ("data-theme", "light")
+                          prop.text "🌞"
+                          prop.title "Light theme"
+                      ]
+                      Html.button [
+                          prop.className "theme-toggle"
+                          prop.custom ("data-theme", "dark")
+                          prop.text "🌙"
+                          prop.title "Dark theme"
+                      ]
+                      Html.button [
+                          prop.className "theme-toggle"
+                          prop.custom ("data-theme", "system")
+                          prop.text "🖥️"
+                          prop.title "System Default"
+                      ]
+                  ]
+              ] ]
 
         let navbar = Html.ul [ prop.children (conf.navItems @ themeSelector) ]
 
         let main =
-            [ Html.head [ Html.title [ prop.text conf.title ]
-                          Html.meta [ prop.charset "utf-8" ]
-                          Html.meta [ prop.name "description"
-                                      prop.content conf.description ]
-                          Html.meta [ prop.name "viewport"
-                                      prop.content "width=device-width, initial-scale=1" ]
-                          Html.meta [ prop.custom ("property", "og:site_name")
-                                      prop.content conf.name ]
-                          Html.meta [ prop.custom ("property", "og:title")
-                                      prop.content conf.title ]
-                          Html.meta [ prop.custom ("property", "og:description")
-                                      prop.content conf.description ]
-                          Html.meta [ prop.custom ("property", "og:url")
-                                      prop.content conf.url ]
-                          Html.link [ prop.rel "canonical"
-                                      prop.href conf.url ]
-                          Html.link [ prop.rel "icon"
-                                      prop.href conf.favicon ]
-                          Html.link [ prop.rel "stylesheet"
-                                      prop.href conf.pagefindStyle ]
-                          Html.script [ prop.src conf.pagefindScript ]
-                          Html.link [ prop.rel "stylesheet"
-                                      prop.type' "text/css"
-                                      prop.href conf.style ]
-                          Html.link [ prop.rel "stylesheet"
-                                      prop.type' "text/css"
-                                      prop.href conf.highlightStyle ] ]
-              Html.body [ Html.nav [ prop.className "tabs"
-                                     prop.children [ navbar ] ]
-                          Html.main [ prop.className "container"
-                                      prop.children [ Html.div [ prop.className "content"
-                                                                 prop.children content ] ] ] ]
-              Html.footer [ prop.className "footer"
-                            prop.children [ Html.div [ prop.className "container"
-                                                       prop.text ($"Copyright © %s{conf.copyright}") ] ] ] ]
+            [ Html.head [
+                  Html.title [ prop.text conf.title ]
+                  Html.meta [ prop.charset "utf-8" ]
+                  Html.meta [ prop.name "description"; prop.content conf.description ]
+                  Html.meta [ prop.name "viewport"; prop.content "width=device-width, initial-scale=1" ]
+                  Html.meta [ prop.custom ("property", "og:site_name"); prop.content conf.name ]
+                  Html.meta [ prop.custom ("property", "og:title"); prop.content conf.title ]
+                  Html.meta [ prop.custom ("property", "og:description"); prop.content conf.description ]
+                  Html.meta [ prop.custom ("property", "og:url"); prop.content conf.url ]
+                  Html.link [ prop.rel "canonical"; prop.href conf.url ]
+                  Html.link [ prop.rel "icon"; prop.href conf.favicon ]
+                  Html.link [ prop.rel "stylesheet"; prop.href conf.pagefindStyle ]
+                  Html.script [ prop.src conf.pagefindScript ]
+                  Html.link [ prop.rel "stylesheet"; prop.type' "text/css"; prop.href conf.style ]
+                  Html.link [ prop.rel "stylesheet"; prop.type' "text/css"; prop.href conf.highlightStyle ]
+              ]
+              Html.body [
+                  Html.nav [ prop.className "tabs"; prop.children [ navbar ] ]
+                  Html.main [
+                      prop.className "container"
+                      prop.children [ Html.div [ prop.className "content"; prop.children content ] ]
+                  ]
+              ]
+              Html.footer [
+                  prop.className "footer"
+                  prop.children [
+                      Html.div [ prop.className "container"; prop.text ($"Copyright © %s{conf.copyright}") ]
+                  ]
+              ] ]
 
         let scripts =
             conf.scriptInjection
-            |> List.map (fun src ->
-                Html.script [ prop.lang "javascript"
-                              prop.type' "text/javascript"
-                              prop.src src ])
+            |> List.map (fun src -> Html.script [ prop.lang "javascript"; prop.type' "text/javascript"; prop.src src ])
 
-        Html.html [ prop.lang conf.lang
-                    prop.children (scripts @ main) ]
+        Html.html [ prop.lang conf.lang; prop.children (scripts @ main) ]
 
     type FooterButton =
         | Prev
@@ -618,15 +607,19 @@ module Component =
                     | Prev -> $"<< %s{t}", "prev"
                     | Next -> $"%s{t} >>", "next"
 
-                Html.a [ prop.classes [ className; "button" ]
-                         prop.href ref
-                         prop.title text
-                         prop.children [ Html.span [ prop.text text ] ] ]
+                Html.a [
+                    prop.classes [ className; "button" ]
+                    prop.href ref
+                    prop.title text
+                    prop.children [ Html.span [ prop.text text ] ]
+                ]
             | None -> null
 
         let prev = button Prev prev
         let next = button Next next
 
-        [ Html.div [ prop.className "buttons"
-                     prop.custom ("data-pagefind-ignore", "all")
-                     prop.children [ prev; next ] ] ]
+        [ Html.div [
+              prop.className "buttons"
+              prop.custom ("data-pagefind-ignore", "all")
+              prop.children [ prev; next ]
+          ] ]

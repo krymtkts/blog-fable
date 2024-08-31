@@ -20,8 +20,8 @@ module Path =
     type IExports =
         abstract basename: path: string -> string
         abstract dirname: path: string -> string
-        abstract join: [<ParamArray>] paths: string [] -> string
-        abstract resolve: [<ParamArray>] paths: string [] -> string
+        abstract join: [<ParamArray>] paths: string[] -> string
+        abstract resolve: [<ParamArray>] paths: string[] -> string
         abstract sep: string
 
 [<Import("*", "path")>]
