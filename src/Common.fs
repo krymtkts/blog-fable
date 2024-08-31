@@ -30,6 +30,34 @@ module DateTime =
     let toRFC822DateTimeString = DateTime.toRFC822DateTimeString
     let toRFC3339Date (d: DateTime) = d |> String.format "yyyy-MM-dd"
 
+    let toShortDayName (dayOfWeek: DayOfWeek) =
+        // NOTE: System.Globalization.DateTimeFormatInfo.GetAbbreviatedDayName is not supported by Fable.
+        match dayOfWeek with
+        | DayOfWeek.Sunday -> "Sun"
+        | DayOfWeek.Monday -> "Mon"
+        | DayOfWeek.Tuesday -> "Tue"
+        | DayOfWeek.Wednesday -> "Wed"
+        | DayOfWeek.Thursday -> "Thu"
+        | DayOfWeek.Friday -> "Fri"
+        | DayOfWeek.Saturday -> "Sat"
+        | _ -> ""
+
+    let toShortMonthName (date: DateTime) =
+        match date.Month with
+        | 1 -> "Jan"
+        | 2 -> "Feb"
+        | 3 -> "Mar"
+        | 4 -> "Apr"
+        | 5 -> "May"
+        | 6 -> "Jun"
+        | 7 -> "Jul"
+        | 8 -> "Aug"
+        | 9 -> "Sep"
+        | 10 -> "Oct"
+        | 11 -> "Nov"
+        | 12 -> "Dec"
+        | _ -> ""
+
 module private Util =
     open HighlightJs
     open Marked
@@ -73,7 +101,7 @@ module private Util =
 
             let listitem (item: Marked.Tokens.ListItem) =
                 let checkState =
-                    match item.``checked`` with
+                    match item.checked with
                     | None
                     | Some false -> ""
                     | _ -> "checked"
@@ -173,6 +201,8 @@ module Parser =
     /// Parses a markdown string
     let parseMarkdown str = Util.parseMarkdown str
 
+    let parseYaml str : 'a = Yaml.parse str
+
     let parseMarkdownAsReactEl content =
         let (frontMatter, content) = extractFrontMatter content
 
@@ -240,18 +270,25 @@ module Misc =
 
     let isMarkdown (path: string) = path.EndsWith ".md"
 
-    let getMarkdownFiles dir =
+    let isYaml (path: string) =
+        path.EndsWith ".yml" || path.EndsWith ".yaml"
+
+    let getFiles predict dir =
         promise {
             let! paths = IO.getFiles dir
 
             let files =
                 paths
-                |> List.filter isMarkdown
+                |> List.filter predict
                 |> List.map (Directory.join2 dir)
                 |> List.map IO.resolve
 
             return files
         }
+
+    let getMarkdownFiles = getFiles isMarkdown
+
+    let getYamlFiles = getFiles isYaml
 
     let getImagePathPairs src dest =
         promise {

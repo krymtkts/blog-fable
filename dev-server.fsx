@@ -76,7 +76,12 @@ let handleWatcherEvents, socketHandler =
 
                 match fi.FullName with
                 | x when x.EndsWith(".fs") -> BuildFable
-                | x when x.EndsWith(".md") -> BuildMd
+                | x when
+                    x.EndsWith(".md")
+                    || x.EndsWith(".yml")
+                    || x.EndsWith(".yaml")
+                    ->
+                    BuildMd
                 | x when x.EndsWith(".scss") -> BuildStyle
                 | _ -> Noop)
             |> Set.ofSeq
@@ -195,6 +200,8 @@ try
     use _ =
         !! "src/**/*.fs"
         ++ "contents/**/*.md"
+        ++ "contents/**/*.yml"
+        ++ "contents/**/*.yaml"
         ++ "sass/**/*.scss"
         |> ChangeWatcher.run handleWatcherEvents
 

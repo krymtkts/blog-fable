@@ -22,6 +22,9 @@ render
       archives =
         { root = "/archives"
           title = "Archives" }
+      booklogs =
+        { root = "/booklogs"
+          title = "Booklogs" }
       images = "/img"
 
       feedName = "feed"
@@ -37,4 +40,5 @@ render
             archives = 0.8
             tags = 0.8
             posts = 0.9
-            pages = 0.8 } }
+            pages = 0.8
+            booklogs = 0.9 } }
