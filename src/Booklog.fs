@@ -55,8 +55,14 @@ module Misc =
         let days = datesInYear year |> List.groupBy _.DayOfWeek
         let calendar=
             days |> List.map (fun (dow, dates) ->
-                dates |> List.map (fun d ->
-                    let d =
+                dates
+                |> List.groupBy id
+                |> List.map (fun (_, logs) ->
+                    logs |> List.mapi (fun i log -> (i,log))
+                )
+                |> List.concat
+                |> List.map (fun (i, d) ->
+                    let cls =
                         if Set.contains d map then
                             "log"
                         else if d.Year <> year then
@@ -64,7 +70,14 @@ module Misc =
                         else
                             "no-log"
 
-                    Html.td [ prop.className [d] ]
+                    Html.td [
+                        prop.className cls
+                        prop.children [
+                            Html.a [
+                                prop.href $"#{d |> DateTime.toRFC3339Date}-{i+1}"
+                            ]
+                        ]
+                    ]
                 )
                 |> Html.tr
         )
@@ -97,7 +110,12 @@ module Misc =
         let booklogCalendar =  generateCalendar year logs
         let booklogRows =
             logs
-            |> List.map (fun log ->
+            |> List.groupBy _.date
+            |> List.map (fun (_, logs) ->
+                logs |> List.mapi (fun i log -> (i,log))
+            )
+            |> List.concat
+            |> List.map (fun (i, log) ->
                 let tags =
                     log.tags
                     |> function
@@ -109,6 +127,7 @@ module Misc =
                     prop.className "section"
                     prop.children [
                         Html.h2 [
+                            prop.id $"{log.date}-{i+1}"
                             prop.className "subtitle"
                             prop.children [
                                 Html.text log.date

@@ -259,6 +259,11 @@ pre code {
     }
     td.log {
       background-color: $sl-cyan;
+      a {
+        display: block;
+        height: 100%;
+        width: 100%;
+      }
     }
     td.no-log {
       background-color: $sl-base02;
