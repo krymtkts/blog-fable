@@ -68,14 +68,20 @@ module Misc =
                 )
                 |> Html.tr
         )
-        Html.table [ prop.className "calendar"
-                     prop.children [
-                            Html.thead [
-                                Html.tr [
-                                ]
+        Html.div [
+            prop.className "section calendar-container"
+            prop.children [
+                Html.table [
+                    prop.className "calendar"
+                    prop.children [
+                        Html.thead [
+                            Html.tr [
                             ]
-                            Html.tbody calendar
-                     ] ]
+                        ]
+                        Html.tbody calendar
+                    ] ]
+            ]
+        ]
 
     let generateBooklogLinks baseUrl years =
         let links =
@@ -87,7 +93,7 @@ module Misc =
         Html.ul [ prop.className "booklog-links"; prop.children links ]
 
     let generateBooklogTable links (year: int) (logs: Booklog list) =
-        let header = Html.h1 [ Html.text $"Booklog {year}" ]
+        let header = Html.h1 [ prop.className "title" ; prop.children (Html.text $"Booklog {year}") ]
         let booklogCalendar =  generateCalendar year logs
         let booklogRows =
             logs
@@ -99,27 +105,27 @@ module Misc =
                         | None -> []
                     |> String.concat ", "
 
-                Html.tr [ Html.td [ Html.text log.date ]
-                          Html.td [ Html.text log.bookTitle ]
-                          Html.td [ Html.text log.bookAuthor ]
-                          Html.td [ Html.text $"read count: {log.readCount |> Option.defaultValue 0}" ]
-                          Html.td [ Html.text $"previously read: {log.previouslyRead |> Option.defaultValue false}" ]
-                          Html.td [ Html.text $"pages: {log.pages}" ]
-                          Html.td [ Html.text tags ]
-                          Html.td [ Html.text (log.notes |> Option.defaultValue "") ] ])
+                Html.div [
+                    prop.className "section"
+                    prop.children [
+                        Html.h2 [
+                            prop.className "subtitle"
+                            prop.children [
+                                Html.text log.date
+                                Html.text log.bookTitle
+                                Html.text (log.readCount |> function | Some rc -> $" ({rc})" | None -> "")
+                                Html.text (
+                                    log.previouslyRead
+                                    |> function
+                                    | Some pr -> if pr then " rereading " else ""
+                                    | None -> "")
+                                Html.text log.pages
+                            ]]
+                        Html.p [ Html.text (log.notes |> Option.defaultValue "")]
+                    ]
+                ])
 
-        let booklogTable =
-            Html.table [ Html.thead [ Html.tr [ Html.th [ Html.text "Date" ]
-                                                Html.th [ Html.text "Title" ]
-                                                Html.th [ Html.text "Author" ]
-                                                Html.th [ Html.text "Read Count" ]
-                                                Html.th [ Html.text "Previously Read" ]
-                                                Html.th [ Html.text "Pages" ]
-                                                Html.th [ Html.text "Tags" ]
-                                                Html.th [ Html.text "Notes" ] ] ]
-                         Html.tbody booklogRows ]
-
-        [ header; booklogCalendar; booklogTable; links; ]
+        [ header; booklogCalendar; Html.div booklogRows; links; ]
 
     let groupBooklogs (booklogs: Booklog list) =
         let minYear = booklogs |> List.map (_.date >> DateTime.Parse >> _.Year) |> List.min
