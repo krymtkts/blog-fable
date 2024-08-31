@@ -157,22 +157,32 @@ module Misc =
                 Html.div [
                     prop.className "section"
                     prop.children [
-                        Html.h2 [
+                        Html.p [
                             prop.id $"{log.date}-{i+1}"
-                            prop.className "subtitle"
+                            prop.className "title is-4"
                             prop.children [
                                 Html.text log.date
                                 Html.small [
-                                    Html.text log.bookTitle
-                                    Html.text (log.readCount |> function | Some rc -> $" ({rc})" | None -> "")
-                                    Html.text (
-                                        log.previouslyRead
-                                        |> function
-                                        | Some pr -> if pr then " rereading " else ""
-                                        | None -> "")
-                                    Html.text log.pages
+                                    Html.text $" - {log.bookTitle}"
                                 ]
                             ]]
+                        Html.p [
+                            prop.className "subtitle is-6"
+                            prop.children [
+                                Html.text "page: "
+                                Html.text log.pages
+                                Html.text ", read count: "
+                                Html.text (
+                                        let rc =
+                                            log.readCount |> function | Some rc -> rc | None -> 1
+                                        log.previouslyRead
+                                        |> function
+                                        | Some pr when pr ->
+                                            $"n+{rc}"
+                                        | _ -> $"{rc}"
+                                        )
+                            ]
+                        ]
                         Html.p [ Html.text (log.notes |> Option.defaultValue "")]
                     ]
                 ])
