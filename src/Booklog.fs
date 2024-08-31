@@ -131,14 +131,16 @@ module Misc =
                             prop.className "subtitle"
                             prop.children [
                                 Html.text log.date
-                                Html.text log.bookTitle
-                                Html.text (log.readCount |> function | Some rc -> $" ({rc})" | None -> "")
-                                Html.text (
-                                    log.previouslyRead
-                                    |> function
-                                    | Some pr -> if pr then " rereading " else ""
-                                    | None -> "")
-                                Html.text log.pages
+                                Html.small [
+                                    Html.text log.bookTitle
+                                    Html.text (log.readCount |> function | Some rc -> $" ({rc})" | None -> "")
+                                    Html.text (
+                                        log.previouslyRead
+                                        |> function
+                                        | Some pr -> if pr then " rereading " else ""
+                                        | None -> "")
+                                    Html.text log.pages
+                                ]
                             ]]
                         Html.p [ Html.text (log.notes |> Option.defaultValue "")]
                     ]
