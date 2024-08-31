@@ -236,9 +236,17 @@ pre code {
   }
 }
 
+.calendar-container {
+  overflow: auto;
+}
+
 .calendar {
   border-spacing: 0.1em;
   border-collapse: separate;
+
+  min-width: 760px;
+  overflow: hidden;
+
   > tbody > tr {
     td {
       border: none;
