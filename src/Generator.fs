@@ -437,7 +437,7 @@ module Rendering =
         }
 
     let renderBooklogs (conf: FrameConfiguration) (site: PathConfiguration) (sourceDir: string) (dest: string) =
-        let title = $"%s{conf.title} - Tags"
+        let title = $"%s{conf.title} - Booklogs"
 
         promise {
             printfn "Getting booklogs from %s" sourceDir
