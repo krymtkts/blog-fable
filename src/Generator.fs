@@ -449,7 +449,7 @@ module Rendering =
             let minYear, booklogPerYear = booklogs |> groupBooklogs
             let maxYear = now.Year
             let years = [ minYear..maxYear ]
-            let basePath = $"%s{site.siteRoot}/%s{IO.leaf dest}".Replace(".html", "")
+            let basePath = $"%s{site.siteRoot}/%s{IO.leaf destDir}"
             let links = generateBooklogLinks basePath years
 
             do!
@@ -465,7 +465,7 @@ module Rendering =
                         |> generateBooklogTable links year
                         |> frame
                             { conf with
-                                title = title
+                                title = $"%s{title} - %d{year}"
                                 url = $"%s{conf.url}%s{basePath}" }
                         |> Parser.parseReactStaticHtml
 
