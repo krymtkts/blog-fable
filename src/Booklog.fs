@@ -155,6 +155,12 @@ module Misc =
                         | None -> []
                     |> String.concat ", "
 
+                let notes =
+                    log.notes
+                    |> function
+                        | Some notes -> Html.p [ prop.dangerouslySetInnerHTML (parseMarkdown notes) ]
+                        | None -> Html.p []
+
                 Html.div [
                     prop.className "section"
                     prop.children [
@@ -186,7 +192,7 @@ module Misc =
 
                             ]
                         ]
-                        Html.p [ Html.text (log.notes |> Option.defaultValue "") ]
+                        notes
                     ]
                 ])
 
