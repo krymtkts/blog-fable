@@ -145,6 +145,7 @@ module Misc =
             |> List.groupBy _.date
             |> List.map (fun (_, logs) -> logs |> List.mapi (fun i log -> (i, log)))
             |> List.concat
+            |> List.rev
             |> List.map (fun (i, log) ->
                 // TODO: add tags to booklog.
                 let tags =
@@ -160,13 +161,12 @@ module Misc =
                         Html.p [
                             prop.id $"{log.date}-{i + 1}"
                             prop.className "title is-4"
-                            prop.children [ Html.text log.date; Html.small [ Html.text $" - {log.bookTitle}" ] ]
+                            prop.children [ Html.text log.date ]
                         ]
                         Html.p [
                             prop.className "subtitle is-6"
                             prop.children [
-                                Html.text "page: "
-                                Html.text log.pages
+                                Html.text $"{log.bookTitle}"
                                 Html.text ", read count: "
                                 Html.text (
                                     let rc =
@@ -180,6 +180,10 @@ module Misc =
                                         | Some pr when pr -> $"n+{rc}"
                                         | _ -> $"{rc}"
                                 )
+                                Html.br []
+                                Html.text "page: "
+                                Html.text log.pages
+
                             ]
                         ]
                         Html.p [ Html.text (log.notes |> Option.defaultValue "") ]

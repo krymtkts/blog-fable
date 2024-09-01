@@ -4,7 +4,7 @@
   readCount: 1
   pages: 71 ~ 80
   notes: |
-    _**Markdown support**_.
+    _**Markdown support not yet**_.
 - date: 2024-02-01
   bookTitle: B book
   bookAuthor: John Doe
@@ -92,3 +92,10 @@
   bookAuthor: No name
   readCount: 1
   pages: 21 ~ 30
+- date: 2024-12-31
+  bookTitle: C book
+  bookAuthor: No name
+  readCount: 1
+  pages: 31 ~ 40
+  notes: |
+    read again in the same day.
