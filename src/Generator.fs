@@ -436,7 +436,13 @@ module Rendering =
             return locs
         }
 
-    let renderBooklogs (conf: FrameConfiguration) (site: PathConfiguration) (sourceDir: string) (dest: string) =
+    let renderBooklogs
+        (conf: FrameConfiguration)
+        (site: PathConfiguration)
+        (priority: string)
+        (sourceDir: string)
+        (dest: string)
+        =
         let title = $"%s{conf.title} - Booklogs"
 
         promise {
@@ -452,7 +458,7 @@ module Rendering =
             let basePath = $"%s{site.siteRoot}/%s{IO.leaf destDir}"
             let links = generateBooklogLinks basePath years
 
-            do!
+            let promises, locs =
                 [ minYear..maxYear ]
                 |> List.map (fun year ->
                     let logs =
@@ -469,13 +475,19 @@ module Rendering =
                                 url = $"%s{conf.url}%s{basePath}" }
                         |> Parser.parseReactStaticHtml
 
+                    let lastmod = logs |> List.maxBy _.date |> _.date
+
+                    let loc: Xml.SiteLocation =
+                        { loc = sourceToSitemap basePath (year |> string)
+                          lastmod = lastmod
+                          priority = priority }
+
                     let dest = $"{destDir}/%d{year}.html"
                     printfn $"Writing booklog to %s{dest}..."
-                    IO.writeFile dest content |> Promise.map ignore
+                    IO.writeFile dest content, loc)
+                |> List.unzip
 
-                )
-                |> Promise.all
-                |> Promise.map ignore
+            do! promises |> Promise.all |> Promise.map ignore
 
             do!
                 let logs =
@@ -494,6 +506,8 @@ module Rendering =
 
                 printfn $"Writing booklog to %s{dest}..."
                 IO.writeFile dest content
+
+            return locs
         }
 
 
@@ -784,18 +798,17 @@ let render (opts: RenderOptions) =
 
         let! tagLocs = renderTags conf site tagDef <| RenderOptions.tagsDestinationPath opts
 
-        // TODO: organize.
-        renderBooklogs conf site
-        <| RenderOptions.booklogsSourceRoot opts
-        <| RenderOptions.booklogsDestinationPath opts
-        |> ignore
+        let! booklogLocs =
+            renderBooklogs conf site (opts.sitemap.booklogs |> string)
+            <| RenderOptions.booklogsSourceRoot opts
+            <| RenderOptions.booklogsDestinationPath opts
 
         do! render404 conf site <| RenderOptions.``404DestinationPath`` opts
 
         do!
             renderSitemap conf.url
             <| RenderOptions.sitemapDestinationPath opts
-            <| (Seq.concat [ navSitemap; tagLocs; archiveLocs ])
+            <| (Seq.concat [ navSitemap; tagLocs; archiveLocs; booklogLocs ])
 
         do!
             renderFeed
