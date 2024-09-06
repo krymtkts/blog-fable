@@ -459,7 +459,7 @@ module Rendering =
             let links = generateBooklogLinks basePath years
 
             let contents =
-                [ minYear..maxYear ]
+                years
                 |> List.map (fun year ->
                     match booklogPerYear |> Map.tryFind year with
                     | None -> []
