@@ -458,56 +458,33 @@ module Rendering =
             let basePath = $"%s{site.siteRoot}/%s{IO.leaf destDir}"
             let links = generateBooklogLinks basePath years
 
-            let promises, locs =
-                [ minYear..maxYear ]
+            let contents =
+                years
                 |> List.map (fun year ->
-                    let logs =
-                        match booklogPerYear |> Map.tryFind year with
-                        | None -> []
-                        | Some(logs) -> logs
-
-                    let content =
-                        logs
-                        |> generateBooklogTable links year
-                        |> frame
-                            { conf with
-                                title = $"%s{title} - %d{year}"
-                                url = $"%s{conf.url}%s{basePath}" }
-                        |> Parser.parseReactStaticHtml
-
-                    let lastmod = logs |> List.maxBy _.date |> _.date
-
-                    let loc: Xml.SiteLocation =
-                        { loc = sourceToSitemap basePath (year |> string)
-                          lastmod = lastmod
-                          priority = priority }
-
-                    let dest = $"{destDir}/%d{year}.html"
-                    printfn $"Writing booklog to %s{dest}..."
-                    IO.writeFile dest content, loc)
-                |> List.unzip
-
-            do! promises |> Promise.all |> Promise.map ignore
-
-            do!
-                let logs =
-                    match booklogPerYear |> Map.tryFind maxYear with
+                    match booklogPerYear |> Map.tryFind year with
                     | None -> []
                     | Some(logs) -> logs
+                    |> parseBooklogTable
+                        { conf with title = title }
+                        { priority = priority
+                          basePath = basePath
+                          links = links
+                          year = year })
 
-                let content =
-                    logs
-                    |> generateBooklogTable links maxYear
-                    |> frame
-                        { conf with
-                            title = title
-                            url = $"%s{conf.url}%s{basePath}" }
-                    |> Parser.parseReactStaticHtml
+            do!
+                contents
+                |> List.map (fun (content, _, year) ->
+                    let dest = $"{destDir}/%d{year}.html"
+                    printfn $"Writing booklog to %s{dest}..."
+                    IO.writeFile dest content)
+                |> Promise.all
+                |> Promise.map ignore
 
-                printfn $"Writing booklog to %s{dest}..."
-                IO.writeFile dest content
+            do!
+                printfn $"Writing index of booklog to %s{dest}..."
+                contents |> List.last |> (fun (content, _, _) -> IO.writeFile dest content)
 
-            return locs
+            return contents |> List.unzip3 |> (fun (_, locs, _) -> locs)
         }
 
 
