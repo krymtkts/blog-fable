@@ -15,6 +15,12 @@
   bookTitle: B book
   bookAuthor: John Doe
   pages: 81 ~ 90
+- date: 2024-02-01
+  bookTitle: B book
+  bookAuthor: John Doe
+  pages: 81 ~ 90
+  notes: |
+    read again in the same day.
 - date: 2024-02-29
   bookTitle: B book
   bookAuthor: John Doe
@@ -27,6 +33,18 @@
   bookTitle: B book
   bookAuthor: John Doe
   pages: 121 ~ 130
+- date: 2024-04-01
+  bookTitle: B book
+  bookAuthor: John Doe
+  pages: 121 ~ 130
+  notes: |
+    read again in the same day.
+- date: 2024-04-01
+  bookTitle: B book
+  bookAuthor: John Doe
+  pages: 121 ~ 130
+  notes: |
+    read again and again in the same day.
 - date: 2024-04-30
   bookTitle: B book
   bookAuthor: John Doe

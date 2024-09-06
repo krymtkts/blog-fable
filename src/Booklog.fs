@@ -104,7 +104,7 @@ module Misc =
                             match Map.tryFind d dateMap with
                             | Some count ->
                                 let date = d |> DateTime.toRFC3339Date
-                                "log", [ Html.a [ prop.href $"#{date}-1"; prop.title $"{date} ({count})" ] ]
+                                "log", [ Html.a [ prop.href $"#{date}-{count}"; prop.title $"{date} ({count})" ] ]
                             | None -> if d.Year <> year then "other-year", [] else "no-log", []
 
                         Html.td [ prop.className cls; prop.children anchor ])
