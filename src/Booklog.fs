@@ -205,3 +205,28 @@ module Misc =
             booklogs |> List.groupBy (_.date >> DateTime.Parse >> _.Year) |> Map.ofList
 
         (minYear, booklogPerYear)
+
+    type BooklogDef =
+        { priority: string
+          basePath: string
+          links: Fable.React.ReactElement
+          year: int }
+
+    let parseBooklogTable (conf: FrameConfiguration) (def: BooklogDef) (booklogs: Booklog list) =
+        let content =
+            booklogs
+            |> generateBooklogTable def.links def.year
+            |> frame
+                { conf with
+                    title = $"%s{conf.title} - %d{def.year}"
+                    url = $"%s{conf.url}%s{def.basePath}" }
+            |> Parser.parseReactStaticHtml
+
+        let lastmod = booklogs |> List.maxBy _.date |> _.date
+
+        let loc: Xml.SiteLocation =
+            { loc = sourceToSitemap def.basePath (def.year |> string)
+              lastmod = lastmod
+              priority = def.priority }
+
+        content, loc, def.year
