@@ -292,10 +292,10 @@ pre code {
       }
     }
     td.no-log {
-      background-color: $sl-base02;
+      background-color: var(--bulma-white-ter);
     }
     td.other-year {
-      background-color: $sl-base03;
+      background-color: var(--bulma-white);
     }
   }
 }
