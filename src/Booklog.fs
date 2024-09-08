@@ -313,9 +313,4 @@ module Misc =
           book: Book }
 
     let generateBooklogSummaryContent (conf: FrameConfiguration) (def: BookDef) (booklogs: Booklog list) =
-        parseBooklog
-            conf
-            def
-            (fun def -> def.book.id)
-            (fun def -> generateBooklogSummary def.links def.book)
-            booklogs
+        parseBooklog conf def (fun def -> def.book.id) (fun def -> generateBooklogSummary def.links def.book) booklogs
