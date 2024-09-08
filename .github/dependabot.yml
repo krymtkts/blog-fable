@@ -28,6 +28,7 @@ updates:
       dotnet-tools:
         patterns:
           - "fable"
+          - "fantomas"
           - "femto"
       fable:
         patterns:
