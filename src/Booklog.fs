@@ -130,32 +130,18 @@ module Misc =
             ]
         ]
 
+    let generateLinks (className: string) (href: 'T -> string) (text: 'T -> string) pages =
+        let links =
+            pages
+            |> List.map (fun x -> Html.li [ Html.a [ prop.href (href x); prop.children [ Html.text (text x) ] ] ])
+
+        Html.ul [ prop.className className; prop.children links ]
+
     let generateBooklogLinks baseUrl years =
-        let links =
-            years
-            |> List.map (fun year ->
-                Html.li [
-                    Html.a [
-                        prop.href $"{baseUrl}/{year}.html"
-                        prop.children [ Html.text (year |> string) ]
-                    ]
-                ])
+        generateLinks "booklog-links" (fun year -> $"{baseUrl}/{year}.html") string years
 
-        Html.ul [ prop.className "booklog-links"; prop.children links ]
-
-    // TODO: refactor
     let generateBookLinks baseUrl (books: Book list) =
-        let links =
-            books
-            |> List.map (fun book ->
-                Html.li [
-                    Html.a [
-                        prop.href $"{baseUrl}/{book.id}.html"
-                        prop.children [ Html.text (book.bookTitle) ]
-                    ]
-                ])
-
-        Html.ul [ prop.className "book-links"; prop.children links ]
+        generateLinks "book-links" (fun (book: Book) -> $"{baseUrl}/{book.id}.html") _.bookTitle books
 
     let generateBooklogTable links (books: Map<string, Book>) (year: int) (logs: Booklog list) =
         let header =
@@ -279,6 +265,34 @@ module Misc =
     let getBookMap (books: Book list) =
         books |> List.map (fun book -> book.bookTitle, book) |> Map.ofList
 
+    let inline parseBooklog<'D, 'T
+        when 'D: (member basePath: string) and 'D: (member priority: string) and 'T: (member date: string)>
+        (conf: FrameConfiguration)
+        (def: 'D)
+        (getId: 'D -> string)
+        (generate: 'D -> 'T list -> Fable.React.ReactElement list)
+        (booklogs: 'T list)
+        =
+        let id = getId def
+
+        let content =
+            booklogs
+            |> generate def
+            |> frame
+                { conf with
+                    title = $"%s{conf.title} - %s{id}"
+                    url = $"%s{conf.url}%s{def.basePath}" }
+            |> Parser.parseReactStaticHtml
+
+        let lastmod = booklogs |> List.maxBy _.date |> _.date
+
+        let loc: Xml.SiteLocation =
+            { loc = sourceToSitemap def.basePath id
+              lastmod = lastmod
+              priority = def.priority }
+
+        content, loc, id
+
     type BooklogDef =
         { priority: string
           basePath: string
@@ -286,24 +300,13 @@ module Misc =
           books: Map<string, Book>
           year: int }
 
-    let parseBooklogTable (conf: FrameConfiguration) (def: BooklogDef) (booklogs: Booklog list) =
-        let content =
+    let parseAsBooklogList (conf: FrameConfiguration) (def: BooklogDef) (booklogs: Booklog list) =
+        parseBooklog
+            conf
+            def
+            (fun def -> def.year |> string)
+            (fun def -> generateBooklogTable def.links def.books def.year)
             booklogs
-            |> generateBooklogTable def.links def.books def.year
-            |> frame
-                { conf with
-                    title = $"%s{conf.title} - %d{def.year}"
-                    url = $"%s{conf.url}%s{def.basePath}" }
-            |> Parser.parseReactStaticHtml
-
-        let lastmod = booklogs |> List.maxBy _.date |> _.date
-
-        let loc: Xml.SiteLocation =
-            { loc = sourceToSitemap def.basePath (def.year |> string)
-              lastmod = lastmod
-              priority = def.priority }
-
-        content, loc, def.year
 
     type BookDef =
         { priority: string
@@ -311,22 +314,10 @@ module Misc =
           links: Fable.React.ReactElement
           book: Book }
 
-    // TODO; refactor
-    let parseBooklogSummary (conf: FrameConfiguration) (def: BookDef) (booklogs: Booklog list) =
-        let content =
+    let parseAsBooklogSummary (conf: FrameConfiguration) (def: BookDef) (booklogs: Booklog list) =
+        parseBooklog
+            conf
+            def
+            (fun def -> def.book.bookTitle)
+            (fun def -> generateBooklogSummary def.links def.book)
             booklogs
-            |> generateBooklogSummary def.links def.book
-            |> frame
-                { conf with
-                    title = $"%s{conf.title} - %s{def.book.bookTitle}"
-                    url = $"%s{conf.url}%s{def.basePath}" }
-            |> Parser.parseReactStaticHtml
-
-        let lastmod = booklogs |> List.maxBy _.date |> _.date
-
-        let loc: Xml.SiteLocation =
-            { loc = sourceToSitemap def.basePath def.book.id
-              lastmod = lastmod
-              priority = def.priority }
-
-        content, loc, def.book.id

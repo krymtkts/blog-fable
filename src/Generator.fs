@@ -258,22 +258,19 @@ module Rendering =
                   index = false }
         }
 
+    let private parseBooksSource source (parser: string -> 'T list) =
+        promise {
+            printfn $"Rendering %s{source}..."
+            let! yml = IO.readFile source
+
+            return parser yml
+        }
+
     let private readBooklogsSource source =
-        promise {
-            printfn $"Rendering %s{source}..."
-            let! yml = IO.readFile source
+        parseBooksSource source Parser.parseBooklogs
 
-            return Parser.parseBooklogs yml
-        }
-
-    // TODO: refactor.
     let private readBooksSource source =
-        promise {
-            printfn $"Rendering %s{source}..."
-            let! yml = IO.readFile source
-
-            return Parser.parseBooks yml
-        }
+        parseBooksSource source Parser.parseBooks
 
     let private writeContent
         (conf: FrameConfiguration)
@@ -486,13 +483,13 @@ module Rendering =
                     ]
                 ]
 
-            let contents =
+            let booklogContents =
                 years
                 |> List.map (fun year ->
                     match booklogPerYear |> Map.tryFind year with
                     | None -> []
                     | Some(logs) -> logs
-                    |> parseBooklogTable
+                    |> parseAsBooklogList
                         { conf with title = title }
                         { priority = priority
                           basePath = basePath
@@ -501,9 +498,9 @@ module Rendering =
                           year = year })
 
             do!
-                contents
+                booklogContents
                 |> List.map (fun (content, _, year) ->
-                    let dest = $"{destDir}/%d{year}.html"
+                    let dest = $"{destDir}/%s{year}.html"
                     printfn $"Writing booklog to %s{dest}..."
                     IO.writeFile dest content)
                 |> Promise.all
@@ -518,7 +515,7 @@ module Rendering =
                     |> function
                         | None -> None
                         | Some book ->
-                            parseBooklogSummary
+                            parseAsBooklogSummary
                                 conf
                                 { priority = priority
                                   basePath = basePath
@@ -542,11 +539,14 @@ module Rendering =
             do!
                 printfn $"Writing index of booklog to %s{booklogsDest}..."
 
-                contents
+                booklogContents
                 |> List.last
                 |> (fun (content, _, _) -> IO.writeFile booklogsDest content)
 
-            return contents |> List.unzip3 |> (fun (_, locs, _) -> locs)
+            return
+                [ booklogContents |> List.unzip3 |> (fun (_, locs, _) -> locs)
+                  bookContents |> List.unzip3 |> (fun (_, locs, _) -> locs) ]
+                |> List.concat
         }
 
 
