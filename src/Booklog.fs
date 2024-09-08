@@ -316,6 +316,6 @@ module Misc =
         parseBooklog
             conf
             def
-            (fun def -> def.book.bookTitle)
+            (fun def -> def.book.id)
             (fun def -> generateBooklogSummary def.links def.book)
             booklogs
