@@ -177,7 +177,7 @@ module Misc =
                             prop.children [ Html.text log.date ]
                         ]
                         Html.p [
-                            prop.className "subtitle is-6"
+                            prop.className "subtitle content is-small"
                             prop.children [
                                 Html.text $"{log.bookTitle}"
                                 Html.text ", read count: "
@@ -194,10 +194,8 @@ module Misc =
                                         | Some pr when pr -> $"n+{rc}"
                                         | _ -> $"{rc}"
                                 )
-                                Html.br []
                                 Html.text "page: "
                                 Html.text log.pages
-
                             ]
                         ]
                         notes
