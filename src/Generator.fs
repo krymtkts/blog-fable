@@ -489,7 +489,7 @@ module Rendering =
                     match booklogPerYear |> Map.tryFind year with
                     | None -> []
                     | Some(logs) -> logs
-                    |> parseAsBooklogList
+                    |> generateYearlyBooklogContent
                         { conf with title = title }
                         { priority = priority
                           basePath = basePath
@@ -515,7 +515,7 @@ module Rendering =
                     |> function
                         | None -> None
                         | Some book ->
-                            parseAsBooklogSummary
+                            generateBooklogSummaryContent
                                 conf
                                 { priority = priority
                                   basePath = basePath

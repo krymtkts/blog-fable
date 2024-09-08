@@ -143,7 +143,7 @@ module Misc =
     let generateBookLinks baseUrl (books: Book list) =
         generateLinks "book-links" (fun (book: Book) -> $"{baseUrl}/{book.id}.html") _.bookTitle books
 
-    let generateBooklogTable links (books: Map<string, Book>) (year: int) (logs: Booklog list) =
+    let generateBooklogList links (books: Map<string, Book>) (year: int) (logs: Booklog list) =
         let header =
             Html.h1 [ prop.className "title"; prop.children (Html.text $"Booklog {year}") ]
 
@@ -300,12 +300,12 @@ module Misc =
           books: Map<string, Book>
           year: int }
 
-    let parseAsBooklogList (conf: FrameConfiguration) (def: BooklogDef) (booklogs: Booklog list) =
+    let generateYearlyBooklogContent (conf: FrameConfiguration) (def: BooklogDef) (booklogs: Booklog list) =
         parseBooklog
             conf
             def
             (fun def -> def.year |> string)
-            (fun def -> generateBooklogTable def.links def.books def.year)
+            (fun def -> generateBooklogList def.links def.books def.year)
             booklogs
 
     type BookDef =
@@ -314,7 +314,7 @@ module Misc =
           links: Fable.React.ReactElement
           book: Book }
 
-    let parseAsBooklogSummary (conf: FrameConfiguration) (def: BookDef) (booklogs: Booklog list) =
+    let generateBooklogSummaryContent (conf: FrameConfiguration) (def: BookDef) (booklogs: Booklog list) =
         parseBooklog
             conf
             def
