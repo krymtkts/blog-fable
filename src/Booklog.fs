@@ -189,7 +189,7 @@ module Misc =
 
         [ header; booklogCalendar; Html.div booklogRows; links ]
 
-    let groupBooklogs (booklogs: Booklog list) =
+    let groupBooklogsByYear (booklogs: Booklog list) =
         let minYear = booklogs |> List.map (_.date >> DateTime.Parse >> _.Year) |> List.min
 
         let booklogPerYear =
