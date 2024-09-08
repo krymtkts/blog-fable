@@ -12,7 +12,6 @@ module Parser =
         abstract readCount: int option
         abstract previouslyRead: bool option
         abstract pages: string
-        abstract tags: string ResizeArray option
         abstract notes: string option
 
     let parseBooklogs (str: string) =
@@ -147,14 +146,6 @@ module Misc =
             |> List.concat
             |> List.rev
             |> List.map (fun (i, log) ->
-                // TODO: add tags to booklog.
-                let tags =
-                    log.tags
-                    |> function
-                        | Some ts -> ts |> List.ofSeq
-                        | None -> []
-                    |> String.concat ", "
-
                 let notes =
                     log.notes
                     |> function
