@@ -8,15 +8,24 @@ module Parser =
     type Booklog =
         abstract date: string
         abstract bookTitle: string
-        abstract bookAuthor: string
         abstract readCount: int option
-        abstract previouslyRead: bool option
         abstract pages: string
         abstract notes: string option
+
+    type Book =
+        abstract bookTitle: string
+        abstract bookAuthor: string
+        abstract previouslyRead: bool option
 
     let parseBooklogs (str: string) =
         // NOTE: requires to define as ResizeArray to convert from raw JavaScript array.
         let bs: Booklog ResizeArray = Yaml.parse str
+
+        bs |> List.ofSeq
+
+    let parseBooks (str: string) =
+        // NOTE: requires to define as ResizeArray to convert from raw JavaScript array.
+        let bs: Book ResizeArray = Yaml.parse str
 
         bs |> List.ofSeq
 
@@ -133,7 +142,7 @@ module Misc =
 
         Html.ul [ prop.className "booklog-links"; prop.children links ]
 
-    let generateBooklogTable links (year: int) (logs: Booklog list) =
+    let generateBooklogTable links (books: Map<string, Book>) (year: int) (logs: Booklog list) =
         let header =
             Html.h1 [ prop.className "title"; prop.children (Html.text $"Booklog {year}") ]
 
@@ -151,6 +160,12 @@ module Misc =
                     |> function
                         | Some notes -> Html.p [ prop.dangerouslySetInnerHTML (parseMarkdown notes) ]
                         | None -> Html.p []
+
+                let getPreviouslyRead bookTitle =
+                    Map.tryFind bookTitle books
+                    |> function
+                        | Some book -> book.previouslyRead
+                        | None -> None
 
                 Html.div [
                     prop.className "section"
@@ -172,7 +187,8 @@ module Misc =
                                             | Some rc -> rc
                                             | None -> 1
 
-                                    log.previouslyRead
+                                    log.bookTitle
+                                    |> getPreviouslyRead
                                     |> function
                                         | Some pr when pr -> $"n+{rc}"
                                         | _ -> $"{rc}"
@@ -197,16 +213,20 @@ module Misc =
 
         (minYear, booklogPerYear)
 
+    let getBookMap (books: Book list) =
+        books |> List.map (fun book -> book.bookTitle, book) |> Map.ofList
+
     type BooklogDef =
         { priority: string
           basePath: string
           links: Fable.React.ReactElement
+          books: Map<string, Book>
           year: int }
 
     let parseBooklogTable (conf: FrameConfiguration) (def: BooklogDef) (booklogs: Booklog list) =
         let content =
             booklogs
-            |> generateBooklogTable def.links def.year
+            |> generateBooklogTable def.links def.books def.year
             |> frame
                 { conf with
                     title = $"%s{conf.title} - %d{def.year}"

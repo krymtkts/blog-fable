@@ -258,12 +258,21 @@ module Rendering =
                   index = false }
         }
 
-    let private readYamlSource source =
+    let private readBooklogsSource source =
         promise {
             printfn $"Rendering %s{source}..."
             let! yml = IO.readFile source
 
             return Parser.parseBooklogs yml
+        }
+
+    // TODO: refactor.
+    let private readBooksSource source =
+        promise {
+            printfn $"Rendering %s{source}..."
+            let! yml = IO.readFile source
+
+            return Parser.parseBooks yml
         }
 
     let private writeContent
@@ -449,10 +458,15 @@ module Rendering =
             printfn "Getting booklogs from %s" sourceDir
             let! files = getYamlFiles sourceDir
             printfn "Getting %d booklogs..." (List.length files)
-            let! booklogs = files |> List.map readYamlSource |> Promise.all
+            let! booklogs = files |> List.map readBooklogsSource |> Promise.all
+            printfn "Getting books from %s" sourceDir
+            let! files = getYamlFiles sourceDir
+            printfn "Getting %d books..." (List.length files)
+            let! books = files |> List.map readBooksSource |> Promise.all
             let booklogs = booklogs |> List.ofArray |> List.concat
             let destDir = dest.Replace(".html", "")
             let minYear, booklogPerYear = booklogs |> groupBooklogsByYear
+            let bookMap = books |> List.concat |> getBookMap
             let maxYear = now.Year
             let years = [ minYear..maxYear ]
             let basePath = $"%s{site.siteRoot}/%s{IO.leaf destDir}"
@@ -469,6 +483,7 @@ module Rendering =
                         { priority = priority
                           basePath = basePath
                           links = links
+                          books = bookMap
                           year = year })
 
             do!
