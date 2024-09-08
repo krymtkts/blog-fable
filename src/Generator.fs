@@ -468,11 +468,23 @@ module Rendering =
             let booklogs = booklogs |> List.ofArray |> List.concat
             let destDir = booklogsDest.Replace(".html", "")
             let minYear, booklogPerYear = booklogs |> groupBooklogsByYear
+            let booklogPerTitle = booklogs |> groupBooklogsByTitle
             let bookMap = books |> List.concat |> getBookMap
             let maxYear = now.Year
             let years = [ minYear..maxYear ]
             let basePath = $"%s{site.siteRoot}/%s{IO.leaf destDir}"
-            let links = generateBooklogLinks basePath years
+            let yearLinks = generateBooklogLinks basePath years
+            let bookLinks = bookMap |> Map.toList |> List.map snd |> generateBookLinks basePath
+
+            let links =
+                Html.ul [
+                    prop.children [
+                        Html.li [ Html.h2 "Years" ]
+                        Html.ul [ yearLinks ]
+                        Html.li [ Html.h2 "Books" ]
+                        Html.ul [ bookLinks ]
+                    ]
+                ]
 
             let contents =
                 years
@@ -492,6 +504,36 @@ module Rendering =
                 contents
                 |> List.map (fun (content, _, year) ->
                     let dest = $"{destDir}/%d{year}.html"
+                    printfn $"Writing booklog to %s{dest}..."
+                    IO.writeFile dest content)
+                |> Promise.all
+                |> Promise.map ignore
+
+            let bookContents =
+                booklogPerTitle
+                |> Map.toList
+                |> List.map (fun (title, logs) ->
+                    bookMap
+                    |> Map.tryFind title
+                    |> function
+                        | None -> None
+                        | Some book ->
+                            parseBooklogSummary
+                                conf
+                                { priority = priority
+                                  basePath = basePath
+                                  links = links
+                                  book = book }
+                                logs
+
+                            |> Some)
+                |> List.filter Option.isSome
+                |> List.map Option.get
+
+            do!
+                bookContents
+                |> List.map (fun (content, _, id) ->
+                    let dest = $"{destDir}/%s{id}.html"
                     printfn $"Writing booklog to %s{dest}..."
                     IO.writeFile dest content)
                 |> Promise.all
