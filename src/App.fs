@@ -22,6 +22,7 @@ render
       archives =
         { root = "/archives"
           title = "Archives" }
+      books = { root = "/books"; title = "Books" }
       booklogs =
         { root = "/booklogs"
           title = "Booklogs" }

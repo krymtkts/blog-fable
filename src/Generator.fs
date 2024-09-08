@@ -449,22 +449,24 @@ module Rendering =
         (conf: FrameConfiguration)
         (site: PathConfiguration)
         (priority: string)
-        (sourceDir: string)
-        (dest: string)
+        (booklogsSourceDir: string)
+        (booklogsDest: string)
+        (booksSourceDir: string)
+        (booksDest: string)
         =
         let title = $"%s{conf.title} - Booklogs"
 
         promise {
-            printfn "Getting booklogs from %s" sourceDir
-            let! files = getYamlFiles sourceDir
+            printfn "Getting booklogs from %s" booklogsSourceDir
+            let! files = getYamlFiles booklogsSourceDir
             printfn "Getting %d booklogs..." (List.length files)
             let! booklogs = files |> List.map readBooklogsSource |> Promise.all
-            printfn "Getting books from %s" sourceDir
-            let! files = getYamlFiles sourceDir
+            printfn "Getting books from %s" booklogsSourceDir
+            let! files = getYamlFiles booksSourceDir
             printfn "Getting %d books..." (List.length files)
             let! books = files |> List.map readBooksSource |> Promise.all
             let booklogs = booklogs |> List.ofArray |> List.concat
-            let destDir = dest.Replace(".html", "")
+            let destDir = booklogsDest.Replace(".html", "")
             let minYear, booklogPerYear = booklogs |> groupBooklogsByYear
             let bookMap = books |> List.concat |> getBookMap
             let maxYear = now.Year
@@ -496,8 +498,11 @@ module Rendering =
                 |> Promise.map ignore
 
             do!
-                printfn $"Writing index of booklog to %s{dest}..."
-                contents |> List.last |> (fun (content, _, _) -> IO.writeFile dest content)
+                printfn $"Writing index of booklog to %s{booklogsDest}..."
+
+                contents
+                |> List.last
+                |> (fun (content, _, _) -> IO.writeFile booklogsDest content)
 
             return contents |> List.unzip3 |> (fun (_, locs, _) -> locs)
         }
@@ -586,6 +591,7 @@ type RenderOptions =
       pages: Content
       tags: Content
       archives: Content
+      books: Content
       booklogs: Content
       images: string
 
@@ -604,6 +610,7 @@ module RenderOptions =
     let feedPath opts = $"/%s{opts.feedName}.xml"
     let archivesPath opts = $"%s{opts.archives.root}.html"
     let tagsPath opts = $"%s{opts.tags.root}.html"
+    let booksPath opts = $"%s{opts.books.root}.html"
     let booklogsPath opts = $"%s{opts.booklogs.root}.html"
     let stylePath opts = $"%s{opts.pathRoot}/css/style.css"
 
@@ -630,6 +637,7 @@ module RenderOptions =
     let postsSourceRoot opts = $"%s{opts.src}%s{opts.posts.root}"
 
     let pagesSourceRoot opts = $"%s{opts.src}%s{opts.pages.root}"
+    let booksSourceRoot opts = $"%s{opts.src}%s{opts.books.root}"
     let booklogsSourceRoot opts = $"%s{opts.src}%s{opts.booklogs.root}"
     let devScriptSourcePath = "src/Dev.fs.js"
     let handlerScriptSourcePath = "src/Handler.fs.js"
@@ -651,6 +659,9 @@ module RenderOptions =
 
     let tagsDestinationPath opts =
         $"%s{destinationRoot opts}%s{tagsPath opts}"
+
+    let booksDestinationPath opts =
+        $"%s{destinationRoot opts}%s{booksPath opts}"
 
     let booklogsDestinationPath opts =
         $"%s{destinationRoot opts}%s{booklogsPath opts}"
@@ -794,6 +805,8 @@ let render (opts: RenderOptions) =
             renderBooklogs conf site (opts.sitemap.booklogs |> string)
             <| RenderOptions.booklogsSourceRoot opts
             <| RenderOptions.booklogsDestinationPath opts
+            <| RenderOptions.booksSourceRoot opts
+            <| RenderOptions.booksDestinationPath opts
 
         do! render404 conf site <| RenderOptions.``404DestinationPath`` opts
 

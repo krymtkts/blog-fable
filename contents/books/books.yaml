@@ -1,0 +1,7 @@
+- bookTitle: B book
+  bookAuthor: John Doe
+- bookTitle: A book
+  bookAuthor: Jane Doe
+  previouslyRead: true
+- bookTitle: C book
+  bookAuthor: No name
