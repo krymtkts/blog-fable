@@ -194,7 +194,7 @@ module Misc =
                                         | Some pr when pr -> $"n+{rc}"
                                         | _ -> $"{rc}"
                                 )
-                                Html.text "page: "
+                                Html.text ", page: "
                                 Html.text log.pages
                             ]
                         ]
