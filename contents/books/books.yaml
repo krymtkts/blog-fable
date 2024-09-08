@@ -1,0 +1,10 @@
+- id: b-book
+  bookTitle: B book
+  bookAuthor: John Doe
+- id: a-book
+  bookTitle: A book
+  bookAuthor: Jane Doe
+  previouslyRead: true
+- id: c-book
+  bookTitle: C book
+  bookAuthor: No name

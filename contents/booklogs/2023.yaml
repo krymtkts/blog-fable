@@ -1,123 +1,97 @@
 - date: 2023-01-01
   bookTitle: A book
-  bookAuthor: Jane Doe
   readCount: 1
   pages: 1 ~ 9
   notes: |
     start day of Jan.
 - date: 2023-02-01
   bookTitle: A book
-  bookAuthor: Jane Doe
   readCount: 1
   pages: 10 ~ 19
   notes: |
     start day of Feb.
 - date: 2023-02-28
   bookTitle: A book
-  bookAuthor: Jane Doe
   readCount: 1
   pages: 20 ~ 29
 - date: 2023-03-01
   bookTitle: A book
-  bookAuthor: Jane Doe
   readCount: 1
   pages: 30 ~ 39
   notes: |
     start day of Mar.
 - date: 2023-04-01
   bookTitle: A book
-  bookAuthor: Jane Doe
   readCount: 1
   pages: 40 ~ 49
   notes: |
     start day of Apr.
 - date: 2023-04-30
   bookTitle: A book
-  bookAuthor: Jane Doe
   readCount: 1
   pages: 50 ~ 59
 - date: 2023-05-01
   bookTitle: A book
-  bookAuthor: Jane Doe
   readCount: 1
   pages: 60 ~ 69
   notes: |
     start day of May.
 - date: 2023-06-01
   bookTitle: A book
-  bookAuthor: Jane Doe
   readCount: 1
   pages: 70 ~ 79
   notes: |
     start day of Jun.
 - date: 2023-06-30
   bookTitle: A book
-  bookAuthor: Jane Doe
   readCount: 1
   pages: 80 ~ 89
 - date: 2023-07-01
   bookTitle: A book
-  bookAuthor: Jane Doe
   readCount: 1
   pages: 90 ~ 99
   notes: |
     start day of Jul.
 - date: 2023-08-01
   bookTitle: B book
-  bookAuthor: John Doe
   readCount: 2
-  previouslyRead: true
   pages: vi ~ 1
   notes: |
     start day of Aug.
     read again.
 - date: 2023-09-01
   bookTitle: B book
-  bookAuthor: John Doe
   readCount: 2
-  previouslyRead: true
   pages: 1 ~ 10
   notes: |
     start day of Sep.
 - date: 2023-09-30
   bookTitle: B book
-  bookAuthor: John Doe
   readCount: 2
-  previouslyRead: true
   pages: 11 ~ 20
 - date: 2023-10-01
   bookTitle: B book
-  bookAuthor: John Doe
   readCount: 2
-  previouslyRead: true
   pages: 21 ~ 30
   notes: |
     start day of Oct.
 - date: 2023-11-01
   bookTitle: B book
-  bookAuthor: John Doe
   readCount: 2
-  previouslyRead: true
   pages: 31 ~ 40
   notes: |
     start day of Nov.
 - date: 2023-11-30
   bookTitle: B book
-  bookAuthor: John Doe
   readCount: 2
-  previouslyRead: true
   pages: 41 ~ 50
 - date: 2023-12-01
   bookTitle: B book
-  bookAuthor: John Doe
   readCount: 2
-  previouslyRead: true
   pages: 51 ~ 60
   notes: |
     start day of Dec.
 - date: 2023-12-31
   bookTitle: B book
-  bookAuthor: John Doe
   readCount: 2
-  previouslyRead: true
   pages: 61 ~ 70

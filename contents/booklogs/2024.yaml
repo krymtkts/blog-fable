@@ -1,6 +1,5 @@
 - date: 2024-01-01
   bookTitle: B book
-  bookAuthor: John Doe
   pages: 71 ~ 80
   notes: |
     _**Markdown support**_.
@@ -13,101 +12,76 @@
     > blockquote
 - date: 2024-02-01
   bookTitle: B book
-  bookAuthor: John Doe
   pages: 81 ~ 90
 - date: 2024-02-01
   bookTitle: B book
-  bookAuthor: John Doe
   pages: 81 ~ 90
   notes: |
     read again in the same day.
 - date: 2024-02-29
   bookTitle: B book
-  bookAuthor: John Doe
   pages: 91 ~ 100
 - date: 2024-03-01
   bookTitle: B book
-  bookAuthor: John Doe
   pages: 101 ~ 110
 - date: 2024-04-01
   bookTitle: B book
-  bookAuthor: John Doe
   pages: 121 ~ 130
 - date: 2024-04-01
   bookTitle: B book
-  bookAuthor: John Doe
   pages: 121 ~ 130
   notes: |
     read again in the same day.
 - date: 2024-04-01
   bookTitle: B book
-  bookAuthor: John Doe
   pages: 121 ~ 130
   notes: |
     read again and again in the same day.
 - date: 2024-04-30
   bookTitle: B book
-  bookAuthor: John Doe
   pages: 131 ~ 140
 - date: 2024-05-01
   bookTitle: B book
-  bookAuthor: John Doe
   pages: 141 ~ 150
 - date: 2024-06-01
   bookTitle: B book
-  bookAuthor: John Doe
   pages: 151 ~ 160
 - date: 2024-06-30
   bookTitle: B book
-  bookAuthor: John Doe
   pages: 161 ~ 170
 - date: 2024-08-01
   bookTitle: A book
-  bookAuthor: Jane Doe
   readCount: 2
-  previouslyRead: true
   pages: 1 ~ 20
   notes: |
     read again.
 - date: 2024-09-01
   bookTitle: A book
-  bookAuthor: Jane Doe
   readCount: 2
-  previouslyRead: true
   pages: 21 ~ 40
 - date: 2024-09-30
   bookTitle: A book
-  bookAuthor: Jane Doe
   readCount: 2
-  previouslyRead: true
   pages: 41 ~ 60
 - date: 2024-10-01
   bookTitle: A book
-  bookAuthor: Jane Doe
   readCount: 2
-  previouslyRead: true
   pages: 61 ~ 80
 - date: 2024-11-01
   bookTitle: A book
-  bookAuthor: Jane Doe
   readCount: 2
-  previouslyRead: true
   pages: 81 ~ 99
 - date: 2024-11-30
   bookTitle: C book
-  bookAuthor: No name
   pages: 1 ~ 12
 - date: 2024-12-01
   bookTitle: C book
-  bookAuthor: No name
   pages: 13 ~ 20
 - date: 2024-12-31
   bookTitle: C book
-  bookAuthor: No name
   pages: 21 ~ 30
 - date: 2024-12-31
   bookTitle: C book
-  bookAuthor: No name
   pages: 31 ~ 40
   notes: |
     read again in the same day.

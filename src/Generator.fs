@@ -258,13 +258,19 @@ module Rendering =
                   index = false }
         }
 
-    let private readYamlSource source =
+    let private parseBooksSource source (parser: string -> 'T list) =
         promise {
             printfn $"Rendering %s{source}..."
             let! yml = IO.readFile source
 
-            return Parser.parseBooklogs yml
+            return parser yml
         }
+
+    let private readBooklogsSource source =
+        parseBooksSource source Parser.parseBooklogs
+
+    let private readBooksSource source =
+        parseBooksSource source Parser.parseBooks
 
     let private writeContent
         (conf: FrameConfiguration)
@@ -440,51 +446,107 @@ module Rendering =
         (conf: FrameConfiguration)
         (site: PathConfiguration)
         (priority: string)
-        (sourceDir: string)
-        (dest: string)
+        (booklogsSourceDir: string)
+        (booklogsDest: string)
+        (booksSourceDir: string)
+        (booksDest: string)
         =
         let title = $"%s{conf.title} - Booklogs"
 
         promise {
-            printfn "Getting booklogs from %s" sourceDir
-            let! files = getYamlFiles sourceDir
+            printfn "Getting booklogs from %s" booklogsSourceDir
+            let! files = getYamlFiles booklogsSourceDir
             printfn "Getting %d booklogs..." (List.length files)
-            let! booklogs = files |> List.map readYamlSource |> Promise.all
+            let! booklogs = files |> List.map readBooklogsSource |> Promise.all
+            printfn "Getting books from %s" booklogsSourceDir
+            let! files = getYamlFiles booksSourceDir
+            printfn "Getting %d books..." (List.length files)
+            let! books = files |> List.map readBooksSource |> Promise.all
             let booklogs = booklogs |> List.ofArray |> List.concat
-            let destDir = dest.Replace(".html", "")
-            let minYear, booklogPerYear = booklogs |> groupBooklogs
+            let destDir = booklogsDest.Replace(".html", "")
+            let minYear, booklogPerYear = booklogs |> groupBooklogsByYear
+            let booklogPerTitle = booklogs |> groupBooklogsByTitle
+            let bookMap = books |> List.concat |> getBookMap
             let maxYear = now.Year
             let years = [ minYear..maxYear ]
             let basePath = $"%s{site.siteRoot}/%s{IO.leaf destDir}"
-            let links = generateBooklogLinks basePath years
+            let yearLinks = generateBooklogLinks basePath years
+            let bookLinks = bookMap |> Map.toList |> List.map snd |> generateBookLinks basePath
 
-            let contents =
+            let links =
+                Html.ul [
+                    prop.children [
+                        Html.li [ Html.h2 "Years" ]
+                        Html.ul [ yearLinks ]
+                        Html.li [ Html.h2 "Books" ]
+                        Html.ul [ bookLinks ]
+                    ]
+                ]
+
+            let booklogContents =
                 years
                 |> List.map (fun year ->
                     match booklogPerYear |> Map.tryFind year with
                     | None -> []
                     | Some(logs) -> logs
-                    |> parseBooklogTable
+                    |> generateYearlyBooklogContent
                         { conf with title = title }
                         { priority = priority
                           basePath = basePath
                           links = links
+                          books = bookMap
                           year = year })
 
             do!
-                contents
+                booklogContents
                 |> List.map (fun (content, _, year) ->
-                    let dest = $"{destDir}/%d{year}.html"
+                    let dest = $"{destDir}/%s{year}.html"
+                    printfn $"Writing booklog to %s{dest}..."
+                    IO.writeFile dest content)
+                |> Promise.all
+                |> Promise.map ignore
+
+            let bookContents =
+                booklogPerTitle
+                |> Map.toList
+                |> List.map (fun (title, logs) ->
+                    bookMap
+                    |> Map.tryFind title
+                    |> function
+                        | None -> None
+                        | Some book ->
+                            generateBooklogSummaryContent
+                                conf
+                                { priority = priority
+                                  basePath = basePath
+                                  links = links
+                                  book = book }
+                                logs
+
+                            |> Some)
+                |> List.filter Option.isSome
+                |> List.map Option.get
+
+            do!
+                bookContents
+                |> List.map (fun (content, _, id) ->
+                    let dest = $"{destDir}/%s{id}.html"
                     printfn $"Writing booklog to %s{dest}..."
                     IO.writeFile dest content)
                 |> Promise.all
                 |> Promise.map ignore
 
             do!
-                printfn $"Writing index of booklog to %s{dest}..."
-                contents |> List.last |> (fun (content, _, _) -> IO.writeFile dest content)
+                printfn $"Writing index of booklog to %s{booklogsDest}..."
 
-            return contents |> List.unzip3 |> (fun (_, locs, _) -> locs)
+                booklogContents
+                |> List.last
+                |> (fun (content, _, _) -> IO.writeFile booklogsDest content)
+
+            return
+                [ booklogContents |> List.unzip3 |> (fun (_, locs, _) -> locs)
+                  bookContents |> List.unzip3 |> (fun (_, locs, _) -> locs) ]
+                |> List.concat
         }
 
 
@@ -571,6 +633,7 @@ type RenderOptions =
       pages: Content
       tags: Content
       archives: Content
+      books: Content
       booklogs: Content
       images: string
 
@@ -589,6 +652,7 @@ module RenderOptions =
     let feedPath opts = $"/%s{opts.feedName}.xml"
     let archivesPath opts = $"%s{opts.archives.root}.html"
     let tagsPath opts = $"%s{opts.tags.root}.html"
+    let booksPath opts = $"%s{opts.books.root}.html"
     let booklogsPath opts = $"%s{opts.booklogs.root}.html"
     let stylePath opts = $"%s{opts.pathRoot}/css/style.css"
 
@@ -615,6 +679,7 @@ module RenderOptions =
     let postsSourceRoot opts = $"%s{opts.src}%s{opts.posts.root}"
 
     let pagesSourceRoot opts = $"%s{opts.src}%s{opts.pages.root}"
+    let booksSourceRoot opts = $"%s{opts.src}%s{opts.books.root}"
     let booklogsSourceRoot opts = $"%s{opts.src}%s{opts.booklogs.root}"
     let devScriptSourcePath = "src/Dev.fs.js"
     let handlerScriptSourcePath = "src/Handler.fs.js"
@@ -636,6 +701,9 @@ module RenderOptions =
 
     let tagsDestinationPath opts =
         $"%s{destinationRoot opts}%s{tagsPath opts}"
+
+    let booksDestinationPath opts =
+        $"%s{destinationRoot opts}%s{booksPath opts}"
 
     let booklogsDestinationPath opts =
         $"%s{destinationRoot opts}%s{booklogsPath opts}"
@@ -779,6 +847,8 @@ let render (opts: RenderOptions) =
             renderBooklogs conf site (opts.sitemap.booklogs |> string)
             <| RenderOptions.booklogsSourceRoot opts
             <| RenderOptions.booklogsDestinationPath opts
+            <| RenderOptions.booksSourceRoot opts
+            <| RenderOptions.booksDestinationPath opts
 
         do! render404 conf site <| RenderOptions.``404DestinationPath`` opts
 
