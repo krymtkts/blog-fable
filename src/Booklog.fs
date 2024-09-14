@@ -143,6 +143,12 @@ module Misc =
     let generateBookLinks baseUrl (books: Book list) =
         generateLinks "book-links" (fun (book: Book) -> $"{baseUrl}/{book.id}.html") _.bookTitle books
 
+    let generateBooklogNotes (notes: string option) =
+        notes
+        |> function
+            | Some notes -> Html.p [ prop.dangerouslySetInnerHTML (parseMarkdown notes) ]
+            | None -> Html.p []
+
     let generateBooklogList links (books: Map<string, Book>) (year: int) (logs: Booklog list) =
         let header =
             Html.h1 [ prop.className "title"; prop.children (Html.text $"Booklog {year}") ]
@@ -156,11 +162,7 @@ module Misc =
             |> List.concat
             |> List.rev
             |> List.map (fun (i, log) ->
-                let notes =
-                    log.notes
-                    |> function
-                        | Some notes -> Html.p [ prop.dangerouslySetInnerHTML (parseMarkdown notes) ]
-                        | None -> Html.p []
+                let notes = log.notes |> generateBooklogNotes
 
                 let getPreviouslyRead bookTitle =
                     Map.tryFind bookTitle books
@@ -215,11 +217,7 @@ module Misc =
             logs
             |> List.filter (_.notes >> Option.isSome)
             |> List.map (fun (log) ->
-                let notes =
-                    log.notes
-                    |> function
-                        | Some notes -> Html.p [ prop.dangerouslySetInnerHTML (parseMarkdown notes) ]
-                        | None -> Html.p []
+                let notes = log.notes |> generateBooklogNotes
 
                 [ notes
                   Html.p [
