@@ -7,9 +7,9 @@ open Booklog
 
 [<AutoOpen>]
 module Generation =
-    let generatorName = "blog-fable"
+    let private generatorName = "blog-fable"
 
-    let generatePostArchives (meta: Meta seq) root =
+    let private generatePostArchives (meta: Meta seq) root =
         promise {
             let archives =
                 meta
@@ -26,7 +26,7 @@ module Generation =
             return Html.ul [ prop.children (List.concat archives) ]
         }
 
-    let generatePageArchives (meta: Meta seq) root =
+    let private generatePageArchives (meta: Meta seq) root =
         promise {
             let archives =
                 meta |> Seq.sortBy (fun meta -> IO.leaf meta.source) |> Seq.map (metaToLi root)
