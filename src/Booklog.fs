@@ -2,21 +2,22 @@ module Booklog
 
 open Common
 
+type Booklog =
+    abstract date: string
+    abstract bookTitle: string
+    abstract readCount: int option
+    abstract pages: string
+    abstract notes: string option
+
+type Book =
+    abstract id: string
+    abstract bookTitle: string
+    abstract bookAuthor: string
+    abstract previouslyRead: bool option
+
+[<RequireQualifiedAccess>]
 module Parser =
     open Yaml
-
-    type Booklog =
-        abstract date: string
-        abstract bookTitle: string
-        abstract readCount: int option
-        abstract pages: string
-        abstract notes: string option
-
-    type Book =
-        abstract id: string
-        abstract bookTitle: string
-        abstract bookAuthor: string
-        abstract previouslyRead: bool option
 
     let parseBooklogs (str: string) =
         // NOTE: requires to define as ResizeArray to convert from raw JavaScript array.
@@ -34,7 +35,6 @@ module Parser =
 module Misc =
     open System
     open Feliz
-    open Parser
 
     let datesInYear year =
         let startDate =
@@ -150,7 +150,7 @@ module Misc =
     let generateBooklogNotes (notes: string option) =
         notes
         |> function
-            | Some notes -> Html.p [ prop.dangerouslySetInnerHTML (parseMarkdown notes) ]
+            | Some notes -> Html.p [ prop.dangerouslySetInnerHTML (Parser.parseMarkdown notes) ]
             | None -> Html.p []
 
     let generateBooklogList baseUrl links (books: Map<string, Book>) (year: int) (logs: Booklog list) =
