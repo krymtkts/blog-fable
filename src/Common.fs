@@ -7,6 +7,7 @@ open Fable.Core.JsInterop
 open Feliz
 open Node
 
+[<RequireQualifiedAccess>]
 module IO =
     let resolve (path: string) = File.absolutePath path
     let writeFile = File.write
@@ -16,6 +17,7 @@ module IO =
     let leaf = Directory.leaf
     let parent = Directory.dirname
 
+[<RequireQualifiedAccess>]
 module String =
 
     let inline format (pattern: string) x =
@@ -26,6 +28,7 @@ module String =
         | x when String.length x <= length -> x
         | x -> x.[.. (length - 4)] + "..."
 
+[<RequireQualifiedAccess>]
 module DateTime =
     let toRFC822DateTimeString = DateTime.toRFC822DateTimeString
     let toRFC3339Date (d: DateTime) = d |> String.format "yyyy-MM-dd"
@@ -168,6 +171,7 @@ module private Util =
 
     let parseMarkdownInline (content: string) : string = marked.parseInline $ (content)
 
+[<RequireQualifiedAccess>]
 module Parser =
     open Yaml
 
