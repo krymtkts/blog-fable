@@ -130,10 +130,11 @@ module Misc =
             ]
         ]
 
+    let generateLink (href: 'T -> string) (text: 'T -> string) (x: 'T) =
+        Html.a [ prop.href (href x); prop.children [ Html.text (text x) ] ]
+
     let generateLinks (className: string) (href: 'T -> string) (text: 'T -> string) pages =
-        let links =
-            pages
-            |> List.map (fun x -> Html.li [ Html.a [ prop.href (href x); prop.children [ Html.text (text x) ] ] ])
+        let links = pages |> List.map (fun x -> Html.li [ generateLink href text x ])
 
         Html.ul [ prop.className className; prop.children links ]
 
