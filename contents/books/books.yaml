@@ -8,3 +8,6 @@
 - id: c-book
   bookTitle: C book
   bookAuthor: No name
+- id: d-book
+  bookTitle: D book
+  bookAuthor: No name
