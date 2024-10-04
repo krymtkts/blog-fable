@@ -219,11 +219,11 @@ pre code {
 .date {
   color: $sl-base01;
 }
-.prev a:before {
-  content: "\2190";
+.prev span:before {
+  content: "\3c\3c";
 }
-.next a:after {
-  content: "\2192";
+.next span:after {
+  content: "\3e\3e";
 }
 .theme-toggle-light:before {
   content: "🌞";
