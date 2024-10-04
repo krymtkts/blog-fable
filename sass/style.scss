@@ -101,6 +101,9 @@ $sl-green: #859900;
   --pagefind-ui-image-box-ratio: 3 / 2;
 
   --mark-color: #{$sl-base3};
+
+  --scrollbar-bg: transparent;
+  --scrollbar-color: rgba(238, 232, 213, 1);
 }
 
 @mixin dark-theme {
@@ -156,6 +159,9 @@ $sl-green: #859900;
   --pagefind-ui-image-box-ratio: 3 / 2;
 
   --mark-color: #{$sl-base03};
+
+  --scrollbar-bg: transparent;
+  --scrollbar-color: rgba(7, 54, 66, 1);
 }
 
 @media (prefers-color-scheme: light) {
@@ -176,6 +182,10 @@ $sl-green: #859900;
   [data-theme="light"] {
     @include light-theme();
   }
+}
+
+html {
+  scrollbar-color: var(--scrollbar-color) var(--scrollbar-bg);
 }
 
 // NOTE: adjust non-parameterized styles.
