@@ -225,6 +225,16 @@ pre code {
 .next a:after {
   content: "\2192";
 }
+.theme-toggle-light:before {
+  content: "🌞";
+}
+.theme-toggle-dark:before {
+  content: "🌙";
+}
+.theme-toggle-system:before {
+  content: "🖥️";
+}
+
 // NOTE: apply style directly without using PagefindHighlight.
 #search {
   mark {
