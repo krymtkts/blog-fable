@@ -1,5 +1,6 @@
 module Booklog
 
+open System
 open Common
 
 type Booklog =
@@ -14,6 +15,14 @@ type Book =
     abstract bookTitle: string
     abstract bookAuthor: string
     abstract previouslyRead: bool option
+
+type Streak =
+    { startDate: DateTime
+      endDate: DateTime
+      count: int }
+
+type StreakSummary = { longest: Streak; current: Streak }
+
 
 [<RequireQualifiedAccess>]
 module Parser =
@@ -130,6 +139,46 @@ module Misc =
             ]
         ]
 
+    let private getStreakSummary (booklogs: Booklog list) =
+        let current, longest =
+            booklogs
+            |> List.map (_.date >> DateTime.Parse)
+            |> List.sortBy id
+            |> List.fold
+                (fun (current, longest) dt ->
+                    let current =
+                        match current with
+                        | Some current when dt = current.endDate.AddDays(1) ->
+                            { current with
+                                endDate = dt
+                                count = current.count + 1 }
+                        | Some _
+                        | None ->
+                            { startDate = dt
+                              endDate = dt
+                              count = 1 }
+
+                    let longest =
+                        match longest with
+                        | Some longest -> if current.count > longest.count then current else longest
+                        | None -> current
+
+                    Some current, Some longest)
+                (None, None)
+
+        { longest = longest.Value
+          current = current.Value }
+
+    let generateStreakSummary (booklogs: Booklog list) =
+        let streak = booklogs |> getStreakSummary
+
+        Html.div [
+            prop.className "streak"
+            prop.children [
+                Html.text $"current: {streak.current.count}, longest: {streak.longest.count}"
+            ]
+        ]
+
     let private generateLink (href: 'T -> string) (text: 'T -> string) (x: 'T) =
         Html.a [ prop.href (href x); prop.children [ Html.text (text x) ] ]
 
@@ -153,7 +202,14 @@ module Misc =
             | Some notes -> Html.p [ prop.dangerouslySetInnerHTML (Parser.parseMarkdown notes) ]
             | None -> Html.p []
 
-    let private generateBooklogList baseUrl links (books: Map<string, Book>) (year: int) (logs: Booklog list) =
+    let private generateBooklogList
+        baseUrl
+        links
+        booklogStreaks
+        (books: Map<string, Book>)
+        (year: int)
+        (logs: Booklog list)
+        =
         let header =
             Html.h1 [ prop.className "title"; prop.children (Html.text $"Booklog {year}") ]
 
@@ -207,7 +263,7 @@ module Misc =
                     ]
                 ])
 
-        [ header; booklogCalendar; Html.div booklogRows; links ]
+        [ header; booklogStreaks; booklogCalendar; Html.div booklogRows; links ]
 
     let private generateBooklogSummary links (book: Book) (logs: Booklog list) =
         let header =
@@ -297,14 +353,15 @@ module Misc =
           basePath: string
           links: Fable.React.ReactElement
           books: Map<string, Book>
-          year: int }
+          year: int
+          streak: Fable.React.ReactElement }
 
     let generateYearlyBooklogContent (conf: FrameConfiguration) (def: BooklogDef) (booklogs: Booklog list) =
         parseBooklog
             conf
             def
             (fun def -> def.year |> string)
-            (fun def -> generateBooklogList def.basePath def.links def.books def.year)
+            (fun def -> generateBooklogList def.basePath def.links def.streak def.books def.year)
             booklogs
 
     type BookDef =
