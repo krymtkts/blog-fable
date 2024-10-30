@@ -169,13 +169,13 @@ module Misc =
         { longest = longest.Value
           current = current.Value }
 
-    let private generateStreakSummary (booklogs: Booklog list) =
+    let generateStreakSummary (booklogs: Booklog list) =
         let streak = booklogs |> getStreakSummary
 
         Html.div [
             prop.className "streak"
             prop.children [
-                Html.text $"current: {streak.current.count}, longest: {streak.current.count}"
+                Html.text $"current: {streak.current.count}, longest: {streak.longest.count}"
             ]
         ]
 
@@ -202,11 +202,17 @@ module Misc =
             | Some notes -> Html.p [ prop.dangerouslySetInnerHTML (Parser.parseMarkdown notes) ]
             | None -> Html.p []
 
-    let private generateBooklogList baseUrl links (books: Map<string, Book>) (year: int) (logs: Booklog list) =
+    let private generateBooklogList
+        baseUrl
+        links
+        booklogStreaks
+        (books: Map<string, Book>)
+        (year: int)
+        (logs: Booklog list)
+        =
         let header =
             Html.h1 [ prop.className "title"; prop.children (Html.text $"Booklog {year}") ]
 
-        let booklogStreaks = generateStreakSummary logs
         let booklogCalendar = generateCalendar year logs
 
         let booklogRows =
@@ -347,14 +353,15 @@ module Misc =
           basePath: string
           links: Fable.React.ReactElement
           books: Map<string, Book>
-          year: int }
+          year: int
+          streak: Fable.React.ReactElement }
 
     let generateYearlyBooklogContent (conf: FrameConfiguration) (def: BooklogDef) (booklogs: Booklog list) =
         parseBooklog
             conf
             def
             (fun def -> def.year |> string)
-            (fun def -> generateBooklogList def.basePath def.links def.books def.year)
+            (fun def -> generateBooklogList def.basePath def.links def.streak def.books def.year)
             booklogs
 
     type BookDef =
