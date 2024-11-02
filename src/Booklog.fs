@@ -143,6 +143,8 @@ module Misc =
         let current, longest =
             booklogs
             |> List.map (_.date >> DateTime.Parse)
+            |> List.groupBy id
+            |> List.map fst
             |> List.sortBy id
             |> List.fold
                 (fun (current, longest) dt ->
