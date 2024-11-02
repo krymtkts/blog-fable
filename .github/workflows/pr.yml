@@ -21,4 +21,4 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --all-projects --exclude=fable_modules
+          args: --all-projects --exclude=fable_modules --org=krymtkts
