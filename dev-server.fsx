@@ -1,6 +1,6 @@
 #r "nuget: Fake.DotNet.Cli"
 #r "nuget: Fake.JavaScript.Npm"
-#r "nuget: Suave"
+#r "nuget: Suave, >= 2.7.0-beta1"
 
 open Fake.Core
 open Fake.DotNet
