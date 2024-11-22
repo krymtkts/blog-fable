@@ -1,8 +1,6 @@
-#r "nuget: Fake.Core.Trace"
 #r "nuget: Fake.DotNet.Cli"
 #r "nuget: Fake.JavaScript.Npm"
-#r "nuget: Fake.IO.FileSystem"
-#r "nuget: Suave"
+#r "nuget: Suave, >= 2.7.0-beta1"
 
 open Fake.Core
 open Fake.DotNet
@@ -23,18 +21,12 @@ open System.Threading
 let port =
     let rec findPort port =
         let portIsTaken =
-            System
-                .Net
-                .NetworkInformation
-                .IPGlobalProperties
+            NetworkInformation.IPGlobalProperties
                 .GetIPGlobalProperties()
                 .GetActiveTcpListeners()
             |> Seq.exists (fun x -> x.Port = int (port))
 
-        if portIsTaken then
-            findPort (port + 1us)
-        else
-            port
+        if portIsTaken then findPort (port + 1us) else port
 
     findPort 8080us
 
@@ -76,12 +68,7 @@ let handleWatcherEvents, socketHandler =
 
                 match fi.FullName with
                 | x when x.EndsWith(".fs") -> BuildFable
-                | x when
-                    x.EndsWith(".md")
-                    || x.EndsWith(".yml")
-                    || x.EndsWith(".yaml")
-                    ->
-                    BuildMd
+                | x when x.EndsWith(".md") || x.EndsWith(".yml") || x.EndsWith(".yaml") -> BuildMd
                 | x when x.EndsWith(".scss") -> BuildStyle
                 | _ -> Noop)
             |> Set.ofSeq
@@ -139,9 +126,7 @@ let handleWatcherEvents, socketHandler =
 
     handleWatcherEvents, socketHandler
 
-let home =
-    IO.Path.Join [| __SOURCE_DIRECTORY__
-                    "docs" |]
+let home = IO.Path.Join [| __SOURCE_DIRECTORY__; "docs" |]
 
 printfn $"watch '%s{home}'"
 
@@ -170,25 +155,25 @@ let root =
 let app: WebPart =
     let logger = Logging.Log.create "dev-server"
 
-    choose [
+    choose
+        [
 
-             path "/websocket" >=> handShake socketHandler
+          path "/websocket" >=> handShake socketHandler
 
-             GET
-             >=> Writers.setHeader "Cache-Control" "no-cache, no-store, must-revalidate"
-             >=> Writers.setHeader "Pragma" "no-cache"
-             >=> Writers.setHeader "Expires" "0"
-             >=> choose [ path $"{root}/"
-                          >=> Files.browseFileHome "blog-fable/index.html"
-                          path $"{root}"
-                          >=> Redirection.redirect $"/blog-fable/"
+          GET
+          >=> Writers.setHeader "Cache-Control" "no-cache, no-store, must-revalidate"
+          >=> Writers.setHeader "Pragma" "no-cache"
+          >=> Writers.setHeader "Expires" "0"
+          >=> choose
+                  [ path $"{root}/" >=> Files.browseFileHome "blog-fable/index.html"
+                    path $"{root}" >=> Redirection.redirect $"/blog-fable/"
 
-                          Files.browseHome ]
-             >=> log logger logFormat
+                    Files.browseHome ]
+          >=> log logger logFormat
 
-             Writers.setStatus HTTP_404
-             >=> logWithLevel Logging.Error logger logFormat
-             >=> Files.browseFileHome $"{root}/404.html" ]
+          Writers.setStatus HTTP_404
+          >=> logWithLevel Logging.Error logger logFormat
+          >=> Files.browseFileHome $"{root}/404.html" ]
 
 let openIndex url =
     let p = new Diagnostics.ProcessStartInfo(url)
