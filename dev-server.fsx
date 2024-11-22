@@ -1,7 +1,5 @@
-#r "nuget: Fake.Core.Trace"
 #r "nuget: Fake.DotNet.Cli"
 #r "nuget: Fake.JavaScript.Npm"
-#r "nuget: Fake.IO.FileSystem"
 #r "nuget: Suave"
 
 open Fake.Core
