@@ -50,7 +50,11 @@ updates:
       dependencies:
         dependency-type: "production"
         exclude-patterns:
-          - "react*" # NOTE: react should be updated with Fable.
+          - "react*"
+      react-dependencies:
+        dependency-type: "production"
+        patterns:
+          - "react*"
       dev-dependencies:
         dependency-type: "development"
     assignees:
