@@ -217,6 +217,18 @@ module Misc =
 
         let booklogCalendar = generateCalendar year logs
 
+        let (|Int|_|) (str: string) =
+            match System.Int32.TryParse str with
+            | true, int -> Some int
+            | _ -> None
+
+        let readPages (pages: string) =
+            pages.Split([| '~' |])
+            |> function
+                | [| Int s; Int e |] -> $", pages read: {e - s + 1}"
+                | [| Int _ |] -> $",pages read: 1"
+                | _ -> ""
+
         let booklogRows =
             logs
             |> List.groupBy _.date
@@ -259,6 +271,7 @@ module Misc =
                                 )
                                 Html.text ", page: "
                                 Html.text log.pages
+                                log.pages |> readPages |> Html.text
                             ]
                         ]
                         notes
