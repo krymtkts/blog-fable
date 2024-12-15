@@ -17,11 +17,11 @@
       "rollForward": false
     },
     "fantomas": {
-      "version": "6.3.16",
+      "version": "7.0.0-alpha-004",
       "commands": [
         "fantomas"
       ],
-      "rollForward": false
+      "rollForward": true
     }
   }
 }
