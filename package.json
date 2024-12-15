@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "postinstall": "dotnet tool restore",
-    "build-fable": "dotnet fable src --test:MSBuildCracker --runScript",
+    "build-fable": "dotnet fable src --runScript",
     "build-md": "node ./src/App.fs.js",
     "build-css": "sass --style=compressed --no-source-map ./sass/style.scss ./docs/blog-fable/css/style.css",
     "build-index": "pagefind",
