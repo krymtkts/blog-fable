@@ -191,13 +191,14 @@ module Misc =
           current = current.Value
           maxPagesRead = maxPagesRead }
 
-    let generateStreakSummary (booklogs: Booklog list) =
+    let generateBooklogStats (booklogs: Booklog list) =
         let streak = booklogs |> getStreakSummary
 
         Html.div [
             prop.className "streak"
             prop.children [
-                Html.text $"current: {streak.current.count}, longest: {streak.longest.count}, max pages read: {streak.maxPagesRead}"
+                Html.text
+                    $"current: {streak.current.count}, longest: {streak.longest.count}, max pages read: {streak.maxPagesRead}"
             ]
         ]
 
@@ -384,14 +385,14 @@ module Misc =
           links: Fable.React.ReactElement
           books: Map<string, Book>
           year: int
-          streak: Fable.React.ReactElement }
+          stats: Fable.React.ReactElement }
 
     let generateYearlyBooklogContent (conf: FrameConfiguration) (def: BooklogDef) (booklogs: Booklog list) =
         parseBooklog
             conf
             def
             (fun def -> def.year |> string)
-            (fun def -> generateBooklogList def.basePath def.links def.streak def.books def.year)
+            (fun def -> generateBooklogList def.basePath def.links def.stats def.books def.year)
             booklogs
 
     type BookDef =
