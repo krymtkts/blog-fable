@@ -21,8 +21,10 @@ type Streak =
       endDate: DateTime
       count: int }
 
-type StreakSummary = { longest: Streak; current: Streak }
-
+type StreakSummary =
+    { longest: Streak
+      current: Streak
+      maxPagesRead: int }
 
 [<RequireQualifiedAccess>]
 module Parser =
@@ -139,6 +141,21 @@ module Misc =
             ]
         ]
 
+    let private (|Int|_|) (str: string) =
+        match System.Int32.TryParse str with
+        | true, int -> Some int
+        | _ -> None
+
+    let readPages (pages: string) =
+        pages.Split([| '~' |])
+        |> function
+            | [| Int s; Int e |] -> e - s + 1
+            | [| Int _ |] -> 1
+            | _ -> 0
+
+    let private getMaxPagesRead (booklogs: Booklog list) =
+        booklogs |> List.map (_.pages >> readPages) |> List.max
+
     let private getStreakSummary (booklogs: Booklog list) =
         let current, longest =
             booklogs
@@ -168,16 +185,20 @@ module Misc =
                     Some current, Some longest)
                 (None, None)
 
-        { longest = longest.Value
-          current = current.Value }
+        let maxPagesRead = getMaxPagesRead booklogs
 
-    let generateStreakSummary (booklogs: Booklog list) =
+        { longest = longest.Value
+          current = current.Value
+          maxPagesRead = maxPagesRead }
+
+    let generateBooklogStats (booklogs: Booklog list) =
         let streak = booklogs |> getStreakSummary
 
         Html.div [
             prop.className "streak"
             prop.children [
-                Html.text $"current: {streak.current.count}, longest: {streak.longest.count}"
+                Html.text
+                    $"current: {streak.current.count}, longest: {streak.longest.count}, max pages read: {streak.maxPagesRead}"
             ]
         ]
 
@@ -217,17 +238,12 @@ module Misc =
 
         let booklogCalendar = generateCalendar year logs
 
-        let (|Int|_|) (str: string) =
-            match System.Int32.TryParse str with
-            | true, int -> Some int
-            | _ -> None
-
         let readPages (pages: string) =
-            pages.Split([| '~' |])
+            pages
+            |> readPages
             |> function
-                | [| Int s; Int e |] -> $", pages read: {e - s + 1}"
-                | [| Int _ |] -> $",pages read: 1"
-                | _ -> ""
+                | 0 -> ""
+                | i -> $", pages read: {i}"
 
         let booklogRows =
             logs
@@ -369,14 +385,14 @@ module Misc =
           links: Fable.React.ReactElement
           books: Map<string, Book>
           year: int
-          streak: Fable.React.ReactElement }
+          stats: Fable.React.ReactElement }
 
     let generateYearlyBooklogContent (conf: FrameConfiguration) (def: BooklogDef) (booklogs: Booklog list) =
         parseBooklog
             conf
             def
             (fun def -> def.year |> string)
-            (fun def -> generateBooklogList def.basePath def.links def.streak def.books def.year)
+            (fun def -> generateBooklogList def.basePath def.links def.stats def.books def.year)
             booklogs
 
     type BookDef =

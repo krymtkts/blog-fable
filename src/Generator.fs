@@ -470,7 +470,7 @@ module Rendering =
             let maxYear = now.Year
             let years = [ minYear..maxYear ]
             let basePath = $"%s{site.siteRoot}/%s{IO.leaf destDir}"
-            let streakSummary = generateStreakSummary booklogs
+            let stats = generateBooklogStats booklogs
             let yearLinks = generateBooklogLinks basePath years
             let bookLinks = bookMap |> Map.toList |> List.map snd |> generateBookLinks basePath
 
@@ -497,7 +497,7 @@ module Rendering =
                           links = links
                           books = bookMap
                           year = year
-                          streak = streakSummary })
+                          stats = stats })
 
             do!
                 booklogContents
