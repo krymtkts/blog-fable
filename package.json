@@ -7,7 +7,7 @@
   "scripts": {
     "postinstall": "dotnet tool restore",
     "build-fable": "dotnet fable src --runScript",
-    "build-md": "node ./src/App.fs.js",
+    "build-md": "node ./scripts/build-md.js dev",
     "build-css": "sass --style=compressed --no-source-map ./sass/style.scss ./docs/blog-fable/css/style.css",
     "build-index": "pagefind",
     "build": "npm run build-css && npm run build-fable && npm run build-index",
