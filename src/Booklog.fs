@@ -146,12 +146,41 @@ module Misc =
         | true, int -> Some int
         | _ -> None
 
-    let readPages (pages: string) =
-        pages.Split([| '~' |])
+    let private romanMap = Map [ ('i', 1); ('v', 5); ('x', 10) ]
+
+    let private toInt x =
+        x
+        |> Char.ToLower
+        |> romanMap.TryFind
         |> function
+            | Some v -> v
+            | None -> 0
+
+    let private romanToArabic (roman: string) =
+        let roman = roman |> _.Trim()
+
+        roman
+        |> Seq.map toInt
+        |> Seq.pairwise
+        |> Seq.fold (fun acc (v1, v2) -> if v1 < v2 then acc - v1 else acc + v1) 0
+        |> (+) (Seq.last roman |> toInt)
+
+    let private (|Roman|_|) (str: string) =
+        match romanToArabic str with
+        | 0 -> None
+        | i -> Some i
+
+    let readPages (pages: string) =
+        pages
+        |> _.Split([| ',' |])
+        |> Seq.map _.Split([| '~' |])
+        |> Seq.map (function
             | [| Int s; Int e |] -> e - s + 1
             | [| Int _ |] -> 1
-            | _ -> 0
+            | [| Roman s; Roman e |] -> e - s + 1
+            | [| Roman _ |] -> 1
+            | _ -> 0)
+        |> Seq.sum
 
     let private getMaxPagesRead (booklogs: Booklog list) =
         booklogs |> List.map (_.pages >> readPages) |> List.max
