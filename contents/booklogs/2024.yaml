@@ -52,7 +52,7 @@
 - date: 2024-08-01
   bookTitle: A book
   readCount: 2
-  pages: 1 ~ 20
+  pages: i ~ xix, 1 ~ 20
   notes: |
     read again.
 - date: 2024-09-01
@@ -73,7 +73,7 @@
   pages: 81 ~ 99
 - date: 2024-11-30
   bookTitle: C book
-  pages: 1 ~ 12
+  pages: i ~ viii, 1 ~ 12
 - date: 2024-12-01
   bookTitle: C book
   pages: 13 ~ 20
