@@ -54,7 +54,8 @@ module Misc =
             if d.DayOfWeek = DayOfWeek.Sunday then
                 d
             else
-                d.AddDays(-(2.0 - (d.DayOfWeek |> float)))
+                let toMonday = (int d.DayOfWeek + 6) % 7 |> float
+                d.AddDays(-toMonday)
 
         let endDate =
             let d = DateTime(year, 12, 31)
@@ -62,7 +63,8 @@ module Misc =
             if d.DayOfWeek = DayOfWeek.Saturday then
                 d
             else
-                d.AddDays(2.0 - (d.DayOfWeek |> float))
+                let toSaturday = DayOfWeek.Saturday - d.DayOfWeek |> float
+                d.AddDays(toSaturday)
 
         printfn "startDate: %A, endDate: %A" startDate endDate
 
