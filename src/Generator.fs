@@ -468,7 +468,17 @@ module Rendering =
             let booklogPerTitle = booklogs |> groupBooklogsByTitle
             let bookMap = books |> List.concat |> getBookMap
             let maxYear = now.Year
-            let years = [ minYear..maxYear ]
+
+            let booklogContents =
+                [ minYear..maxYear ]
+                |> List.map (fun year ->
+                    year,
+                    match booklogPerYear |> Map.tryFind year with
+                    | None -> []
+                    | Some(logs) -> logs)
+                |> List.filter (fun (_, logs) -> List.length logs > 0)
+
+            let years = booklogContents |> List.map fst
             let basePath = $"%s{site.siteRoot}/%s{IO.leaf destDir}"
             let stats = generateBooklogStats booklogs
             let yearLinks = generateBooklogLinks basePath years
@@ -485,11 +495,9 @@ module Rendering =
                 ]
 
             let booklogContents =
-                years
-                |> List.map (fun year ->
-                    match booklogPerYear |> Map.tryFind year with
-                    | None -> []
-                    | Some(logs) -> logs
+                booklogContents
+                |> List.map (fun (year, booklogs) ->
+                    booklogs
                     |> generateYearlyBooklogContent
                         { conf with title = title }
                         { priority = priority
