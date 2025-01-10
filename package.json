@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "highlight.js": "^11.11.1",
-    "marked": "^15.0.5",
+    "marked": "^15.0.6",
     "marked-footnote": "^1.2.4",
     "marked-highlight": "^2.2.1",
     "react": "^19.0.0",
