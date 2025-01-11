@@ -104,6 +104,10 @@ $sl-green: #859900;
 
   --scrollbar-bg: transparent;
   --scrollbar-color: rgba(238, 232, 213, 1);
+
+  --bulma-family-primary: sans-serif;
+  --bulma-family-secondary: sans-serif;
+  --bulma-family-code: monospace;
 }
 
 @mixin dark-theme {
@@ -162,6 +166,10 @@ $sl-green: #859900;
 
   --scrollbar-bg: transparent;
   --scrollbar-color: rgba(7, 54, 66, 1);
+
+  --bulma-family-primary: sans-serif;
+  --bulma-family-secondary: sans-serif;
+  --bulma-family-code: monospace;
 }
 
 @media (prefers-color-scheme: light) {
