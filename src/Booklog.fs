@@ -110,7 +110,7 @@ module Misc =
             |> List.map (fun (dow, dates) ->
                 let dowCell =
                     match dow with
-                    | DayOfWeek.Sunday
+                    | DayOfWeek.Monday
                     | DayOfWeek.Wednesday
                     | DayOfWeek.Friday ->
                         Html.td [
