@@ -387,6 +387,7 @@ module Misc =
         (conf: FrameConfiguration)
         (def: 'D)
         (getId: 'D -> string)
+        (getTitle: 'D -> string)
         (generate: 'D -> 'T list -> Fable.React.ReactElement list)
         (booklogs: 'T list)
         =
@@ -397,7 +398,7 @@ module Misc =
             |> generate def
             |> frame
                 { conf with
-                    title = $"%s{conf.title} - %s{id}"
+                    title = $"%s{conf.title} - %s{getTitle def}"
                     url = $"%s{conf.url}%s{def.basePath}" }
             |> Parser.parseReactStaticHtml
 
@@ -423,6 +424,7 @@ module Misc =
             conf
             def
             (fun def -> def.year |> string)
+            (fun def -> def.year |> string)
             (fun def -> generateBooklogList def.basePath def.links def.stats def.books def.year)
             booklogs
 
@@ -433,4 +435,10 @@ module Misc =
           book: Book }
 
     let generateBooklogSummaryContent (conf: FrameConfiguration) (def: BookDef) (booklogs: Booklog list) =
-        parseBooklog conf def (fun def -> def.book.id) (fun def -> generateBooklogSummary def.links def.book) booklogs
+        parseBooklog
+            conf
+            def
+            (fun def -> def.book.id)
+            (fun def -> def.book.bookTitle)
+            (fun def -> generateBooklogSummary def.links def.book)
+            booklogs
