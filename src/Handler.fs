@@ -43,11 +43,9 @@ let PagefindUI: PagefindUI = jsNative
 window.addEventListener (
     "DOMContentLoaded",
     (fun _ ->
-        let elm = document.querySelector "#search"
+        let elm = document.querySelectorAll "#search"
 
-        if isNull elm then
-            ()
-        else
+        if elm.length > 0 then
             PagefindUI.Create(
                 !!{| element = "#search"
                      baseUrl = "/blog-fable/"
