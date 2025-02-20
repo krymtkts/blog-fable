@@ -55,7 +55,7 @@ window.addEventListener (
                            clear_search = "Clear"
                            load_more = "More"
                            search_label = ""
-                           zero_results = "\"[SEARCH_TERM]\" now found."
+                           zero_results = "\"[SEARCH_TERM]\" not found."
                            many_results = "\"[SEARCH_TERM]\" ([COUNT])"
                            one_result = "\"[SEARCH_TERM]\" ([COUNT])"
                            searching = "Searching \"[SEARCH_TERM]\"..." |} |}
