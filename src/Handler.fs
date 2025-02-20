@@ -24,10 +24,10 @@ let private setThemeMode (t: string) =
 localStorage.getItem "theme-mode" |> setThemeMode
 
 let private initThemeModeHandler _ =
-    let els = document.querySelectorAll (".theme-toggle")
+    let els = document.querySelectorAll ".theme-toggle"
 
     for i = 0 to els.length - 1 do
-        let el = els.item (i)
+        let el = els.item i
         let themeMode = el.getAttribute "data-theme"
         el.addEventListener ("click", (fun _ -> setThemeMode themeMode))
 
