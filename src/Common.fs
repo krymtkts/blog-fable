@@ -76,7 +76,7 @@ module private Util =
                 let text = marked.Parser.parseInline item.tokens
 
                 let escapedText = Regex.Replace(text, @"[^\w]+", "-")
-                let l = (int) item.depth + 1
+                let l = int item.depth + 1
 
                 let meta = if l = 2 then " data-pagefind-meta=\"title\" " else ""
 
@@ -167,9 +167,9 @@ module private Util =
 
     marked.``use`` me
 
-    let parseMarkdown (content: string) : string = marked.parse $ (content)
+    let parseMarkdown (content: string) : string = marked.parse $ content
 
-    let parseMarkdownInline (content: string) : string = marked.parseInline $ (content)
+    let parseMarkdownInline (content: string) : string = marked.parseInline $ content
 
 [<RequireQualifiedAccess>]
 module Parser =
@@ -202,7 +202,7 @@ module Parser =
     let parseYaml str : 'a = Yaml.parse str
 
     let parseMarkdownAsReactEl content =
-        let (frontMatter, content) = extractFrontMatter content
+        let frontMatter, content = extractFrontMatter content
 
         let content =
             Html.div [
@@ -236,7 +236,7 @@ module Misc =
         match leaf.Split '-' |> List.ofArray with
         | year :: month :: day :: _ ->
             match [ year; month; day ] |> List.map Int32.TryParse with
-            | [ (true, year); (true, month); (true, day) ] ->
+            | [ true, year; true, month; true, day ] ->
                 let date = $"%04d{year}-%02d{month}-%02d{day}"
                 Post(date)
             | _ -> Page
@@ -436,8 +436,8 @@ module Component =
     let liA ref (title: NavItem) =
         let children =
             function
-            | Text(s) -> [ prop.title s; prop.text s ]
-            | Html(s) -> [ prop.dangerouslySetInnerHTML s ]
+            | Text s -> [ prop.title s; prop.text s ]
+            | Html s -> [ prop.dangerouslySetInnerHTML s ]
             | Element(s, el) -> [ prop.title s; prop.children [ el ] ]
 
         Html.li [ Html.a <| prop.href ref :: children title ]
@@ -460,7 +460,7 @@ module Component =
 
         let prefix =
             match meta.layout with
-            | Post(date) -> $"%s{date} - "
+            | Post date -> $"%s{date} - "
             | _ -> ""
 
         let title =

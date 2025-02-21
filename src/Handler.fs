@@ -24,10 +24,10 @@ let private setThemeMode (t: string) =
 localStorage.getItem "theme-mode" |> setThemeMode
 
 let private initThemeModeHandler _ =
-    let els = document.querySelectorAll (".theme-toggle")
+    let els = document.querySelectorAll ".theme-toggle"
 
     for i = 0 to els.length - 1 do
-        let el = els.item (i)
+        let el = els.item i
         let themeMode = el.getAttribute "data-theme"
         el.addEventListener ("click", (fun _ -> setThemeMode themeMode))
 
@@ -55,7 +55,7 @@ window.addEventListener (
                            clear_search = "Clear"
                            load_more = "More"
                            search_label = ""
-                           zero_results = "\"[SEARCH_TERM]\" now found."
+                           zero_results = "\"[SEARCH_TERM]\" not found."
                            many_results = "\"[SEARCH_TERM]\" ([COUNT])"
                            one_result = "\"[SEARCH_TERM]\" ([COUNT])"
                            searching = "Searching \"[SEARCH_TERM]\"..." |} |}

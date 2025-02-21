@@ -86,7 +86,7 @@ module Generation =
                 match meta.frontMatter with
                 | Some fm ->
                     match fm.tags with
-                    | Some tags -> tags |> Seq.map (fun t -> (t, meta))
+                    | Some tags -> tags |> Seq.map (fun t -> t, meta)
                     | None -> [||]
                 | None -> [||])
             |> Seq.concat
@@ -223,7 +223,7 @@ module Rendering =
 
             let pubDate =
                 match layout with
-                | Post d -> Some(d)
+                | Post d -> Some d
                 | Page -> None
 
             let fm, content = md |> Parser.parseMarkdownAsReactEl |> (fun (fm, c) -> fm, c)
@@ -352,7 +352,7 @@ module Rendering =
                         let prev, next =
                             match i with
                             | 0 -> None, getMeta <| i + 1
-                            | i when (i = Seq.length metas - 1) -> Some(metas.[i - 1]), None
+                            | i when i = Seq.length metas - 1 -> Some(metas.[i - 1]), None
                             | i -> Some(metas.[i - 1]), getMeta <| i + 1
 
                         let dest = getDestinationPath meta.source destDir
@@ -374,7 +374,7 @@ module Rendering =
                 |> List.ofSeq
             with
             | [ post ] -> post, None
-            | [ post; prev ] -> post, Some(prev)
+            | [ post; prev ] -> post, Some prev
             | _ -> failwith "requires at last one post."
 
         promise {
@@ -475,7 +475,7 @@ module Rendering =
                     year,
                     match booklogPerYear |> Map.tryFind year with
                     | None -> []
-                    | Some(logs) -> logs)
+                    | Some logs -> logs)
                 |> List.filter (fun (_, logs) -> List.length logs > 0)
 
             let years = booklogContents |> List.map fst
@@ -551,7 +551,7 @@ module Rendering =
 
                 booklogContents
                 |> List.last
-                |> (fun (content, _, _) -> IO.writeFile booklogsDest content)
+                |> fun (content, _, _) -> IO.writeFile booklogsDest content
 
             return
                 [ booklogContents |> List.unzip3 |> (fun (_, locs, _) -> locs)
@@ -774,11 +774,11 @@ let private buildBundledScripts opts =
     match opts.stage with
     | Development ->
         [ RenderOptions.devScriptPath opts; RenderOptions.handlerScriptPath opts ],
-        [ (RenderOptions.devScriptSourcePath, RenderOptions.devScriptDestinationPath opts)
-          (RenderOptions.handlerScriptSourcePath, RenderOptions.handlerScriptDestinationPath opts) ]
+        [ RenderOptions.devScriptSourcePath, RenderOptions.devScriptDestinationPath opts
+          RenderOptions.handlerScriptSourcePath, RenderOptions.handlerScriptDestinationPath opts ]
     | Production ->
         [ RenderOptions.handlerScriptPath opts ],
-        [ (RenderOptions.handlerScriptSourcePath, RenderOptions.handlerScriptDestinationPath opts) ]
+        [ RenderOptions.handlerScriptSourcePath, RenderOptions.handlerScriptDestinationPath opts ]
 
 let private buildHighlightStyle opts =
     RenderOptions.highlightStylePath opts, [ (opts.highlightStyle, RenderOptions.highlightStyleDestinationPath opts) ]
@@ -865,7 +865,7 @@ let render (opts: RenderOptions) =
         do!
             renderSitemap conf.url
             <| RenderOptions.sitemapDestinationPath opts
-            <| (Seq.concat [ navSitemap; tagLocs; archiveLocs; booklogLocs ])
+            <| Seq.concat [ navSitemap; tagLocs; archiveLocs; booklogLocs ]
 
         do!
             renderFeed

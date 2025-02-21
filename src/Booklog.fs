@@ -81,7 +81,7 @@ module Misc =
             logs
             |> List.map (_.date >> DateTime.Parse)
             |> List.groupBy id
-            |> List.map (fun (d, logs) -> (d, logs |> List.length))
+            |> List.map (fun (d, logs) -> d, logs |> List.length)
             |> Map.ofList
 
         let days = datesInYear year |> List.groupBy _.DayOfWeek
@@ -148,7 +148,7 @@ module Misc =
         | true, int -> Some int
         | _ -> None
 
-    let private romanMap = Map [ ('i', 1); ('v', 5); ('x', 10) ]
+    let private romanMap = Map [ 'i', 1; 'v', 5; 'x', 10 ]
 
     let private toInt x =
         x
@@ -279,7 +279,7 @@ module Misc =
         let booklogRows =
             logs
             |> List.groupBy _.date
-            |> List.map (fun (_, logs) -> logs |> List.mapi (fun i log -> (i, log)))
+            |> List.map (fun (_, logs) -> logs |> List.mapi (fun i log -> i, log))
             |> List.concat
             |> List.rev
             |> List.map (fun (i, log) ->
@@ -297,9 +297,9 @@ module Misc =
                         Html.p [
                             prop.className "subtitle content is-small"
                             prop.children [
-                                (match book with
-                                 | Some book -> book |> generateBookLink baseUrl
-                                 | None -> Html.text log.bookTitle)
+                                match book with
+                                | Some book -> book |> generateBookLink baseUrl
+                                | None -> Html.text log.bookTitle
                                 Html.text ", read count: "
                                 Html.text (
                                     let rc =
@@ -374,10 +374,10 @@ module Misc =
         let booklogPerYear =
             booklogs |> List.groupBy (_.date >> DateTime.Parse >> _.Year) |> Map.ofList
 
-        (minYear, booklogPerYear)
+        minYear, booklogPerYear
 
     let groupBooklogsByTitle (booklogs: Booklog list) =
-        booklogs |> List.groupBy (_.bookTitle) |> Map.ofList
+        booklogs |> List.groupBy _.bookTitle |> Map.ofList
 
     let getBookMap (books: Book list) =
         books |> List.map (fun book -> book.bookTitle, book) |> Map.ofList
