@@ -612,7 +612,7 @@ module Component =
                     prop.classes [ className; "button" ]
                     prop.href ref
                     prop.title text
-                    prop.children [ Html.span [ prop.text text ] ]
+                    prop.children [ Html.span [ prop.dangerouslySetInnerHTML text ] ]
                 ]
             | None -> null
 
