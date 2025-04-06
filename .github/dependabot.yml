@@ -18,7 +18,7 @@ updates:
       - "krymtkts"
   # Maintain dependencies for NuGet
   - package-ecosystem: "nuget"
-    directory: "/"
+    directory: "/src"
     schedule:
       interval: "weekly"
       day: "friday"
