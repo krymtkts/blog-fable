@@ -177,6 +177,7 @@ module Parser =
 
     type FrontMatter =
         abstract title: string
+        abstract subtitle: string option
         abstract tags: string array option
         abstract date: string option
 
