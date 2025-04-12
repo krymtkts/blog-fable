@@ -1,5 +1,6 @@
 ---
 title: Sample page `code sample`
+subtitle: "*subtitle*"
 tags: [sample, yaml]
 date: 2023-09-01
 ---
