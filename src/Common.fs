@@ -187,6 +187,9 @@ module Parser =
         | None -> fm.title
         |> Util.parseMarkdownInline
 
+    let getTextTitle (fm: FrontMatter) =
+        Regex.Replace(getFormattedTitle fm, "</?\w+>", "") // TODO: use a better parser.
+
     let private matchFrontMatter s =
         Regex.Match(s, @"^---\s*\n(?<frontMatter>[\s\S]*?)\n?---\s*\n?(?<content>[\s\S]*)")
 
@@ -608,7 +611,8 @@ module Component =
                 let text, className =
                     let t =
                         match meta.frontMatter with
-                        | Some fm -> $"%s{meta.date} %s{Parser.getFormattedTitle fm}"
+                        // NOTE: The subtitle is excluded to shorten the button.
+                        | Some fm -> $"%s{meta.date} %s{fm.title |> Util.parseMarkdownInline}"
                         | None -> $"%s{meta.date} %s{meta.leaf}"
 
                     match button with

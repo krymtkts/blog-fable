@@ -285,7 +285,7 @@ module Rendering =
 
             let title =
                 match meta.index, meta.frontMatter with
-                | false, Some fm -> $"%s{conf.title} - %s{fm.title}"
+                | false, Some fm -> $"%s{conf.title} - %s{Parser.getTextTitle fm}"
                 | _ -> conf.title
 
             let header =
