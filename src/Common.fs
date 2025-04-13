@@ -181,7 +181,7 @@ module Parser =
         abstract tags: string array option
         abstract date: string option
 
-    let getTitle (fm: FrontMatter) =
+    let getFormattedTitle (fm: FrontMatter) =
         match fm.subtitle with
         | Some subtitle -> $"{fm.title} - {subtitle}"
         | None -> fm.title
@@ -385,7 +385,7 @@ module Xml =
           link = link
           title =
             match meta.frontMatter with
-            | Some fm -> Parser.getTitle fm
+            | Some fm -> Parser.getFormattedTitle fm
             | None -> meta.leaf
           description = meta.content |> Parser.parseReactStaticMarkup |> simpleEscape
           pubDate = pubDate }
@@ -472,7 +472,7 @@ module Component =
 
         let title =
             match meta.frontMatter with
-            | Some fm -> $"%s{prefix}%s{Parser.getTitle fm}"
+            | Some fm -> $"%s{prefix}%s{Parser.getFormattedTitle fm}"
             | None -> leaf
 
         let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
@@ -496,7 +496,7 @@ module Component =
                 [ date pubDate fm.date
                   Html.h1 [
                       prop.className [ "title" ]
-                      prop.dangerouslySetInnerHTML (Parser.getTitle fm)
+                      prop.dangerouslySetInnerHTML (Parser.getFormattedTitle fm)
                   ]
                   Html.div [
                       prop.className [ "tags" ]
@@ -608,7 +608,7 @@ module Component =
                 let text, className =
                     let t =
                         match meta.frontMatter with
-                        | Some fm -> $"%s{meta.date} %s{Parser.getTitle fm}"
+                        | Some fm -> $"%s{meta.date} %s{Parser.getFormattedTitle fm}"
                         | None -> $"%s{meta.date} %s{meta.leaf}"
 
                     match button with
