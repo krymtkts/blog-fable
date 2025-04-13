@@ -388,7 +388,7 @@ module Xml =
           link = link
           title =
             match meta.frontMatter with
-            | Some fm -> Parser.getFormattedTitle fm
+            | Some fm -> Parser.getTextTitle fm
             | None -> meta.leaf
           description = meta.content |> Parser.parseReactStaticMarkup |> simpleEscape
           pubDate = pubDate }
