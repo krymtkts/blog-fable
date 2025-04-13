@@ -177,8 +177,18 @@ module Parser =
 
     type FrontMatter =
         abstract title: string
+        abstract subtitle: string option
         abstract tags: string array option
         abstract date: string option
+
+    let getFormattedTitle (fm: FrontMatter) =
+        match fm.subtitle with
+        | Some subtitle -> $"{fm.title} - {subtitle}"
+        | None -> fm.title
+        |> Util.parseMarkdownInline
+
+    let getTextTitle (fm: FrontMatter) =
+        Regex.Replace(getFormattedTitle fm, "</?\w+>", "") // TODO: use a better parser.
 
     let private matchFrontMatter s =
         Regex.Match(s, @"^---\s*\n(?<frontMatter>[\s\S]*?)\n?---\s*\n?(?<content>[\s\S]*)")
@@ -378,7 +388,7 @@ module Xml =
           link = link
           title =
             match meta.frontMatter with
-            | Some fm -> fm.title
+            | Some fm -> Parser.getTextTitle fm
             | None -> meta.leaf
           description = meta.content |> Parser.parseReactStaticMarkup |> simpleEscape
           pubDate = pubDate }
@@ -465,7 +475,7 @@ module Component =
 
         let title =
             match meta.frontMatter with
-            | Some fm -> $"%s{prefix}%s{fm.title |> Util.parseMarkdownInline}"
+            | Some fm -> $"%s{prefix}%s{Parser.getFormattedTitle fm}"
             | None -> leaf
 
         let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
@@ -489,7 +499,7 @@ module Component =
                 [ date pubDate fm.date
                   Html.h1 [
                       prop.className [ "title" ]
-                      prop.dangerouslySetInnerHTML (fm.title |> Util.parseMarkdownInline)
+                      prop.dangerouslySetInnerHTML (Parser.getFormattedTitle fm)
                   ]
                   Html.div [
                       prop.className [ "tags" ]
@@ -601,6 +611,7 @@ module Component =
                 let text, className =
                     let t =
                         match meta.frontMatter with
+                        // NOTE: The subtitle is excluded to shorten the button.
                         | Some fm -> $"%s{meta.date} %s{fm.title |> Util.parseMarkdownInline}"
                         | None -> $"%s{meta.date} %s{meta.leaf}"
 

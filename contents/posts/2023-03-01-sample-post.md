@@ -1,5 +1,6 @@
 ---
 title: Sample post
+subtitle: _subtitle_
 tags: [sample, yaml, t, tag, this-is-extreme-long-tag-name]
 date: 2023-03-02
 ---
