@@ -499,8 +499,15 @@ module Component =
                 [ date pubDate fm.date
                   Html.h1 [
                       prop.className [ "title" ]
-                      prop.dangerouslySetInnerHTML (Parser.getFormattedTitle fm)
+                      prop.dangerouslySetInnerHTML (fm.title |> Util.parseMarkdownInline)
                   ]
+                  match fm.subtitle with
+                  | Some subtitle ->
+                      Html.p [
+                          prop.className [ "subtitle"; "is-4" ]
+                          prop.dangerouslySetInnerHTML (subtitle |> Util.parseMarkdownInline)
+                      ]
+                  | None -> Html.none
                   Html.div [
                       prop.className [ "tags" ]
                       prop.custom ("data-pagefind-ignore", "all")
