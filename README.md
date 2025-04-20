@@ -2,6 +2,8 @@
 
 ![Deploy GitHub Pages](https://github.com/krymtkts/blog-fable/actions/workflows/gh-pages.yml/badge.svg)
 [![Known Vulnerabilities](https://snyk.io/test/github/krymtkts/blog-fable/badge.svg)](https://snyk.io/test/github/krymtkts/blog-fable)
+![Top Language](https://img.shields.io/github/languages/top/krymtkts/blog-fable?color=%23b845fc)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 This is a small [Fable](https://fable.io/) app project to generate static pages.
 Use React with [Feliz](https://zaid-ajaj.github.io/Feliz/#/).
