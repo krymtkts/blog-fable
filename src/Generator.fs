@@ -175,6 +175,12 @@ module Generation =
             | None -> false)
         |> Seq.map Option.get
 
+    type MetaContent = { name: string; content: string }
+
+    let generateMetaDatas (metas: MetaContent list) =
+        metas
+        |> List.map (fun meta -> Html.meta [ prop.name meta.name; prop.content meta.content ])
+
     let generate404 =
         [ Html.h1 [ prop.text "404 Page not found" ]
           Html.p [ prop.text "Sorry! The page you're looking for does not exist." ] ]
@@ -648,6 +654,7 @@ type RenderOptions =
       images: string
 
       additionalNavs: AdditionalNav list
+      additionalMetaContents: MetaContent list
 
       feedName: string
 
@@ -792,6 +799,8 @@ let render (opts: RenderOptions) =
         let jsInjection, scripts = buildBundledScripts opts
         let highlightInjection, highlightStyle = buildHighlightStyle opts
 
+        let additionalMetaContents = generateMetaDatas opts.additionalMetaContents
+
         let site: PathConfiguration =
             { siteRoot = opts.pathRoot
               postRoot = opts.posts.root
@@ -811,7 +820,8 @@ let render (opts: RenderOptions) =
               highlightStyle = highlightInjection
               pagefindStyle = RenderOptions.pagefindStylePath opts
               pagefindScript = RenderOptions.pagefindScriptPath opts
-              scriptInjection = jsInjection }
+              scriptInjection = jsInjection
+              additionalMetaContents = additionalMetaContents }
 
         let renderPostAndPages = renderMarkdowns conf site
 

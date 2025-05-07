@@ -34,6 +34,8 @@ render
         [ { text = "About"
             path = "/pages/about.html" } ]
 
+      additionalMetaContents = []
+
       timeZone = "Asia/Tokyo"
 
       sitemap =
