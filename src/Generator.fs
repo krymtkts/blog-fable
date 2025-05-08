@@ -177,7 +177,7 @@ module Generation =
 
     type MetaContent = { name: string; content: string }
 
-    let generateMetaDatas (metas: MetaContent list) =
+    let generateMetaContents (metas: MetaContent list) =
         metas
         |> List.map (fun meta -> Html.meta [ prop.name meta.name; prop.content meta.content ])
 
@@ -799,7 +799,7 @@ let render (opts: RenderOptions) =
         let jsInjection, scripts = buildBundledScripts opts
         let highlightInjection, highlightStyle = buildHighlightStyle opts
 
-        let additionalMetaContents = generateMetaDatas opts.additionalMetaContents
+        let additionalMetaContents = generateMetaContents opts.additionalMetaContents
 
         let site: PathConfiguration =
             { siteRoot = opts.pathRoot
