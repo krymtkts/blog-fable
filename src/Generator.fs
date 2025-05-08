@@ -793,12 +793,9 @@ let private buildHighlightStyle opts =
 let render (opts: RenderOptions) =
     promise {
         let feed, navs = buildNavList opts
-
         let navItems, navSitemap = generateNavbar opts.pathRoot navs
-
         let jsInjection, scripts = buildBundledScripts opts
         let highlightInjection, highlightStyle = buildHighlightStyle opts
-
         let additionalMetaContents = generateMetaContents opts.additionalMetaContents
 
         let site: PathConfiguration =
