@@ -168,12 +168,13 @@ module Generation =
                 liA $"%s{pathRoot}%s{navi.path}"
                 <| Element(navi.text, Html.h1 [ prop.text navi.text ])
             | Link navi -> liA $"%s{pathRoot}%s{navi.path}" <| Text navi.text),
-        navs
-        |> Seq.map toSitemap
-        |> Seq.filter (function
-            | Some _ -> true
-            | None -> false)
-        |> Seq.map Option.get
+        navs |> Seq.choose toSitemap
+
+    type MetaContent = { name: string; content: string }
+
+    let generateMetaContents (metas: MetaContent list) =
+        metas
+        |> List.map (fun meta -> Html.meta [ prop.name meta.name; prop.content meta.content ])
 
     let generate404 =
         [ Html.h1 [ prop.text "404 Page not found" ]
@@ -519,7 +520,7 @@ module Rendering =
             let bookContents =
                 booklogPerTitle
                 |> Map.toList
-                |> List.map (fun (title, logs) ->
+                |> List.choose (fun (title, logs) ->
                     bookMap
                     |> Map.tryFind title
                     |> function
@@ -532,10 +533,7 @@ module Rendering =
                                   links = links
                                   book = book }
                                 logs
-
                             |> Some)
-                |> List.filter Option.isSome
-                |> List.map Option.get
 
             do!
                 bookContents
@@ -648,6 +646,7 @@ type RenderOptions =
       images: string
 
       additionalNavs: AdditionalNav list
+      additionalMetaContents: MetaContent list
 
       feedName: string
 
@@ -786,11 +785,10 @@ let private buildHighlightStyle opts =
 let render (opts: RenderOptions) =
     promise {
         let feed, navs = buildNavList opts
-
         let navItems, navSitemap = generateNavbar opts.pathRoot navs
-
         let jsInjection, scripts = buildBundledScripts opts
         let highlightInjection, highlightStyle = buildHighlightStyle opts
+        let additionalMetaContents = generateMetaContents opts.additionalMetaContents
 
         let site: PathConfiguration =
             { siteRoot = opts.pathRoot
@@ -811,7 +809,8 @@ let render (opts: RenderOptions) =
               highlightStyle = highlightInjection
               pagefindStyle = RenderOptions.pagefindStylePath opts
               pagefindScript = RenderOptions.pagefindScriptPath opts
-              scriptInjection = jsInjection }
+              scriptInjection = jsInjection
+              additionalMetaContents = additionalMetaContents }
 
         let renderPostAndPages = renderMarkdowns conf site
 

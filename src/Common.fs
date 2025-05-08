@@ -541,7 +541,8 @@ module Component =
           highlightStyle: string
           pagefindStyle: string
           pagefindScript: string
-          scriptInjection: string list }
+          scriptInjection: string list
+          additionalMetaContents: ReactElement list }
 
     let frame (conf: FrameConfiguration) (content: Fable.React.ReactElement list) =
         let themeSelector =
@@ -568,22 +569,23 @@ module Component =
         let navbar = Html.ul [ prop.children (conf.navItems @ themeSelector) ]
 
         let main =
-            [ Html.head [
-                  Html.title [ prop.text conf.title ]
-                  Html.meta [ prop.charset "utf-8" ]
-                  Html.meta [ prop.name "description"; prop.content conf.description ]
-                  Html.meta [ prop.name "viewport"; prop.content "width=device-width, initial-scale=1" ]
-                  Html.meta [ prop.custom ("property", "og:site_name"); prop.content conf.name ]
-                  Html.meta [ prop.custom ("property", "og:title"); prop.content conf.title ]
-                  Html.meta [ prop.custom ("property", "og:description"); prop.content conf.description ]
-                  Html.meta [ prop.custom ("property", "og:url"); prop.content conf.url ]
-                  Html.link [ prop.rel "canonical"; prop.href conf.url ]
-                  Html.link [ prop.rel "icon"; prop.href conf.favicon ]
-                  Html.link [ prop.rel "stylesheet"; prop.href conf.pagefindStyle ]
-                  Html.script [ prop.src conf.pagefindScript ]
-                  Html.link [ prop.rel "stylesheet"; prop.type' "text/css"; prop.href conf.style ]
-                  Html.link [ prop.rel "stylesheet"; prop.type' "text/css"; prop.href conf.highlightStyle ]
-              ]
+            [ Html.head (
+                  [ Html.title [ prop.text conf.title ]
+                    Html.meta [ prop.charset "utf-8" ]
+                    Html.meta [ prop.name "description"; prop.content conf.description ]
+                    Html.meta [ prop.name "viewport"; prop.content "width=device-width, initial-scale=1" ]
+                    Html.meta [ prop.custom ("property", "og:site_name"); prop.content conf.name ]
+                    Html.meta [ prop.custom ("property", "og:title"); prop.content conf.title ]
+                    Html.meta [ prop.custom ("property", "og:description"); prop.content conf.description ]
+                    Html.meta [ prop.custom ("property", "og:url"); prop.content conf.url ]
+                    Html.link [ prop.rel "canonical"; prop.href conf.url ]
+                    Html.link [ prop.rel "icon"; prop.href conf.favicon ]
+                    Html.link [ prop.rel "stylesheet"; prop.href conf.pagefindStyle ]
+                    Html.script [ prop.src conf.pagefindScript ]
+                    Html.link [ prop.rel "stylesheet"; prop.type' "text/css"; prop.href conf.style ]
+                    Html.link [ prop.rel "stylesheet"; prop.type' "text/css"; prop.href conf.highlightStyle ] ]
+                  @ conf.additionalMetaContents
+              )
               Html.body [
                   Html.nav [ prop.className "tabs"; prop.children [ navbar ] ]
                   Html.main [
