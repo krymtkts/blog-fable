@@ -168,12 +168,7 @@ module Generation =
                 liA $"%s{pathRoot}%s{navi.path}"
                 <| Element(navi.text, Html.h1 [ prop.text navi.text ])
             | Link navi -> liA $"%s{pathRoot}%s{navi.path}" <| Text navi.text),
-        navs
-        |> Seq.map toSitemap
-        |> Seq.filter (function
-            | Some _ -> true
-            | None -> false)
-        |> Seq.map Option.get
+        navs |> Seq.choose toSitemap
 
     type MetaContent = { name: string; content: string }
 
@@ -525,7 +520,7 @@ module Rendering =
             let bookContents =
                 booklogPerTitle
                 |> Map.toList
-                |> List.map (fun (title, logs) ->
+                |> List.choose (fun (title, logs) ->
                     bookMap
                     |> Map.tryFind title
                     |> function
@@ -538,10 +533,7 @@ module Rendering =
                                   links = links
                                   book = book }
                                 logs
-
                             |> Some)
-                |> List.filter Option.isSome
-                |> List.map Option.get
 
             do!
                 bookContents
