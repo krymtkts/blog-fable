@@ -22,8 +22,8 @@ type Streak =
       count: int }
 
 type StreakSummary =
-    { longest: Streak
-      current: Streak
+    { longest: Streak option
+      current: Streak option
       maxPagesRead: int }
 
 [<RequireQualifiedAccess>]
@@ -218,18 +218,25 @@ module Misc =
 
         let maxPagesRead = getMaxPagesRead booklogs
 
-        { longest = longest.Value
-          current = current.Value
+        { longest = longest
+          current = current
           maxPagesRead = maxPagesRead }
 
     let generateBooklogStats (booklogs: Booklog list) =
-        let streak = booklogs |> getStreakSummary
+        let { longest = longest
+              current = current
+              maxPagesRead = maxPagesRead } =
+            booklogs |> getStreakSummary
+
+        let current, longest =
+            match current, longest with
+            | Some current, Some longest -> current.count, longest.count
+            | _ -> 0, 0 // NOTE: Neither current nor longest will ever be None individually.
 
         Html.div [
             prop.className "streak"
             prop.children [
-                Html.text
-                    $"current: {streak.current.count}, longest: {streak.longest.count}, max pages read: {streak.maxPagesRead}"
+                Html.text $"current: {current}, longest: {longest}, max pages read: {maxPagesRead}"
             ]
         ]
 
