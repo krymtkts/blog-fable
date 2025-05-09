@@ -231,7 +231,7 @@ module Misc =
         let current, longest =
             match current, longest with
             | Some current, Some longest -> current.count, longest.count
-            | _ -> 0, 0
+            | _ -> 0, 0 // NOTE: Neither current nor longest will ever be None individually.
 
         Html.div [
             prop.className "streak"
