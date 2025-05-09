@@ -14,8 +14,6 @@ updates:
           - "*"
     assignees:
       - "krymtkts"
-    reviewers:
-      - "krymtkts"
   # Maintain dependencies for NuGet
   - package-ecosystem: "nuget"
     directory: "/src"
@@ -35,8 +33,6 @@ updates:
           - "Fable.*"
           - "Feliz"
     assignees:
-      - "krymtkts"
-    reviewers:
       - "krymtkts"
   # Maintain dependencies for npm
   - package-ecosystem: "npm"
@@ -58,6 +54,4 @@ updates:
       dev-dependencies:
         dependency-type: "development"
     assignees:
-      - "krymtkts"
-    reviewers:
       - "krymtkts"
