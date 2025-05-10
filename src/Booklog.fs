@@ -406,7 +406,7 @@ module Misc =
             |> frame
                 { conf with
                     title = $"%s{conf.title} - %s{getTitle def}"
-                    url = $"%s{conf.url}%s{def.basePath}" }
+                    url = $"%s{conf.url}%s{def.basePath}/%s{id}.html" }
             |> Parser.parseReactStaticHtml
 
         let lastmod = booklogs |> List.maxBy _.date |> _.date
