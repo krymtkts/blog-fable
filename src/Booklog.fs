@@ -396,18 +396,22 @@ module Misc =
         (getId: 'D -> string)
         (getTitle: 'D -> string)
         (generate: 'D -> 'T list -> Fable.React.ReactElement list)
+        (primary: 'D -> bool)
         (booklogs: 'T list)
         =
         let id = getId def
 
-        let content =
-            booklogs
-            |> generate def
-            |> frame
+        let conf =
+            if primary def then
                 { conf with
-                    title = $"%s{conf.title} - %s{getTitle def}"
+                    title = $"%s{conf.title} - %s{id}"
+                    url = $"%s{conf.url}%s{def.basePath}.html" }
+            else
+                { conf with
+                    title = $"%s{conf.title} - %s{id}"
                     url = $"%s{conf.url}%s{def.basePath}/%s{id}.html" }
-            |> Parser.parseReactStaticHtml
+
+        let content = booklogs |> generate def |> frame conf |> Parser.parseReactStaticHtml
 
         let lastmod = booklogs |> List.maxBy _.date |> _.date
 
@@ -424,7 +428,8 @@ module Misc =
           links: Fable.React.ReactElement
           books: Map<string, Book>
           year: int
-          stats: Fable.React.ReactElement }
+          stats: Fable.React.ReactElement
+          index: bool }
 
     let generateYearlyBooklogContent (conf: FrameConfiguration) (def: BooklogDef) (booklogs: Booklog list) =
         parseBooklog
@@ -433,6 +438,7 @@ module Misc =
             (fun def -> def.year |> string)
             (fun def -> def.year |> string)
             (fun def -> generateBooklogList def.basePath def.links def.stats def.books def.year)
+            (fun def -> def.index)
             booklogs
 
     type BookDef =
@@ -448,4 +454,5 @@ module Misc =
             (fun def -> def.book.id)
             (fun def -> def.book.bookTitle)
             (fun def -> generateBooklogSummary def.links def.book)
+            (fun _ -> false)
             booklogs

@@ -365,7 +365,7 @@ module Rendering =
         }
 
     let renderIndex conf site metaPosts dest =
-        let index m = { m with index = true }
+        let index (m: Meta) = { m with index = true }
 
         let meta, metaPrev =
             match
@@ -496,6 +496,22 @@ module Rendering =
                     ]
                 ]
 
+            let booklogIndex =
+                booklogContents
+                |> List.last
+                |> fun (year, booklogs) ->
+                    booklogs
+                    |> generateYearlyBooklogContent
+                        { conf with title = title }
+                        { priority = priority
+                          basePath = basePath
+                          links = links
+                          books = bookMap
+                          year = year
+                          stats = stats
+                          index = true }
+
+
             let booklogContents =
                 booklogContents
                 |> List.map (fun (year, booklogs) ->
@@ -507,7 +523,8 @@ module Rendering =
                           links = links
                           books = bookMap
                           year = year
-                          stats = stats })
+                          stats = stats
+                          index = false })
 
             do!
                 booklogContents
@@ -547,10 +564,7 @@ module Rendering =
 
             do!
                 printfn $"Writing index of booklog to %s{booklogsDest}..."
-
-                booklogContents
-                |> List.last
-                |> fun (content, _, _) -> IO.writeFile booklogsDest content
+                booklogIndex |> fun (content, _, _) -> IO.writeFile booklogsDest content
 
             return
                 [ booklogContents |> List.unzip3 |> (fun (_, locs, _) -> locs)
