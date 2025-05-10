@@ -214,7 +214,8 @@ module Rendering =
         { siteRoot: string
           postRoot: string
           pageRoot: string
-          tagRoot: string }
+          tagRoot: string
+          destRoot: string }
 
     let private readSource source =
         promise {
@@ -282,7 +283,7 @@ module Rendering =
         next
         =
         promise {
-            let path = dest.Replace("\\", "/").Split($"%s{root.siteRoot}/") |> Seq.last
+            let path = dest.Replace("\\", "/").Split($"%s{root.destRoot}/") |> Seq.last
 
             let title =
                 match meta.index, meta.frontMatter with
@@ -303,7 +304,7 @@ module Rendering =
                     { conf with
                         title = title
                         description = meta.description
-                        url = $"%s{conf.url}/%s{path}" }
+                        url = $"%s{conf.url}%s{root.siteRoot}/%s{path}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing %s{dest}..."
@@ -794,7 +795,8 @@ let render (opts: RenderOptions) =
             { siteRoot = opts.pathRoot
               postRoot = opts.posts.root
               pageRoot = opts.pages.root
-              tagRoot = opts.tags.root }
+              tagRoot = opts.tags.root
+              destRoot = RenderOptions.destinationRoot opts }
 
         let conf: FrameConfiguration =
             { lang = opts.lang
