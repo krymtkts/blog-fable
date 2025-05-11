@@ -115,7 +115,7 @@ module private Util =
                         | -1 -> text, ""
                         | i -> text.Substring(0, i), text.Substring(i)
 
-                    $"""<li><label class="checkbox"><input type="checkbox" class="checkbox" disabled %s{checkState} />%s{str}</label>%s{rst}</li>"""
+                    $"""<li><label class="checkbox"><input type="checkbox" name="checkbox" class="checkbox" disabled %s{checkState} aria-label="Checkbox" />%s{str}</label>%s{rst}</li>"""
                 | false -> $"""<li>%s{text}</li>"""
 
             let checkbox _ =
@@ -125,9 +125,10 @@ module private Util =
             let image (item: Marked.Tokens.Image) =
                 // NOTE: add lazy loading attribute.
                 let title =
-                    match item.title with
-                    | "" -> item.text
-                    | x -> x
+                    if String.IsNullOrWhiteSpace item.title then
+                        item.text
+                    else
+                        item.title
 
                 $"""<img src="%s{item.href}" title="%s{title}" alt="%s{item.text}" loading="lazy" />"""
 
@@ -602,7 +603,7 @@ module Component =
 
         let scripts =
             conf.scriptInjection
-            |> List.map (fun src -> Html.script [ prop.lang "javascript"; prop.type' "text/javascript"; prop.src src ])
+            |> List.map (fun src -> Html.script [ prop.type' "text/javascript"; prop.src src ])
 
         Html.html [ prop.lang conf.lang; prop.children (scripts @ main) ]
 

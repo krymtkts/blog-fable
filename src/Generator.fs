@@ -21,7 +21,8 @@ module Generation =
                 |> Seq.map (fun (yearMonth, metas) ->
                     let lis = metas |> Seq.map (metaToLi root) |> List.ofSeq
 
-                    [ Html.li [ Html.h3 $"{yearMonth} ({List.length lis})" ]; Html.ul lis ])
+                    [ Html.li [ Html.h3 $"{yearMonth} ({List.length lis})" ]
+                      Html.li [ Html.ul lis ] ])
 
             return Html.ul [ prop.children (List.concat archives) ]
         }
@@ -62,7 +63,7 @@ module Generation =
                               priority = def.priority })
 
                     generate def.metas $"%s{pathRoot}%s{def.root}"
-                    |> Promise.map (fun content -> [ Html.li [ Html.h2 def.title ]; content ], refs))
+                    |> Promise.map (fun content -> [ Html.li [ Html.h2 def.title ]; Html.li [ content ] ], refs))
                 |> Promise.all
 
             let a, refs = a |> List.ofSeq |> List.unzip
@@ -103,9 +104,7 @@ module Generation =
                 |> Map.toList
                 |> List.map (fun (tag, metas) -> Component.tagToLi def.tagRoot tag <| List.length metas)
 
-            [ Html.ul [
-                  prop.children [ Html.li [ Html.h2 def.title ]; Html.ul [ prop.children tags ] ]
-              ] ]
+            [ Html.ul [ Html.li [ Html.h2 def.title ]; Html.li [ Html.ul [ prop.children tags ] ] ] ]
 
         let tagPageContents =
             tagAndPage
@@ -121,10 +120,7 @@ module Generation =
 
                         metaToLi parent meta)
 
-                tag,
-                [ Html.ul [
-                      prop.children [ Html.li [ Html.h2 $"{tag} ({List.length metas})" ]; Html.ul lis ]
-                  ] ])
+                tag, [ Html.ul [ Html.li [ Html.h2 $"{tag} ({List.length metas})" ]; Html.li [ Html.ul lis ] ] ])
 
         let locs: Xml.SiteLocation seq =
             tagAndPage
@@ -166,7 +162,7 @@ module Generation =
         |> List.map (function
             | Title navi ->
                 liA $"%s{pathRoot}%s{navi.path}"
-                <| Element(navi.text, Html.h1 [ prop.text navi.text ])
+                <| Element(navi.text, Html.p [ prop.text navi.text ])
             | Link navi -> liA $"%s{pathRoot}%s{navi.path}" <| Text navi.text),
         navs |> Seq.choose toSitemap
 
@@ -490,9 +486,9 @@ module Rendering =
                 Html.ul [
                     prop.children [
                         Html.li [ Html.h2 "Years" ]
-                        Html.ul [ yearLinks ]
+                        Html.li [ yearLinks ]
                         Html.li [ Html.h2 "Books" ]
-                        Html.ul [ bookLinks ]
+                        Html.li [ bookLinks ]
                     ]
                 ]
 
