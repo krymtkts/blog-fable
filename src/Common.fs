@@ -115,7 +115,7 @@ module private Util =
                         | -1 -> text, ""
                         | i -> text.Substring(0, i), text.Substring(i)
 
-                    $"""<li><label class="checkbox"><input type="checkbox" class="checkbox" disabled %s{checkState} />%s{str}</label>%s{rst}</li>"""
+                    $"""<li><label class="checkbox"><input type="checkbox" name="checkbox" class="checkbox" disabled %s{checkState} aria-label="Checkbox" />%s{str}</label>%s{rst}</li>"""
                 | false -> $"""<li>%s{text}</li>"""
 
             let checkbox _ =
