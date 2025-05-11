@@ -602,7 +602,7 @@ module Component =
 
         let scripts =
             conf.scriptInjection
-            |> List.map (fun src -> Html.script [ prop.lang "javascript"; prop.type' "text/javascript"; prop.src src ])
+            |> List.map (fun src -> Html.script [ prop.type' "text/javascript"; prop.src src ])
 
         Html.html [ prop.lang conf.lang; prop.children (scripts @ main) ]
 
