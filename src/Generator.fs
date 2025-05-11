@@ -214,7 +214,8 @@ module Rendering =
         { siteRoot: string
           postRoot: string
           pageRoot: string
-          tagRoot: string }
+          tagRoot: string
+          destRoot: string }
 
     let private readSource source =
         promise {
@@ -282,7 +283,7 @@ module Rendering =
         next
         =
         promise {
-            let path = dest.Replace("\\", "/").Split($"%s{root.siteRoot}/") |> Seq.last
+            let path = dest.Replace("\\", "/").Split($"%s{root.destRoot}/") |> Seq.last
 
             let title =
                 match meta.index, meta.frontMatter with
@@ -303,7 +304,7 @@ module Rendering =
                     { conf with
                         title = title
                         description = meta.description
-                        url = $"%s{conf.url}/%s{path}" }
+                        url = $"%s{conf.url}%s{root.siteRoot}/%s{path}" }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing %s{dest}..."
@@ -364,7 +365,7 @@ module Rendering =
         }
 
     let renderIndex conf site metaPosts dest =
-        let index m = { m with index = true }
+        let index (m: Meta) = { m with index = true }
 
         let meta, metaPrev =
             match
@@ -495,6 +496,22 @@ module Rendering =
                     ]
                 ]
 
+            let booklogIndex =
+                booklogContents
+                |> List.last
+                |> fun (year, booklogs) ->
+                    booklogs
+                    |> generateYearlyBooklogContent
+                        { conf with title = title }
+                        { priority = priority
+                          basePath = basePath
+                          links = links
+                          books = bookMap
+                          year = year
+                          stats = stats
+                          index = true }
+
+
             let booklogContents =
                 booklogContents
                 |> List.map (fun (year, booklogs) ->
@@ -506,7 +523,8 @@ module Rendering =
                           links = links
                           books = bookMap
                           year = year
-                          stats = stats })
+                          stats = stats
+                          index = false })
 
             do!
                 booklogContents
@@ -546,10 +564,7 @@ module Rendering =
 
             do!
                 printfn $"Writing index of booklog to %s{booklogsDest}..."
-
-                booklogContents
-                |> List.last
-                |> fun (content, _, _) -> IO.writeFile booklogsDest content
+                booklogIndex |> fun (content, _, _) -> IO.writeFile booklogsDest content
 
             return
                 [ booklogContents |> List.unzip3 |> (fun (_, locs, _) -> locs)
@@ -794,7 +809,8 @@ let render (opts: RenderOptions) =
             { siteRoot = opts.pathRoot
               postRoot = opts.posts.root
               pageRoot = opts.pages.root
-              tagRoot = opts.tags.root }
+              tagRoot = opts.tags.root
+              destRoot = RenderOptions.destinationRoot opts }
 
         let conf: FrameConfiguration =
             { lang = opts.lang
