@@ -125,9 +125,10 @@ module private Util =
             let image (item: Marked.Tokens.Image) =
                 // NOTE: add lazy loading attribute.
                 let title =
-                    match item.title with
-                    | "" -> item.text
-                    | x -> x
+                    if String.IsNullOrWhiteSpace item.title then
+                        item.text
+                    else
+                        item.title
 
                 $"""<img src="%s{item.href}" title="%s{title}" alt="%s{item.text}" loading="lazy" />"""
 
