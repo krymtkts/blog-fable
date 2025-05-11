@@ -162,7 +162,7 @@ module Generation =
         |> List.map (function
             | Title navi ->
                 liA $"%s{pathRoot}%s{navi.path}"
-                <| Element(navi.text, Html.h1 [ prop.text navi.text ])
+                <| Element(navi.text, Html.p [ prop.text navi.text ])
             | Link navi -> liA $"%s{pathRoot}%s{navi.path}" <| Text navi.text),
         navs |> Seq.choose toSitemap
 
