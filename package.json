@@ -12,7 +12,7 @@
     "build-index": "pagefind",
     "build": "npm run build-css && npm run build-fable && npm run build-index",
     "build-dev": "npm run build-css && npm run build-fable dev && npm run build-index",
-    "serve": "dotnet fsi ./dev-server.fsx /blog-fable",
+    "serve": "dotnet fsi ./DevServer.fsx /blog-fable",
     "dev": "npm run build-dev && npm run serve"
   },
   "version": "1.0.0",
