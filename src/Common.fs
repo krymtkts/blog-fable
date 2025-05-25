@@ -234,7 +234,6 @@ module Parser =
 
 [<AutoOpen>]
 module Misc =
-    open System
     let argv = Process.argv
 
     type Layout =
@@ -249,7 +248,7 @@ module Misc =
             match [ year; month; day ] |> List.map Int32.TryParse with
             | [ true, year; true, month; true, day ] ->
                 let date = $"%04d{year}-%02d{month}-%02d{day}"
-                Post(date)
+                Post date
             | _ -> Page
         | _ -> Page
 

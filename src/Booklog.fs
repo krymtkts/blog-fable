@@ -344,7 +344,7 @@ module Misc =
         let booklogRows =
             logs
             |> List.filter (_.notes >> Option.isSome)
-            |> List.map (fun (log) ->
+            |> List.map (fun log ->
                 let notes = log.notes |> generateBooklogNotes
 
                 [ notes

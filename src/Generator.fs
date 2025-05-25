@@ -421,7 +421,7 @@ module Rendering =
             do!
                 tagPageContents
                 |> List.map (fun (tag, tagPageContent) ->
-                    let dest = IO.resolve ($"""%s{dest.Replace(".html", "")}/%s{tag}.html""")
+                    let dest = IO.resolve $"""%s{dest.Replace(".html", "")}/%s{tag}.html"""
                     let parent = dest |> IO.parent |> IO.leaf
                     printfn $"Writing tag %s{dest}..."
 
