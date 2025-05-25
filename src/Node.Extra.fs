@@ -32,9 +32,9 @@ module Directory =
             | false -> return! create dir
         }
 
-    let dirname (dir: string) = path.dirname (dir)
+    let dirname (dir: string) = path.dirname dir
 
-    let leaf (dir: string) = path.basename (dir)
+    let leaf (dir: string) = path.basename dir
 
     let getFiles (isRecursive: bool) (dir: string) =
         Promise.create (fun resolve reject ->
