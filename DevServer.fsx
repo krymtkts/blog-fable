@@ -5,7 +5,6 @@
 open Fake.Core
 open Fake.DotNet
 open Fake.IO
-open Fake.IO.Globbing.Operators
 open Fake.JavaScript
 open Suave
 open Suave.Filters
@@ -21,10 +20,8 @@ open System.Threading
 let port =
     let rec findPort port =
         let portIsTaken =
-            NetworkInformation.IPGlobalProperties
-                .GetIPGlobalProperties()
-                .GetActiveTcpListeners()
-            |> Seq.exists (fun x -> x.Port = int (port))
+            NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners()
+            |> Seq.exists (fun x -> x.Port = int port)
 
         if portIsTaken then findPort (port + 1us) else port
 
@@ -36,7 +33,7 @@ type BuildEvent =
     | BuildStyle
     | Noop
 
-let handleWatcherEvents, socketHandler =
+let (handleWatcherEvents: FileChange seq -> unit), socketHandler =
     let refreshEvent = new Event<_>()
 
     let buildFable () =
@@ -109,7 +106,7 @@ let handleWatcherEvents, socketHandler =
                 let! msg = ws.read ()
 
                 match msg with
-                | (Close, _, _) ->
+                | Close, _, _ ->
                     use _ = cts
                     cts.Cancel()
 
@@ -139,12 +136,12 @@ let cfg =
         mimeTypesMap =
             Writers.defaultMimeTypesMap
             // NOTE: Add custom mime types for pagefind to prevent 404 error.
-            @@ ((function
-            | ".pagefind"
-            | ".pf_fragment"
-            | ".pf_index"
-            | ".pf_meta" -> Writers.createMimeType "application/octet-stream" false
-            | _ -> None)) }
+            @@ function
+                | ".pagefind"
+                | ".pf_fragment"
+                | ".pf_index"
+                | ".pf_meta" -> Writers.createMimeType "application/octet-stream" false
+                | _ -> None }
 
 
 let root =
@@ -180,22 +177,3 @@ let openIndex url =
 
     p.UseShellExecute <- true
     Diagnostics.Process.Start(p) |> ignore
-
-try
-    use _ =
-        !! "src/**/*.fs"
-        ++ "contents/**/*.md"
-        ++ "contents/**/*.yml"
-        ++ "contents/**/*.yaml"
-        ++ "sass/**/*.scss"
-        |> ChangeWatcher.run handleWatcherEvents
-
-    let index: string = $"http://localhost:%d{port}%s{root}/index.html"
-    printfn $"Open %s{index} ..."
-    openIndex index
-
-    printfn "Starting dev server..."
-    startWebServer cfg app
-
-finally
-    ()
