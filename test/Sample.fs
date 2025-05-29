@@ -1,36 +1,55 @@
 module Tests
 
+open System
 open Expecto
+open Expecto.Flip
+
+open Microsoft.Playwright
+
+open DevServer
+open Suave
+open System.Threading
+
+(*
+This tests requires the Playwright CLI to be installed.
+ex) PS> ./test/bin/Debug/*/playwright.ps1 install
+*)
 
 [<Tests>]
 let tests =
-  testList "samples" [
-    testCase "universe exists (╭ರᴥ•́)" <| fun _ ->
-      let subject = true
-      Expect.isTrue subject "I compute, therefore I am."
+    testList "samples" [
 
-    testCase "when true is not (should fail)" <| fun _ ->
-      let subject = false
-      Expect.isTrue subject "I should fail because the subject is false"
+        test "PlayWright" {
 
-    testCase "I'm skipped (should skip)" <| fun _ ->
-      Tests.skiptest "Yup, waiting for a sunny day..."
+            printfn "Starting dev server..."
 
-    testCase "I'm always fail (should fail)" <| fun _ ->
-      Tests.failtest "This was expected..."
+            let home = IO.Path.Join [| __SOURCE_DIRECTORY__; ".."; "docs" |]
+            let root = "/blog-fable"
+            let _, webServer = startWebServerAsync (cfg home) (app root)
+            let cancellationTokenSource = new CancellationTokenSource()
+            Async.Start(webServer, cancellationTokenSource.Token) |> ignore
 
-    testCase "contains things" <| fun _ ->
-      Expect.containsAll [| 2; 3; 4 |] [| 2; 4 |]
-                         "This is the case; {2,3,4} contains {2,4}"
+            let index: string = $"http://localhost:%d{port}%s{root}/index.html"
 
-    testCase "contains things (should fail)" <| fun _ ->
-      Expect.containsAll [| 2; 3; 4 |] [| 2; 4; 1 |]
-                         "Expecting we have one (1) in there"
+            task {
+                use! playwright = Playwright.CreateAsync()
+                let! browser = playwright.Chromium.LaunchAsync()
+                let! page = browser.NewPageAsync()
 
-    testCase "Sometimes I want to ༼ノಠل͟ಠ༽ノ ︵ ┻━┻" <| fun _ ->
-      Expect.equal "abcdëf" "abcdef" "These should equal"
+                let! response = page.GotoAsync(index)
 
-    test "I am (should fail)" {
-      "╰〳 ಠ 益 ಠೃ 〵╯" |> Expect.equal true false
-    }
-  ]
+                match response with
+                | null -> failwithf "Failed to load page: %s" index
+                | r when not r.Ok -> failwithf "Failed to load page: %s" index
+                | _ -> ()
+
+                let! title = page.TitleAsync()
+
+                printfn "title is '%s'" title
+
+            }
+            |> Async.AwaitTask
+            |> Async.RunSynchronously
+        }
+
+    ]

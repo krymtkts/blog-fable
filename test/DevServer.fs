@@ -1,6 +1,4 @@
-#r "nuget: Fake.DotNet.Cli"
-#r "nuget: Fake.JavaScript.Npm"
-#r "nuget: Suave, >= 2.7.0-beta1"
+module DevServer
 
 open Fake.Core
 open Fake.DotNet
@@ -123,11 +121,10 @@ let (handleWatcherEvents: FileChange seq -> unit), socketHandler =
 
     handleWatcherEvents, socketHandler
 
-let home = IO.Path.Join [| __SOURCE_DIRECTORY__; "docs" |]
+let cfg (home: string) =
+    let home = IO.Path.GetFullPath home
+    printfn $"watch '%s{home}'"
 
-printfn $"watch '%s{home}'"
-
-let cfg =
     { defaultConfig with
         homeFolder = Some(home)
         compressedFilesFolder = Some(home)
@@ -144,33 +141,31 @@ let cfg =
                 | _ -> None }
 
 
-let root =
-    match fsi.CommandLineArgs with
-    | [| _; root |] -> root
-    | _ -> ""
-
-let app: WebPart =
+let app (root: string) : WebPart =
     let logger = Logging.Log.create "dev-server"
 
-    choose
-        [
+    choose [
 
-          path "/websocket" >=> handShake socketHandler
+        path "/websocket" >=> handShake socketHandler
 
-          GET
-          >=> Writers.setHeader "Cache-Control" "no-cache, no-store, must-revalidate"
-          >=> Writers.setHeader "Pragma" "no-cache"
-          >=> Writers.setHeader "Expires" "0"
-          >=> choose
-                  [ path $"{root}/" >=> Files.browseFileHome "blog-fable/index.html"
-                    path $"{root}" >=> Redirection.redirect $"/blog-fable/"
+        GET
+        >=> Writers.setHeader "Cache-Control" "no-cache, no-store, must-revalidate"
+        >=> Writers.setHeader "Pragma" "no-cache"
+        >=> Writers.setHeader "Expires" "0"
+        >=> choose [
 
-                    Files.browseHome ]
-          >=> log logger logFormat
+            path $"{root}/" >=> Files.browseFileHome "blog-fable/index.html"
+            path $"{root}" >=> Redirection.redirect $"/blog-fable/"
 
-          Writers.setStatus HTTP_404
-          >=> logWithLevel Logging.Error logger logFormat
-          >=> Files.browseFileHome $"{root}/404.html" ]
+            Files.browseHome
+
+        ]
+        >=> log logger logFormat
+
+        Writers.setStatus HTTP_404
+        >=> logWithLevel Logging.Error logger logFormat
+        >=> Files.browseFileHome $"{root}/404.html"
+    ]
 
 let openIndex url =
     let p = new Diagnostics.ProcessStartInfo(url)

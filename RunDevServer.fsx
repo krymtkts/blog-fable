@@ -1,10 +1,20 @@
-#load "DevServer.fsx"
+#r "nuget: Fake.DotNet.Cli"
+#r "nuget: Fake.JavaScript.Npm"
+#r "nuget: Suave, >= 2.7.0-beta1"
 
+#load "./test/DevServer.fs"
+
+open System
 open Fake.IO
 open Fake.IO.Globbing.Operators
 open Suave
 
 open DevServer
+
+let root =
+    match fsi.CommandLineArgs with
+    | [| _; root |] -> root
+    | _ -> ""
 
 try
     use _ =
@@ -20,7 +30,10 @@ try
     openIndex index
 
     printfn "Starting dev server..."
-    startWebServer cfg app
+    let home = IO.Path.Join [| __SOURCE_DIRECTORY__; "docs" |]
+    printfn $"watch '%s{home}'"
+
+    startWebServer (cfg home) (app root)
 
 finally
     ()
