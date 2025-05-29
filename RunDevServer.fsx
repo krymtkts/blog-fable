@@ -1,7 +1,8 @@
+// NOTE: requires all dependencies references.
 #r "nuget: Fake.DotNet.Cli"
 #r "nuget: Fake.JavaScript.Npm"
 #r "nuget: Suave, >= 2.7.0-beta1"
-
+// NOTE: loading the dev server from test project.
 #load "./test/DevServer.fs"
 
 open System
@@ -31,9 +32,7 @@ try
 
     printfn "Starting dev server..."
     let home = IO.Path.Join [| __SOURCE_DIRECTORY__; "docs" |]
-    printfn $"watch '%s{home}'"
-
-    startWebServer (cfg home) (app root)
+    startWebServer (suaveConfig home) (webpart root)
 
 finally
     ()

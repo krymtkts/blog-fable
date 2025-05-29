@@ -118,10 +118,9 @@ let (handleWatcherEvents: FileChange seq -> unit), socketHandler =
         Async.Start(refreshLoop (), cts.Token)
         mainLoop cts
 
-
     handleWatcherEvents, socketHandler
 
-let cfg (home: string) =
+let suaveConfig (home: string) =
     let home = IO.Path.GetFullPath home
     printfn $"watch '%s{home}'"
 
@@ -141,7 +140,7 @@ let cfg (home: string) =
                 | _ -> None }
 
 
-let app (root: string) : WebPart =
+let webpart (root: string) : WebPart =
     let logger = Logging.Log.create "dev-server"
 
     choose [
