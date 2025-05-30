@@ -52,33 +52,79 @@ type IPage with
             | r -> return Ok r
         }
 
+let snapshotDir = IO.Path.Combine(__SOURCE_DIRECTORY__, "snapshots")
+
+let ensureSnapshotDir () =
+    if snapshotDir |> IO.Directory.Exists |> not then
+        snapshotDir |> IO.Directory.CreateDirectory |> ignore
+
+let getSnapshotPath (path: string) =
+    if "http" |> path.StartsWith then
+        failwith "Path should not start with 'http'. Use relative paths instead."
+
+    let fileName = path.Replace("/", "_")
+    IO.Path.Combine(snapshotDir, fileName + ".snapshot")
+
+let saveSnapshot (path: string) (content: string) =
+    IO.File.WriteAllTextAsync(path, content, Text.Encoding.UTF8)
+
+let loadSnapshot (path: string) =
+    task {
+        if path |> IO.File.Exists then
+            let! content = IO.File.ReadAllTextAsync(path, Text.Encoding.UTF8)
+            return content |> Some
+        else
+            return None
+    }
+
 
 [<Tests>]
 let tests =
-    testList "samples" [
+    testList "snapshot testing" [
 
-        test "PlayWright" {
+        testAsync "comparison" {
+
+            let paths =
+                [
+
+                  "/index.html"
+
+                  ]
 
             use server = new DevServer()
+            let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+            ensureSnapshotDir ()
 
-            task {
-                use! playwright = Playwright.CreateAsync()
-                let! page = playwright.NewChromiumPage()
+            return!
+                // TODO: i want to use testTask here, but i don't know how to convert it.
+                task {
+                    use! playwright = Playwright.CreateAsync()
+                    let! page = playwright.NewChromiumPage()
 
-                let index: string = $"http://localhost:%d{server.Port}%s{server.Root}/index.html"
-                let! response = page.GotoAndCheck(index)
+                    for path in paths do
+                        let url = baseUrl + path
+                        let snapshotPath = getSnapshotPath path
 
-                match response with
-                | Error msg -> failwithf "%s" msg
-                | Ok _ -> ()
+                        printfn "Loading %s..." url
 
-                let! title = page.TitleAsync()
+                        let! response = url |> page.GotoAndCheck
 
-                printfn "title is '%s'" title
+                        match response with
+                        | Error msg -> failwithf "%s" msg
+                        | Ok _ -> ()
 
-            }
-            |> Async.AwaitTask
-            |> Async.RunSynchronously
+                        let locator = "html" |> page.Locator
+                        let! content = locator.AriaSnapshotAsync()
+                        let! expectedContent = snapshotPath |> loadSnapshot
+
+                        match expectedContent with
+                        | Some expectedContent -> content |> Expect.equal $"Content mismatch for {url}" expectedContent
+                        | None ->
+                            do! saveSnapshot snapshotPath content
+                            printfn $"Saved new snapshot for %s{url} to %s{snapshotPath}"
+
+                }
+                |> Async.AwaitTask
         }
 
     ]
