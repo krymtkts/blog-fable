@@ -21,6 +21,11 @@ runs:
     - name: Check formatting
       shell: bash
       run: dotnet fantomas --check ./src
+    - name: Install Playwright
+      shell: pwsh
+      run: |
+        dotnet build ./test/test.fsproj
+        ./test/bin/Debug/*/playwright.ps1 install
     - name: Snapshot tests
       shell: bash
       run: dotnet test --nologo --verbosity detailed --blame-hang-timeout 5s --blame-hang-dump-type full
