@@ -14,7 +14,7 @@
     "build-dev": "npm run build-css && npm run build-fable dev && npm run build-index",
     "serve": "dotnet fsi ./RunDevServer.fsx /blog-fable",
     "dev": "npm run build-dev && npm run serve",
-    "test": "dotnet test --nologo --verbosity detailed --blame-hang-timeout 5s --blame-hang-dump-type full"
+    "test": "npm run build && dotnet test --nologo --verbosity detailed --blame-hang-timeout 5s --blame-hang-dump-type full"
   },
   "version": "1.0.0",
   "devDependencies": {
