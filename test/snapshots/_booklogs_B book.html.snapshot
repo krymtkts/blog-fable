@@ -1,0 +1,102 @@
+﻿- document:
+  - navigation:
+    - list:
+      - listitem:
+        - link "Blog Fable":
+          - /url: /blog-fable/index.html
+          - heading "Blog Fable" [level=1]
+      - listitem:
+        - link "Archives":
+          - /url: /blog-fable/archives.html
+      - listitem:
+        - link "Tags":
+          - /url: /blog-fable/tags.html
+      - listitem:
+        - link "Booklogs":
+          - /url: /blog-fable/booklogs.html
+      - listitem:
+        - link "About":
+          - /url: /blog-fable/pages/about.html
+      - listitem:
+        - link "RSS":
+          - /url: /blog-fable/feed.xml
+      - listitem:
+        - button "🌞"
+        - button "🌙"
+        - button "🖥️"
+  - main:
+    - heading "Booklog - B book" [level=1]
+    - paragraph
+    - paragraph: start day of Aug. read again.
+    - paragraph
+    - paragraph: "2023-08-01, read count: 2, page: vi ~ 1"
+    - paragraph
+    - paragraph: start day of Sep.
+    - paragraph
+    - paragraph: "2023-09-01, read count: 2, page: 1 ~ 10"
+    - paragraph
+    - paragraph: start day of Oct.
+    - paragraph
+    - paragraph: "2023-10-01, read count: 2, page: 21 ~ 30"
+    - paragraph
+    - paragraph: start day of Nov.
+    - paragraph
+    - paragraph: "2023-11-01, read count: 2, page: 31 ~ 40"
+    - paragraph
+    - paragraph: start day of Dec.
+    - paragraph
+    - paragraph: "2023-12-01, read count: 2, page: 51 ~ 60"
+    - paragraph
+    - paragraph:
+      - emphasis:
+        - strong: Markdown support
+      - text: .
+      - code: code
+    - code: code block
+    - list:
+      - listitem:
+        - paragraph: bullet list
+        - list:
+          - listitem:
+            - paragraph: numbered list
+            - blockquote:
+              - paragraph: blockquote
+    - paragraph
+    - paragraph: "2024-01-01, read count: 1, page: 71 ~ 80"
+    - paragraph
+    - paragraph: read again in the same day.
+    - paragraph
+    - paragraph: "2024-02-01, read count: 1, page: 81 ~ 90"
+    - paragraph
+    - paragraph: read again in the same day.
+    - paragraph
+    - paragraph: "2024-04-01, read count: 1, page: 121 ~ 130"
+    - paragraph
+    - paragraph: read again and again in the same day.
+    - paragraph
+    - paragraph: "2024-04-01, read count: 1, page: 121 ~ 130"
+    - list:
+      - listitem:
+        - heading "Years" [level=2]
+      - list:
+        - list:
+          - listitem:
+            - link "2023":
+              - /url: /blog-fable/booklogs/2023.html
+          - listitem:
+            - link "2024":
+              - /url: /blog-fable/booklogs/2024.html
+      - listitem:
+        - heading "Books" [level=2]
+      - list:
+        - list:
+          - listitem:
+            - link "A book":
+              - /url: /blog-fable/booklogs/a-book.html
+          - listitem:
+            - link "B book":
+              - /url: /blog-fable/booklogs/b-book.html
+          - listitem:
+            - link "C book":
+              - /url: /blog-fable/booklogs/c-book.html
+  - contentinfo: Copyright © 2023 krymtkts

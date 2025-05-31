@@ -1,0 +1,91 @@
+﻿- document:
+  - navigation:
+    - list:
+      - listitem:
+        - link "Blog Fable":
+          - /url: /blog-fable/index.html
+          - paragraph: Blog Fable
+      - listitem:
+        - link "Archives":
+          - /url: /blog-fable/archives.html
+      - listitem:
+        - link "Tags":
+          - /url: /blog-fable/tags.html
+      - listitem:
+        - link "Booklogs":
+          - /url: /blog-fable/booklogs.html
+      - listitem:
+        - link "About":
+          - /url: /blog-fable/pages/about.html
+      - listitem:
+        - link "RSS":
+          - /url: /blog-fable/feed.xml
+      - listitem:
+        - button "🌞"
+        - button "🌙"
+        - button "🖥️"
+  - main:
+    - heading "Booklog - A book" [level=1]
+    - paragraph
+    - paragraph: start day of Jan.
+    - paragraph
+    - paragraph: "2023-01-01, read count: n+1, page: 1 ~ 9"
+    - paragraph
+    - paragraph: start day of Feb.
+    - paragraph
+    - paragraph: "2023-02-01, read count: n+1, page: 10 ~ 19"
+    - paragraph
+    - paragraph: start day of Mar.
+    - paragraph
+    - paragraph: "2023-03-01, read count: n+1, page: 30 ~ 39"
+    - paragraph
+    - paragraph: start day of Apr.
+    - paragraph
+    - paragraph: "2023-04-01, read count: n+1, page: 40 ~ 49"
+    - paragraph
+    - paragraph: start day of May.
+    - paragraph
+    - paragraph: "2023-05-01, read count: n+1, page: 60 ~ 69"
+    - paragraph
+    - paragraph: start day of Jun.
+    - paragraph
+    - paragraph: "2023-06-01, read count: n+1, page: 70 ~ 79"
+    - paragraph
+    - paragraph: start day of Jul.
+    - paragraph
+    - paragraph: "2023-07-01, read count: n+1, page: 90 ~ 99"
+    - paragraph
+    - paragraph: read again.
+    - paragraph
+    - paragraph: "2024-08-01, read count: n+2, page: i ~ xix, 1 ~ 20"
+    - list:
+      - listitem:
+        - heading "Years" [level=2]
+      - listitem:
+        - list:
+          - listitem:
+            - link "2022":
+              - /url: /blog-fable/booklogs/2022.html
+          - listitem:
+            - link "2023":
+              - /url: /blog-fable/booklogs/2023.html
+          - listitem:
+            - link "2024":
+              - /url: /blog-fable/booklogs/2024.html
+      - listitem:
+        - heading "Books" [level=2]
+      - listitem:
+        - list:
+          - listitem:
+            - link "A book":
+              - /url: /blog-fable/booklogs/a-book.html
+          - listitem:
+            - link "B book":
+              - /url: /blog-fable/booklogs/b-book.html
+          - listitem:
+            - link "C book":
+              - /url: /blog-fable/booklogs/c-book.html
+          - listitem:
+            - link "D book":
+              - /url: /blog-fable/booklogs/d-book.html
+  - contentinfo: Copyright © 2023 krymtkts

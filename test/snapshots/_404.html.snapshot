@@ -1,0 +1,30 @@
+﻿- document:
+  - navigation:
+    - list:
+      - listitem:
+        - link "Blog Fable":
+          - /url: /blog-fable/index.html
+          - paragraph: Blog Fable
+      - listitem:
+        - link "Archives":
+          - /url: /blog-fable/archives.html
+      - listitem:
+        - link "Tags":
+          - /url: /blog-fable/tags.html
+      - listitem:
+        - link "Booklogs":
+          - /url: /blog-fable/booklogs.html
+      - listitem:
+        - link "About":
+          - /url: /blog-fable/pages/about.html
+      - listitem:
+        - link "RSS":
+          - /url: /blog-fable/feed.xml
+      - listitem:
+        - button "🌞"
+        - button "🌙"
+        - button "🖥️"
+  - main:
+    - heading "404 Page not found" [level=1]
+    - paragraph: Sorry! The page you're looking for does not exist.
+  - contentinfo: Copyright © 2023 krymtkts

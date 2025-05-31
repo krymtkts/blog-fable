@@ -12,8 +12,9 @@
     "build-index": "pagefind",
     "build": "npm run build-css && npm run build-fable && npm run build-index",
     "build-dev": "npm run build-css && npm run build-fable dev && npm run build-index",
-    "serve": "dotnet fsi ./dev-server.fsx /blog-fable",
-    "dev": "npm run build-dev && npm run serve"
+    "serve": "dotnet fsi ./RunDevServer.fsx /blog-fable",
+    "dev": "npm run build-dev && npm run serve",
+    "test": "npm run build && dotnet test --nologo --verbosity detailed --blame-hang-timeout 5s --blame-hang-dump-type full"
   },
   "version": "1.0.0",
   "devDependencies": {

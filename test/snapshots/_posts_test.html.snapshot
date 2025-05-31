@@ -1,0 +1,37 @@
+﻿- document:
+  - navigation:
+    - list:
+      - listitem:
+        - link "Blog Fable":
+          - /url: /blog-fable/index.html
+          - heading "Blog Fable" [level=1]
+      - listitem:
+        - link "Archives":
+          - /url: /blog-fable/archives.html
+      - listitem:
+        - link "Tags":
+          - /url: /blog-fable/tags.html
+      - listitem:
+        - link "About":
+          - /url: /blog-fable/pages/about.html
+      - listitem:
+        - link "RSS":
+          - /url: /blog-fable/feed.xml
+      - listitem:
+        - button "🌞"
+        - button "🌙"
+        - button "🖥️"
+  - main:
+    - table:
+      - rowgroup:
+        - row "Date Title Author Read Count Previously Read Pages Tags Notes":
+          - cell "Date"
+          - cell "Title"
+          - cell "Author"
+          - cell "Read Count"
+          - cell "Previously Read"
+          - cell "Pages"
+          - cell "Tags"
+          - cell "Notes"
+      - rowgroup
+  - contentinfo: Copyright © 2023 krymtkts

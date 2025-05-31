@@ -1,0 +1,671 @@
+﻿- document:
+  - navigation:
+    - list:
+      - listitem:
+        - link "Blog Fable":
+          - /url: /blog-fable/index.html
+          - paragraph: Blog Fable
+      - listitem:
+        - link "Archives":
+          - /url: /blog-fable/archives.html
+      - listitem:
+        - link "Tags":
+          - /url: /blog-fable/tags.html
+      - listitem:
+        - link "Booklogs":
+          - /url: /blog-fable/booklogs.html
+      - listitem:
+        - link "About":
+          - /url: /blog-fable/pages/about.html
+      - listitem:
+        - link "RSS":
+          - /url: /blog-fable/feed.xml
+      - listitem:
+        - button "🌞"
+        - button "🌙"
+        - button "🖥️"
+  - main:
+    - heading "Booklog 2023" [level=1]
+    - text: "current: 2, longest: 366, max pages read: 39"
+    - table:
+      - rowgroup:
+        - row "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec":
+          - cell
+          - cell "Jan"
+          - cell
+          - cell
+          - cell
+          - cell "Feb"
+          - cell
+          - cell
+          - cell
+          - cell "Mar"
+          - cell
+          - cell
+          - cell
+          - cell "Apr"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "May"
+          - cell
+          - cell
+          - cell
+          - cell "Jun"
+          - cell
+          - cell
+          - cell
+          - cell "Jul"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "Aug"
+          - cell
+          - cell
+          - cell
+          - cell "Sep"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "Oct"
+          - cell
+          - cell
+          - cell
+          - cell "Nov"
+          - cell
+          - cell
+          - cell
+          - cell "Dec"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+      - rowgroup:
+        - row "2023-01-01 (1) 2023-04-30 (1) 2023-10-01 (1) 2023-12-31 (1)":
+          - cell
+          - cell "2023-01-01 (1)":
+            - link "2023-01-01 (1)":
+              - /url: "#2023-01-01-1"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "2023-04-30 (1)":
+            - link "2023-04-30 (1)":
+              - /url: "#2023-04-30-1"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "2023-10-01 (1)":
+            - link "2023-10-01 (1)":
+              - /url: "#2023-10-01-1"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "2023-12-31 (1)":
+            - link "2023-12-31 (1)":
+              - /url: "#2023-12-31-1"
+        - row "Mon 2023-05-01 (1)":
+          - cell "Mon"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "2023-05-01 (1)":
+            - link "2023-05-01 (1)":
+              - /url: "#2023-05-01-1"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+        - row "2023-02-28 (1) 2023-08-01 (1)":
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "2023-02-28 (1)":
+            - link "2023-02-28 (1)":
+              - /url: "#2023-02-28-1"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "2023-08-01 (1)":
+            - link "2023-08-01 (1)":
+              - /url: "#2023-08-01-1"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+        - row "Wed 2023-02-01 (1) 2023-03-01 (1) 2023-11-01 (1)":
+          - cell "Wed"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "2023-02-01 (1)":
+            - link "2023-02-01 (1)":
+              - /url: "#2023-02-01-1"
+          - cell
+          - cell
+          - cell
+          - cell "2023-03-01 (1)":
+            - link "2023-03-01 (1)":
+              - /url: "#2023-03-01-1"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "2023-11-01 (1)":
+            - link "2023-11-01 (1)":
+              - /url: "#2023-11-01-1"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+        - row "2023-06-01 (1) 2023-11-30 (1)":
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "2023-06-01 (1)":
+            - link "2023-06-01 (1)":
+              - /url: "#2023-06-01-1"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "2023-11-30 (1)":
+            - link "2023-11-30 (1)":
+              - /url: "#2023-11-30-1"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+        - row "Fri 2023-06-30 (1) 2023-09-01 (1) 2023-12-01 (1)":
+          - cell "Fri"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "2023-06-30 (1)":
+            - link "2023-06-30 (1)":
+              - /url: "#2023-06-30-1"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "2023-09-01 (1)":
+            - link "2023-09-01 (1)":
+              - /url: "#2023-09-01-1"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "2023-12-01 (1)":
+            - link "2023-12-01 (1)":
+              - /url: "#2023-12-01-1"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+        - row "2023-04-01 (1) 2023-07-01 (1) 2023-09-30 (1)":
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "2023-04-01 (1)":
+            - link "2023-04-01 (1)":
+              - /url: "#2023-04-01-1"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "2023-07-01 (1)":
+            - link "2023-07-01 (1)":
+              - /url: "#2023-07-01-1"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell "2023-09-30 (1)":
+            - link "2023-09-30 (1)":
+              - /url: "#2023-09-30-1"
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+          - cell
+    - paragraph: 2023-12-31
+    - paragraph:
+      - link "B book":
+        - /url: /blog-fable/booklogs/b-book.html
+      - text: ", read count: 2, page: 61 ~ 70, pages read: 10"
+    - paragraph
+    - paragraph: 2023-12-01
+    - paragraph:
+      - link "B book":
+        - /url: /blog-fable/booklogs/b-book.html
+      - text: ", read count: 2, page: 51 ~ 60, pages read: 10"
+    - paragraph
+    - paragraph: start day of Dec.
+    - paragraph
+    - paragraph: 2023-11-30
+    - paragraph:
+      - link "B book":
+        - /url: /blog-fable/booklogs/b-book.html
+      - text: ", read count: 2, page: 41 ~ 50, pages read: 10"
+    - paragraph
+    - paragraph: 2023-11-01
+    - paragraph:
+      - link "B book":
+        - /url: /blog-fable/booklogs/b-book.html
+      - text: ", read count: 2, page: 31 ~ 40, pages read: 10"
+    - paragraph
+    - paragraph: start day of Nov.
+    - paragraph
+    - paragraph: 2023-10-01
+    - paragraph:
+      - link "B book":
+        - /url: /blog-fable/booklogs/b-book.html
+      - text: ", read count: 2, page: 21 ~ 30, pages read: 10"
+    - paragraph
+    - paragraph: start day of Oct.
+    - paragraph
+    - paragraph: 2023-09-30
+    - paragraph:
+      - link "B book":
+        - /url: /blog-fable/booklogs/b-book.html
+      - text: ", read count: 2, page: 11 ~ 20, pages read: 10"
+    - paragraph
+    - paragraph: 2023-09-01
+    - paragraph:
+      - link "B book":
+        - /url: /blog-fable/booklogs/b-book.html
+      - text: ", read count: 2, page: 1 ~ 10, pages read: 10"
+    - paragraph
+    - paragraph: start day of Sep.
+    - paragraph
+    - paragraph: 2023-08-01
+    - paragraph:
+      - link "B book":
+        - /url: /blog-fable/booklogs/b-book.html
+      - text: ", read count: 2, page: vi ~ 1"
+    - paragraph
+    - paragraph: start day of Aug. read again.
+    - paragraph
+    - paragraph: 2023-07-01
+    - paragraph:
+      - link "A book":
+        - /url: /blog-fable/booklogs/a-book.html
+      - text: ", read count: n+1, page: 90 ~ 99, pages read: 10"
+    - paragraph
+    - paragraph: start day of Jul.
+    - paragraph
+    - paragraph: 2023-06-30
+    - paragraph:
+      - link "A book":
+        - /url: /blog-fable/booklogs/a-book.html
+      - text: ", read count: n+1, page: 80 ~ 89, pages read: 10"
+    - paragraph
+    - paragraph: 2023-06-01
+    - paragraph:
+      - link "A book":
+        - /url: /blog-fable/booklogs/a-book.html
+      - text: ", read count: n+1, page: 70 ~ 79, pages read: 10"
+    - paragraph
+    - paragraph: start day of Jun.
+    - paragraph
+    - paragraph: 2023-05-01
+    - paragraph:
+      - link "A book":
+        - /url: /blog-fable/booklogs/a-book.html
+      - text: ", read count: n+1, page: 60 ~ 69, pages read: 10"
+    - paragraph
+    - paragraph: start day of May.
+    - paragraph
+    - paragraph: 2023-04-30
+    - paragraph:
+      - link "A book":
+        - /url: /blog-fable/booklogs/a-book.html
+      - text: ", read count: n+1, page: 50 ~ 59, pages read: 10"
+    - paragraph
+    - paragraph: 2023-04-01
+    - paragraph:
+      - link "A book":
+        - /url: /blog-fable/booklogs/a-book.html
+      - text: ", read count: n+1, page: 40 ~ 49, pages read: 10"
+    - paragraph
+    - paragraph: start day of Apr.
+    - paragraph
+    - paragraph: 2023-03-01
+    - paragraph:
+      - link "A book":
+        - /url: /blog-fable/booklogs/a-book.html
+      - text: ", read count: n+1, page: 30 ~ 39, pages read: 10"
+    - paragraph
+    - paragraph: start day of Mar.
+    - paragraph
+    - paragraph: 2023-02-28
+    - paragraph:
+      - link "A book":
+        - /url: /blog-fable/booklogs/a-book.html
+      - text: ", read count: n+1, page: 20 ~ 29, pages read: 10"
+    - paragraph
+    - paragraph: 2023-02-01
+    - paragraph:
+      - link "A book":
+        - /url: /blog-fable/booklogs/a-book.html
+      - text: ", read count: n+1, page: 10 ~ 19, pages read: 10"
+    - paragraph
+    - paragraph: start day of Feb.
+    - paragraph
+    - paragraph: 2023-01-01
+    - paragraph:
+      - link "A book":
+        - /url: /blog-fable/booklogs/a-book.html
+      - text: ", read count: n+1, page: 1 ~ 9, pages read: 9"
+    - paragraph
+    - paragraph: start day of Jan.
+    - paragraph
+    - list:
+      - listitem:
+        - heading "Years" [level=2]
+      - listitem:
+        - list:
+          - listitem:
+            - link "2022":
+              - /url: /blog-fable/booklogs/2022.html
+          - listitem:
+            - link "2023":
+              - /url: /blog-fable/booklogs/2023.html
+          - listitem:
+            - link "2024":
+              - /url: /blog-fable/booklogs/2024.html
+      - listitem:
+        - heading "Books" [level=2]
+      - listitem:
+        - list:
+          - listitem:
+            - link "A book":
+              - /url: /blog-fable/booklogs/a-book.html
+          - listitem:
+            - link "B book":
+              - /url: /blog-fable/booklogs/b-book.html
+          - listitem:
+            - link "C book":
+              - /url: /blog-fable/booklogs/c-book.html
+          - listitem:
+            - link "D book":
+              - /url: /blog-fable/booklogs/d-book.html
+  - contentinfo: Copyright © 2023 krymtkts

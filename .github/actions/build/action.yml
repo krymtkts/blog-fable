@@ -21,3 +21,6 @@ runs:
     - name: Check formatting
       shell: bash
       run: dotnet fantomas --check ./src
+    - name: Snapshot tests
+      shell: bash
+      run: dotnet test --nologo --verbosity detailed --blame-hang-timeout 5s --blame-hang-dump-type full

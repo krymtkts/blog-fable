@@ -1,0 +1,208 @@
+﻿- document:
+  - navigation:
+    - list:
+      - listitem:
+        - link "Blog Fable":
+          - /url: /blog-fable/index.html
+          - paragraph: Blog Fable
+      - listitem:
+        - link "Archives":
+          - /url: /blog-fable/archives.html
+      - listitem:
+        - link "Tags":
+          - /url: /blog-fable/tags.html
+      - listitem:
+        - link "Booklogs":
+          - /url: /blog-fable/booklogs.html
+      - listitem:
+        - link "About":
+          - /url: /blog-fable/pages/about.html
+      - listitem:
+        - link "RSS":
+          - /url: /blog-fable/feed.xml
+      - listitem:
+        - button "🌞"
+        - button "🌙"
+        - button "🖥️"
+  - main:
+    - text: 2023-02-01
+    - heading "About Markdown parser code sample" [level=1]:
+      - text: About Markdown parser
+      - code: code sample
+    - link "sample":
+      - /url: /blog-fable/tags/sample.html
+    - link "markdown":
+      - /url: /blog-fable/tags/markdown.html
+    - link "fsharp":
+      - /url: /blog-fable/tags/fsharp.html
+    - paragraph:
+      - text: You can write posts or pages in Markdown. Markdown is parse by
+      - link "Marked":
+        - /url: https://marked.js.org/
+      - text: .
+    - paragraph: The sample rendering is following.
+    - separator
+    - paragraph: plain
+    - paragraph:
+      - emphasis: italic
+    - paragraph:
+      - strong: bold
+    - paragraph:
+      - code: code
+    - paragraph:
+      - deletion: strikethrough
+    - paragraph:
+      - text: plain
+      - emphasis: italic
+      - strong: bold
+      - code: code
+      - deletion: strikethrough
+    - paragraph:
+      - code: extreme long inline code ......................................................................
+    - paragraph: Recommends to start Markdown headings from h2 because it render the blog title as h1.
+    - paragraph:
+      - text: footnote like this
+      - superscript:
+        - link "1":
+          - /url: "#footnote-1"
+      - superscript:
+        - link "2":
+          - /url: "#footnote-2"
+    - heading "blockquote" [level=3]:
+      - link "blockquote":
+        - /url: "#blockquote"
+    - blockquote:
+      - paragraph: blockquote
+      - paragraph: blockquote blockquote
+    - heading "codeblock" [level=3]:
+      - link "codeblock":
+        - /url: "#codeblock"
+    - code: "module App open StaticWebGenerator render { stage = dev lang = \"ja\" siteName = \"Blog Fable\" description = \"A small Fable app project to generate static pages\" siteUrl = \"https://krymtkts.github.io\" pathRoot = \"/blog-fable\" copyright = \"2023 krymtkts\" favicon = \"/img/favicon.ico\" highlightStyle = \"node_modules/highlight.js/styles/base16/solarized-dark.min.css\" src = \"contents\" dst = \"docs\" posts = { root = \"/posts\"; title = \"Posts\" } pages = { root = \"/pages\"; title = \"Pages\" } tags = { root = \"/tags\"; title = \"Tags\" } archives = { root = \"/archives\" title = \"Archives\" } images = \"/img\" feedName = \"feed\" additionalNavs = [ { text = \"About\" path = \"/pages/about.html\" } ] timeZone = \"Asia/Tokyo\" sitemap = { index = 1.0 archives = 0.8 tags = 0.8 posts = 0.9 pages = 0.8 } }"
+    - heading "list" [level=3]:
+      - link "list":
+        - /url: "#list"
+    - list:
+      - listitem:
+        - paragraph: bullet list item a
+        - list:
+          - listitem:
+            - checkbox "Checkbox" [checked] [disabled]
+            - paragraph: level 2 task item 1
+          - listitem:
+            - checkbox "Checkbox" [disabled]
+            - paragraph: level 2 task item 2
+            - list:
+              - listitem:
+                - paragraph: level 3
+                - list:
+                  - listitem:
+                    - paragraph: level 4
+    - list:
+      - listitem:
+        - paragraph: ordered list
+        - list:
+          - listitem:
+            - checkbox "Checkbox" [disabled]
+            - paragraph: level 2 task item
+            - list:
+              - listitem:
+                - paragraph: level 3
+            - list:
+              - listitem:
+                - checkbox "Checkbox" [disabled]
+                - paragraph: level 4
+          - listitem:
+            - paragraph: level 2 item b
+        - list:
+          - listitem:
+            - checkbox "Checkbox" [disabled]
+            - paragraph: level 3
+    - list:
+      - listitem:
+        - paragraph: composition
+        - list:
+          - listitem:
+            - checkbox "Checkbox" [checked] [disabled]
+            - paragraph: ordered item 1
+            - list:
+              - listitem:
+                - paragraph:
+                  - deletion: strikethrough
+        - list:
+          - listitem:
+            - paragraph: unordered item 1 has extreme long label text ......................................
+          - listitem:
+            - checkbox "Checkbox" [disabled]
+            - paragraph: unordered item 2 has extreme long label text ......................................
+            - list:
+              - listitem:
+                - paragraph:
+                  - code: inline code
+            - list:
+              - listitem:
+                - paragraph:
+                  - emphasis: italic
+                - list:
+                  - listitem:
+                    - paragraph:
+                      - strong: bold
+                    - list:
+                      - listitem:
+                        - paragraph:
+                          - strong:
+                            - emphasis: italic bold
+          - listitem:
+            - blockquote:
+              - paragraph: blockquote
+              - paragraph: multiline
+          - listitem:
+            - code: module App open StaticWebGenerator
+    - heading "table" [level=3]:
+      - link "table":
+        - /url: "#table"
+    - table:
+      - rowgroup:
+        - row "col1 col2 col3 col4":
+          - cell "col1"
+          - cell "col2"
+          - cell "col3"
+          - cell "col4"
+      - rowgroup:
+        - row "1 2 3 4":
+          - cell "1"
+          - cell "2"
+          - cell "3"
+          - cell "4"
+        - row "one two three four":
+          - cell "one"
+          - cell "two"
+          - cell "three"
+          - cell "four"
+    - heading "link" [level=3]:
+      - link "link":
+        - /url: "#link"
+    - paragraph:
+      - link "krymtkts/blog-fable":
+        - /url: https://github.com/krymtkts/blog-fable
+    - heading [level=2]:
+      - separator
+    - list:
+      - listitem:
+        - paragraph:
+          - text: footnote line requires blank line before.
+          - link "Back to reference 1":
+            - /url: "#footnote-ref-1"
+            - text: ↩
+      - listitem:
+        - paragraph:
+          - text: footnote with
+          - link "link":
+            - /url: https://github.com/krymtkts/blog-fable
+          - link "Back to reference 2":
+            - /url: "#footnote-ref-2"
+            - text: ↩
+    - link "« 2023-01-01 2023-01-01-sample-post-without-front-matter.html":
+      - /url: /blog-fable/posts/2023-01-01-sample-post-without-front-matter.html
+    - link "2023-03-02 Sample post »":
+      - /url: /blog-fable/posts/2023-03-01-sample-post.html
+  - contentinfo: Copyright © 2023 krymtkts

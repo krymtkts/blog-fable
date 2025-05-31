@@ -1,0 +1,56 @@
+﻿- document:
+  - navigation:
+    - list:
+      - listitem:
+        - link "Blog Fable":
+          - /url: /blog-fable/index.html
+          - paragraph: Blog Fable
+      - listitem:
+        - link "Archives":
+          - /url: /blog-fable/archives.html
+      - listitem:
+        - link "Tags":
+          - /url: /blog-fable/tags.html
+      - listitem:
+        - link "Booklogs":
+          - /url: /blog-fable/booklogs.html
+      - listitem:
+        - link "About":
+          - /url: /blog-fable/pages/about.html
+      - listitem:
+        - link "RSS":
+          - /url: /blog-fable/feed.xml
+      - listitem:
+        - button "🌞"
+        - button "🌙"
+        - button "🖥️"
+  - main:
+    - heading "Sample page without front matter code sample" [level=2]:
+      - link "Sample page without front matter code sample":
+        - /url: "#Sample-page-without-front-matter-code-code-sample-code-"
+        - text: Sample page without front matter
+        - code: code sample
+    - paragraph:
+      - text: The page can omit front matter
+      - code: title
+      - text: ","
+      - code: date
+      - text: and
+      - code: tags
+      - text: .
+    - paragraph:
+      - text: For pages without a specified
+      - code: date
+      - text: ", set the build date as the publication date of the RSS feed."
+    - paragraph:
+      - text: Recommend specifying the
+      - code: title
+      - text: in front matter.
+    - paragraph:
+      - text: If a page does not have a
+      - code: title
+      - text: ", the generated link will look like this."
+    - paragraph:
+      - link "sample-page-without-front-matter.md":
+        - /url: /blog-fable/pages/sampla-page-without-front-matter.html
+  - contentinfo: Copyright © 2023 krymtkts
