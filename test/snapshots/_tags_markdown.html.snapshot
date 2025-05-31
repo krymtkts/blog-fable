@@ -1,0 +1,38 @@
+﻿- document:
+  - navigation:
+    - list:
+      - listitem:
+        - link "Blog Fable":
+          - /url: /blog-fable/index.html
+          - paragraph: Blog Fable
+      - listitem:
+        - link "Archives":
+          - /url: /blog-fable/archives.html
+      - listitem:
+        - link "Tags":
+          - /url: /blog-fable/tags.html
+      - listitem:
+        - link "Booklogs":
+          - /url: /blog-fable/booklogs.html
+      - listitem:
+        - link "About":
+          - /url: /blog-fable/pages/about.html
+      - listitem:
+        - link "RSS":
+          - /url: /blog-fable/feed.xml
+      - listitem:
+        - button "🌞"
+        - button "🌙"
+        - button "🖥️"
+  - main:
+    - list:
+      - listitem:
+        - heading "markdown (1)" [level=2]
+      - listitem:
+        - list:
+          - listitem:
+            - link "2023-02-01 - About Markdown parser code sample":
+              - /url: \blog-fable\posts\2023-02-01-about-markdown-parser.html
+              - text: 2023-02-01 - About Markdown parser
+              - code: code sample
+  - contentinfo: Copyright © 2023 krymtkts

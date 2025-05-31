@@ -1,0 +1,59 @@
+﻿- document:
+  - navigation:
+    - list:
+      - listitem:
+        - link "Blog Fable":
+          - /url: /blog-fable/index.html
+          - paragraph: Blog Fable
+      - listitem:
+        - link "Archives":
+          - /url: /blog-fable/archives.html
+      - listitem:
+        - link "Tags":
+          - /url: /blog-fable/tags.html
+      - listitem:
+        - link "Booklogs":
+          - /url: /blog-fable/booklogs.html
+      - listitem:
+        - link "About":
+          - /url: /blog-fable/pages/about.html
+      - listitem:
+        - link "RSS":
+          - /url: /blog-fable/feed.xml
+      - listitem:
+        - button "🌞"
+        - button "🌙"
+        - button "🖥️"
+  - main:
+    - heading "Sample post without front matter code sample" [level=2]:
+      - link "Sample post without front matter code sample":
+        - /url: "#Sample-post-without-front-matter-code-code-sample-code-"
+        - text: Sample post without front matter
+        - code: code sample
+    - paragraph:
+      - text: The post can omit front matter
+      - code: title
+      - text: ","
+      - code: date
+      - text: and
+      - code: tags
+      - text: .
+    - paragraph:
+      - text: Recommend specifying the
+      - code: title
+      - text: in front matter.
+    - paragraph:
+      - text: If a post does not have a
+      - code: title
+      - text: ", the generated link will look like this."
+    - paragraph:
+      - link "2023-01-01-sample-post-without-front-matter.md":
+        - /url: /blog-fable/posts/2023-01-01-sample-post-without-front-matter.html
+    - link "« 2022-12-31 Flatten posts in nested directory":
+      - /url: /blog-fable/posts/2022-12-31-flatten-posts-in-nested-directory.html
+    - link "2023-02-01 About Markdown parser code sample »":
+      - /url: /blog-fable/posts/2023-02-01-about-markdown-parser.html
+      - text: 2023-02-01 About Markdown parser
+      - code: code sample
+      - text: »
+  - contentinfo: Copyright © 2023 krymtkts

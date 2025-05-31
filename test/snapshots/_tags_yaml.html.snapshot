@@ -1,0 +1,45 @@
+﻿- document:
+  - navigation:
+    - list:
+      - listitem:
+        - link "Blog Fable":
+          - /url: /blog-fable/index.html
+          - paragraph: Blog Fable
+      - listitem:
+        - link "Archives":
+          - /url: /blog-fable/archives.html
+      - listitem:
+        - link "Tags":
+          - /url: /blog-fable/tags.html
+      - listitem:
+        - link "Booklogs":
+          - /url: /blog-fable/booklogs.html
+      - listitem:
+        - link "About":
+          - /url: /blog-fable/pages/about.html
+      - listitem:
+        - link "RSS":
+          - /url: /blog-fable/feed.xml
+      - listitem:
+        - button "🌞"
+        - button "🌙"
+        - button "🖥️"
+  - main:
+    - list:
+      - listitem:
+        - heading "yaml (2)" [level=2]
+      - listitem:
+        - list:
+          - listitem:
+            - link "Sample page code sample - subtitle":
+              - /url: \blog-fable\pages\sampla-page.html
+              - text: Sample page
+              - code: code sample
+              - text: "-"
+              - emphasis: subtitle
+          - listitem:
+            - link "2023-03-01 - Sample post - subtitle":
+              - /url: \blog-fable\posts\2023-03-01-sample-post.html
+              - text: 2023-03-01 - Sample post -
+              - emphasis: subtitle
+  - contentinfo: Copyright © 2023 krymtkts

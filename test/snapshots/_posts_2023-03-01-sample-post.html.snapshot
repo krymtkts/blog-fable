@@ -1,0 +1,83 @@
+﻿- document:
+  - navigation:
+    - list:
+      - listitem:
+        - link "Blog Fable":
+          - /url: /blog-fable/index.html
+          - paragraph: Blog Fable
+      - listitem:
+        - link "Archives":
+          - /url: /blog-fable/archives.html
+      - listitem:
+        - link "Tags":
+          - /url: /blog-fable/tags.html
+      - listitem:
+        - link "Booklogs":
+          - /url: /blog-fable/booklogs.html
+      - listitem:
+        - link "About":
+          - /url: /blog-fable/pages/about.html
+      - listitem:
+        - link "RSS":
+          - /url: /blog-fable/feed.xml
+      - listitem:
+        - button "🌞"
+        - button "🌙"
+        - button "🖥️"
+  - main:
+    - text: 2023-03-01 - Last updated on 2023-03-02
+    - heading "Sample post" [level=1]
+    - paragraph:
+      - emphasis: subtitle
+    - link "sample":
+      - /url: /blog-fable/tags/sample.html
+    - link "yaml":
+      - /url: /blog-fable/tags/yaml.html
+    - link "t":
+      - /url: /blog-fable/tags/t.html
+    - link "tag":
+      - /url: /blog-fable/tags/tag.html
+    - link "this-is-extreme-long-tag-name":
+      - /url: /blog-fable/tags/this-is-extreme-long-tag-name.html
+    - paragraph: Posts have front matter. Front matter written in YAML.
+    - paragraph: The front matter for this post is as follows.
+    - code: "--- title: Sample post tags: [sample, yaml, t, tag, this-is-extreme-long-tag-name] date: 2023-03-02 ---"
+    - list:
+      - listitem:
+        - paragraph:
+          - code: title
+          - text: is post title. render as h1
+      - listitem:
+        - paragraph:
+          - code: tags
+          - text: is list of tag. Tags page generation based on the content of the
+          - code: tags
+      - listitem:
+        - paragraph:
+          - code: date
+          - text: is update date. optional field. it overrides publication date.
+        - list:
+          - listitem:
+            - paragraph: Define publication date of a post in the title of the Markdown file
+            - list:
+              - listitem:
+                - paragraph:
+                  - text: ex)
+                  - code: blog-fable/contents/posts/2023-02-01-this-is-sample-post.md
+    - paragraph:
+      - text: Use
+      - 'link "eemeli/yaml: YAML parser and stringifier for JavaScript"':
+        - /url: https://github.com/eemeli/yaml
+      - text: for front matter parsing.
+    - paragraph: You can define a post without front matter if you want.
+    - paragraph:
+      - text: See
+      - link "sample-post-without-front-matter.md":
+        - /url: /blog-fable/posts/2023-01-01-sample-post-without-front-matter.html
+    - link "« 2023-02-01 About Markdown parser code sample":
+      - /url: /blog-fable/posts/2023-02-01-about-markdown-parser.html
+      - text: « 2023-02-01 About Markdown parser
+      - code: code sample
+    - link "2023-04-01 Default color scheme »":
+      - /url: /blog-fable/posts/2023-04-01-default-color-scheme.html
+  - contentinfo: Copyright © 2023 krymtkts
