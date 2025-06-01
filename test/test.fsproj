@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <Compile Include="DevServer.fs" />
-    <Compile Include="Sample.fs" />
+    <Compile Include="Tests.fs" />
   </ItemGroup>
 
   <ItemGroup>
