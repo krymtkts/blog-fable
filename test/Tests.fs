@@ -9,6 +9,7 @@ open Microsoft.Playwright
 open DevServer
 open Suave
 open System.Threading
+open System.Threading.Tasks
 
 (*
 This tests requires the Playwright CLI to be installed.
@@ -34,17 +35,34 @@ type DevServer() =
             printfn "Stopping dev server..."
             cancellationTokenSource.Cancel()
 
+    interface IAsyncDisposable with
+        member __.DisposeAsync() =
+            task {
+                printfn "Stopping dev server asynchronously..."
+                do! cancellationTokenSource.CancelAsync()
+            }
+            |> ValueTask
+
 type IPlaywright with
-    member __.NewChromiumPage() =
+    member __.NewChromiumPage() : Task<IPage> =
         task {
             let! browser = __.Chromium.LaunchAsync()
             return! browser.NewPageAsync()
         }
 
+type PlaywrightAsyncDisposable(playwright: IPlaywright) =
+    interface IAsyncDisposable with
+        member _.DisposeAsync() =
+            playwright.Dispose()
+            printfn "Playwright disposed."
+            () |> ValueTask
+
+    member _.Instance = playwright
+
 type IPage with
     member __.GotoAndCheck(url: string) =
         task {
-            let! response = __.GotoAsync(url)
+            let! response = url |> __.GotoAsync
 
             match response with
             | null -> return Error "Failed to load page: %s{url}"
@@ -77,12 +95,11 @@ let loadSnapshot (path: string) =
             return None
     }
 
-
 [<Tests>]
 let tests =
     testList "snapshot testing" [
 
-        testAsync "comparison" {
+        testTask "comparison" {
 
             let paths =
                 [
@@ -123,36 +140,31 @@ let tests =
             let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
             ensureSnapshotDir ()
 
-            return!
-                // TODO: i want to use testTask here, but i don't know how to convert it.
-                task {
-                    use! playwright = Playwright.CreateAsync()
-                    let! page = playwright.NewChromiumPage()
+            let! (playwright: IPlaywright) = Playwright.CreateAsync()
+            use _ = PlaywrightAsyncDisposable playwright
+            let! (page: IPage) = playwright.NewChromiumPage()
 
-                    for path in paths do
-                        let url = baseUrl + path
-                        let snapshotPath = getSnapshotPath path
+            for path in paths do
+                let url = baseUrl + path
+                let snapshotPath = getSnapshotPath path
 
-                        printfn "Loading %s..." url
+                printfn "Loading %s..." url
 
-                        let! response = url |> page.GotoAndCheck
+                let! response = url |> page.GotoAndCheck
 
-                        match response with
-                        | Error msg -> failwithf "%s" msg
-                        | Ok _ -> ()
+                match response with
+                | Error msg -> failwith $"%s{msg}"
+                | Ok _ -> ()
 
-                        let locator = "html" |> page.Locator
-                        let! content = locator.AriaSnapshotAsync()
-                        let! expectedContent = snapshotPath |> loadSnapshot
+                let! content = "html" |> page.Locator |> _.AriaSnapshotAsync()
+                let! expectedContent = snapshotPath |> loadSnapshot
 
-                        match expectedContent with
-                        | Some expectedContent -> content |> Expect.equal $"Content mismatch for {url}" expectedContent
-                        | None ->
-                            do! saveSnapshot snapshotPath content
-                            printfn $"Saved new snapshot for %s{url} to %s{snapshotPath}"
+                match expectedContent with
+                | Some expectedContent -> content |> Expect.equal $"Content mismatch for %s{url}" expectedContent
+                | None ->
+                    do! saveSnapshot snapshotPath content
+                    printfn $"Saved new snapshot for %s{url} to %s{snapshotPath}"
 
-                }
-                |> Async.AwaitTask
         }
 
     ]
