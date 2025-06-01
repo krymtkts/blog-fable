@@ -32,28 +32,28 @@
         - list:
           - listitem:
             - link "Sample page code sample - subtitle":
-              - /url: \blog-fable\pages\sampla-page.html
+              - /url: /blog-fable/pages/sampla-page.html
               - text: Sample page
               - code: code sample
               - text: "-"
               - emphasis: subtitle
           - listitem:
             - link "2023-09-10 - blog-fable":
-              - /url: \blog-fable\posts\2023-09-10-blog-fable.html
+              - /url: /blog-fable/posts/2023-09-10-blog-fable.html
           - listitem:
             - link "2023-04-01 - Default color scheme":
-              - /url: \blog-fable\posts\2023-04-01-default-color-scheme.html
+              - /url: /blog-fable/posts/2023-04-01-default-color-scheme.html
           - listitem:
             - link "2023-03-01 - Sample post - subtitle":
-              - /url: \blog-fable\posts\2023-03-01-sample-post.html
+              - /url: /blog-fable/posts/2023-03-01-sample-post.html
               - text: 2023-03-01 - Sample post -
               - emphasis: subtitle
           - listitem:
             - link "2023-02-01 - About Markdown parser code sample":
-              - /url: \blog-fable\posts\2023-02-01-about-markdown-parser.html
+              - /url: /blog-fable/posts/2023-02-01-about-markdown-parser.html
               - text: 2023-02-01 - About Markdown parser
               - code: code sample
           - listitem:
             - link "2022-12-31 - Flatten posts in nested directory":
-              - /url: \blog-fable\posts\2022-12-31-flatten-posts-in-nested-directory.html
+              - /url: /blog-fable/posts/2022-12-31-flatten-posts-in-nested-directory.html
   - contentinfo: Copyright © 2023 krymtkts

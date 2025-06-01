@@ -32,26 +32,26 @@
         - list:
           - listitem:
             - link "fsharp (1)":
-              - /url: \blog-fable\tags\fsharp.html
+              - /url: /blog-fable/tags/fsharp.html
           - listitem:
             - link "image (1)":
-              - /url: \blog-fable\tags\image.html
+              - /url: /blog-fable/tags/image.html
           - listitem:
             - link "markdown (1)":
-              - /url: \blog-fable\tags\markdown.html
+              - /url: /blog-fable/tags/markdown.html
           - listitem:
             - link "sample (6)":
-              - /url: \blog-fable\tags\sample.html
+              - /url: /blog-fable/tags/sample.html
           - listitem:
             - link "t (1)":
-              - /url: \blog-fable\tags\t.html
+              - /url: /blog-fable/tags/t.html
           - listitem:
             - link "tag (1)":
-              - /url: \blog-fable\tags\tag.html
+              - /url: /blog-fable/tags/tag.html
           - listitem:
             - link "this-is-extreme-long-tag-name (1)":
-              - /url: \blog-fable\tags\this-is-extreme-long-tag-name.html
+              - /url: /blog-fable/tags/this-is-extreme-long-tag-name.html
           - listitem:
             - link "yaml (2)":
-              - /url: \blog-fable\tags\yaml.html
+              - /url: /blog-fable/tags/yaml.html
   - contentinfo: Copyright © 2023 krymtkts

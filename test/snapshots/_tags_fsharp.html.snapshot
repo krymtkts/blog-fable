@@ -32,7 +32,7 @@
         - list:
           - listitem:
             - link "2023-02-01 - About Markdown parser code sample":
-              - /url: \blog-fable\posts\2023-02-01-about-markdown-parser.html
+              - /url: /blog-fable/posts/2023-02-01-about-markdown-parser.html
               - text: 2023-02-01 - About Markdown parser
               - code: code sample
   - contentinfo: Copyright © 2023 krymtkts
