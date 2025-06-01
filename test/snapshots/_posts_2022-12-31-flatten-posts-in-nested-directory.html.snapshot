@@ -1,0 +1,39 @@
+﻿- document:
+  - navigation:
+    - list:
+      - listitem:
+        - link "Blog Fable":
+          - /url: /blog-fable/index.html
+          - paragraph: Blog Fable
+      - listitem:
+        - link "Archives":
+          - /url: /blog-fable/archives.html
+      - listitem:
+        - link "Tags":
+          - /url: /blog-fable/tags.html
+      - listitem:
+        - link "Booklogs":
+          - /url: /blog-fable/booklogs.html
+      - listitem:
+        - link "About":
+          - /url: /blog-fable/pages/about.html
+      - listitem:
+        - link "RSS":
+          - /url: /blog-fable/feed.xml
+      - listitem:
+        - button "🌞"
+        - button "🌙"
+        - button "🖥️"
+  - main:
+    - text: 2022-12-31
+    - heading "Flatten posts in nested directory" [level=1]
+    - link "sample":
+      - /url: /blog-fable/tags/sample.html
+    - paragraph:
+      - text: Flatten posts in nested directory into
+      - code: posts
+      - text: directory. Intend the nested directories used for organizing source Markdown files.
+    - code: "source files. \\---contents \\---posts \\---2022 \\---12 \\---2022-12-31-nested-post.md destination files. \\---docs \\${path_root} \\---posts \\---2022-12-31-nested-post.md"
+    - link "2023-01-01 2023-01-01-sample-post-without-front-matter.html »":
+      - /url: /blog-fable/posts/2023-01-01-sample-post-without-front-matter.html
+  - contentinfo: Copyright © 2023 krymtkts

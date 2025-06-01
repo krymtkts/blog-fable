@@ -1,0 +1,52 @@
+﻿- document:
+  - navigation:
+    - list:
+      - listitem:
+        - link "Blog Fable":
+          - /url: /blog-fable/index.html
+          - paragraph: Blog Fable
+      - listitem:
+        - link "Archives":
+          - /url: /blog-fable/archives.html
+      - listitem:
+        - link "Tags":
+          - /url: /blog-fable/tags.html
+      - listitem:
+        - link "Booklogs":
+          - /url: /blog-fable/booklogs.html
+      - listitem:
+        - link "About":
+          - /url: /blog-fable/pages/about.html
+      - listitem:
+        - link "RSS":
+          - /url: /blog-fable/feed.xml
+      - listitem:
+        - button "🌞"
+        - button "🌙"
+        - button "🖥️"
+  - main:
+    - text: 2023-04-01
+    - heading "Default color scheme" [level=1]
+    - link "sample":
+      - /url: /blog-fable/tags/sample.html
+    - link "image":
+      - /url: /blog-fable/tags/image.html
+    - paragraph: Supports Solarized Light/Dark in default.
+    - list:
+      - listitem:
+        - paragraph: Solarized Light
+        - list:
+          - listitem:
+            - paragraph:
+              - img "Solarized Light"
+      - listitem:
+        - paragraph: Solarized Dark
+        - list:
+          - listitem:
+            - paragraph:
+              - img "Solarized Dark"
+    - link "« 2023-03-02 Sample post":
+      - /url: /blog-fable/posts/2023-03-01-sample-post.html
+    - link "2023-10-01 blog-fable »":
+      - /url: /blog-fable/posts/2023-09-10-blog-fable.html
+  - contentinfo: Copyright © 2023 krymtkts

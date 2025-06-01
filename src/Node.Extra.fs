@@ -1,5 +1,5 @@
 /// Additional Node.js functionality.
-module rec Node
+module rec Node.Extra
 
 open Fable.Core.JsInterop
 open Node.Min

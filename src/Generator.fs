@@ -279,7 +279,7 @@ module Rendering =
         next
         =
         promise {
-            let path = dest.Replace("\\", "/").Split($"%s{root.destRoot}/") |> Seq.last
+            let path = dest |> normalizeUrlPath |> _.Split($"%s{root.destRoot}/") |> Seq.last
 
             let title =
                 match meta.index, meta.frontMatter with
@@ -317,11 +317,10 @@ module Rendering =
             | x -> x |> String.concat " " |> failwithf "Invalid filename patterns: %s"
 
     let private checkPostsFilenamePattern (postRoot: string) (files: string list) =
-        // TODO: dirty path manipulation.
-        let postRoot = postRoot.Replace("\\", "/")
+        let postRoot = postRoot |> normalizeUrlPath
 
         files
-        |> List.filter (fun s -> s.Replace("\\", "/").Contains(postRoot))
+        |> List.filter (normalizeUrlPath >> _.Contains(postRoot))
         |> List.map IO.leaf
         |> List.filter isInvalidPostsFilenamePattern
         |> function

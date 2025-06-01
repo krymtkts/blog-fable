@@ -1,11 +1,8 @@
-#r "nuget: Fake.DotNet.Cli"
-#r "nuget: Fake.JavaScript.Npm"
-#r "nuget: Suave, >= 2.7.0-beta1"
+module DevServer
 
 open Fake.Core
 open Fake.DotNet
 open Fake.IO
-open Fake.IO.Globbing.Operators
 open Fake.JavaScript
 open Suave
 open Suave.Filters
@@ -21,10 +18,8 @@ open System.Threading
 let port =
     let rec findPort port =
         let portIsTaken =
-            NetworkInformation.IPGlobalProperties
-                .GetIPGlobalProperties()
-                .GetActiveTcpListeners()
-            |> Seq.exists (fun x -> x.Port = int (port))
+            NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners()
+            |> Seq.exists (fun x -> x.Port = int port)
 
         if portIsTaken then findPort (port + 1us) else port
 
@@ -36,7 +31,7 @@ type BuildEvent =
     | BuildStyle
     | Noop
 
-let handleWatcherEvents, socketHandler =
+let (handleWatcherEvents: FileChange seq -> unit), socketHandler =
     let refreshEvent = new Event<_>()
 
     let buildFable () =
@@ -109,7 +104,7 @@ let handleWatcherEvents, socketHandler =
                 let! msg = ws.read ()
 
                 match msg with
-                | (Close, _, _) ->
+                | Close, _, _ ->
                     use _ = cts
                     cts.Cancel()
 
@@ -123,14 +118,12 @@ let handleWatcherEvents, socketHandler =
         Async.Start(refreshLoop (), cts.Token)
         mainLoop cts
 
-
     handleWatcherEvents, socketHandler
 
-let home = IO.Path.Join [| __SOURCE_DIRECTORY__; "docs" |]
+let suaveConfig (home: string) =
+    let home = IO.Path.GetFullPath home
+    printfn $"watch '%s{home}'"
 
-printfn $"watch '%s{home}'"
-
-let cfg =
     { defaultConfig with
         homeFolder = Some(home)
         compressedFilesFolder = Some(home)
@@ -139,63 +132,42 @@ let cfg =
         mimeTypesMap =
             Writers.defaultMimeTypesMap
             // NOTE: Add custom mime types for pagefind to prevent 404 error.
-            @@ ((function
-            | ".pagefind"
-            | ".pf_fragment"
-            | ".pf_index"
-            | ".pf_meta" -> Writers.createMimeType "application/octet-stream" false
-            | _ -> None)) }
+            @@ function
+                | ".pagefind"
+                | ".pf_fragment"
+                | ".pf_index"
+                | ".pf_meta" -> Writers.createMimeType "application/octet-stream" false
+                | _ -> None }
 
 
-let root =
-    match fsi.CommandLineArgs with
-    | [| _; root |] -> root
-    | _ -> ""
-
-let app: WebPart =
+let webpart (root: string) : WebPart =
     let logger = Logging.Log.create "dev-server"
 
-    choose
-        [
+    choose [
 
-          path "/websocket" >=> handShake socketHandler
+        path "/websocket" >=> handShake socketHandler
 
-          GET
-          >=> Writers.setHeader "Cache-Control" "no-cache, no-store, must-revalidate"
-          >=> Writers.setHeader "Pragma" "no-cache"
-          >=> Writers.setHeader "Expires" "0"
-          >=> choose
-                  [ path $"{root}/" >=> Files.browseFileHome "blog-fable/index.html"
-                    path $"{root}" >=> Redirection.redirect $"/blog-fable/"
+        GET
+        >=> Writers.setHeader "Cache-Control" "no-cache, no-store, must-revalidate"
+        >=> Writers.setHeader "Pragma" "no-cache"
+        >=> Writers.setHeader "Expires" "0"
+        >=> choose [
 
-                    Files.browseHome ]
-          >=> log logger logFormat
+            path $"{root}/" >=> Files.browseFileHome "blog-fable/index.html"
+            path $"{root}" >=> Redirection.redirect $"/blog-fable/"
 
-          Writers.setStatus HTTP_404
-          >=> logWithLevel Logging.Error logger logFormat
-          >=> Files.browseFileHome $"{root}/404.html" ]
+            Files.browseHome
+
+        ]
+        >=> log logger logFormat
+
+        Writers.setStatus HTTP_404
+        >=> logWithLevel Logging.Error logger logFormat
+        >=> Files.browseFileHome $"{root}/404.html"
+    ]
 
 let openIndex url =
     let p = new Diagnostics.ProcessStartInfo(url)
 
     p.UseShellExecute <- true
     Diagnostics.Process.Start(p) |> ignore
-
-try
-    use _ =
-        !! "src/**/*.fs"
-        ++ "contents/**/*.md"
-        ++ "contents/**/*.yml"
-        ++ "contents/**/*.yaml"
-        ++ "sass/**/*.scss"
-        |> ChangeWatcher.run handleWatcherEvents
-
-    let index: string = $"http://localhost:%d{port}%s{root}/index.html"
-    printfn $"Open %s{index} ..."
-    openIndex index
-
-    printfn "Starting dev server..."
-    startWebServer cfg app
-
-finally
-    ()

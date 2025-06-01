@@ -1,0 +1,57 @@
+﻿- document:
+  - navigation:
+    - list:
+      - listitem:
+        - link "Blog Fable":
+          - /url: /blog-fable/index.html
+          - paragraph: Blog Fable
+      - listitem:
+        - link "Archives":
+          - /url: /blog-fable/archives.html
+      - listitem:
+        - link "Tags":
+          - /url: /blog-fable/tags.html
+      - listitem:
+        - link "Booklogs":
+          - /url: /blog-fable/booklogs.html
+      - listitem:
+        - link "About":
+          - /url: /blog-fable/pages/about.html
+      - listitem:
+        - link "RSS":
+          - /url: /blog-fable/feed.xml
+      - listitem:
+        - button "🌞"
+        - button "🌙"
+        - button "🖥️"
+  - main:
+    - list:
+      - listitem:
+        - heading "Tags" [level=2]
+      - listitem:
+        - list:
+          - listitem:
+            - link "fsharp (1)":
+              - /url: /blog-fable/tags/fsharp.html
+          - listitem:
+            - link "image (1)":
+              - /url: /blog-fable/tags/image.html
+          - listitem:
+            - link "markdown (1)":
+              - /url: /blog-fable/tags/markdown.html
+          - listitem:
+            - link "sample (6)":
+              - /url: /blog-fable/tags/sample.html
+          - listitem:
+            - link "t (1)":
+              - /url: /blog-fable/tags/t.html
+          - listitem:
+            - link "tag (1)":
+              - /url: /blog-fable/tags/tag.html
+          - listitem:
+            - link "this-is-extreme-long-tag-name (1)":
+              - /url: /blog-fable/tags/this-is-extreme-long-tag-name.html
+          - listitem:
+            - link "yaml (2)":
+              - /url: /blog-fable/tags/yaml.html
+  - contentinfo: Copyright © 2023 krymtkts

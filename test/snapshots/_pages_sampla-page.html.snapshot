@@ -1,0 +1,46 @@
+﻿- document:
+  - navigation:
+    - list:
+      - listitem:
+        - link "Blog Fable":
+          - /url: /blog-fable/index.html
+          - paragraph: Blog Fable
+      - listitem:
+        - link "Archives":
+          - /url: /blog-fable/archives.html
+      - listitem:
+        - link "Tags":
+          - /url: /blog-fable/tags.html
+      - listitem:
+        - link "Booklogs":
+          - /url: /blog-fable/booklogs.html
+      - listitem:
+        - link "About":
+          - /url: /blog-fable/pages/about.html
+      - listitem:
+        - link "RSS":
+          - /url: /blog-fable/feed.xml
+      - listitem:
+        - button "🌞"
+        - button "🌙"
+        - button "🖥️"
+  - main:
+    - text: 2023-09-01
+    - heading "Sample page code sample" [level=1]:
+      - text: Sample page
+      - code: code sample
+    - paragraph:
+      - emphasis: subtitle
+    - link "sample":
+      - /url: /blog-fable/tags/sample.html
+    - link "yaml":
+      - /url: /blog-fable/tags/yaml.html
+    - paragraph: Posts have front matter. The front matter feature is same as post's one.
+    - paragraph: The front matter for this post is as follows.
+    - code: "--- title: Sample page `code sample` tags: [sample, yaml] date: 2023-09-01 ---"
+    - paragraph: You can define a page without front matter if you want.
+    - paragraph:
+      - text: See
+      - link "sample-page-without-front-matter.md":
+        - /url: /blog-fable/pages/sampla-page-without-front-matter.html
+  - contentinfo: Copyright © 2023 krymtkts
