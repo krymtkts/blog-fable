@@ -308,10 +308,11 @@ module Misc =
                     src, dest)
         }
 
+    let normalizeUrlPath (s: string) = s.Replace("\\", "/")
+
     let sourceToSitemap root source =
         let leaf: string = Directory.leaf source
-        let path = Directory.join3 "/" root <| Util.mdToHtml leaf
-        path.Replace("\\", "/")
+        Util.mdToHtml leaf|> Directory.join3 "/" root |> normalizeUrlPath
 
     let now = DateTime.Now
 
@@ -461,7 +462,7 @@ module Component =
     let tagToLi root tag count =
         let leaf = Directory.leaf $"{tag}.html"
         let title = Regex.Replace(leaf, "\.(md|html)", "")
-        let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
+        let ref = Util.mdToHtml leaf |> Directory.join3 "/" root |> normalizeUrlPath
 
         liA ref <| Text $"{title} ({count})"
 
@@ -478,7 +479,7 @@ module Component =
             | Some fm -> $"%s{prefix}%s{Parser.getFormattedTitle fm}"
             | None -> leaf
 
-        let ref = Directory.join3 "/" root <| Util.mdToHtml leaf
+        let ref = Util.mdToHtml leaf |> Directory.join3 "/" root |> normalizeUrlPath
 
         liA ref <| Html title
 
