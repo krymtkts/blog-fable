@@ -25,6 +25,7 @@ runs:
       shell: pwsh
       run: |
         dotnet build ./test/test.fsproj
+        ./test/bin/Debug/*/playwright.ps1 install-deps
         ./test/bin/Debug/*/playwright.ps1 install
     - name: Snapshot tests
       shell: bash
