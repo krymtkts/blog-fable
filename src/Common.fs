@@ -5,7 +5,7 @@ open System.Text.RegularExpressions
 open Fable.Core
 open Fable.Core.JsInterop
 open Feliz
-open Node
+open Node.Extra
 
 [<RequireQualifiedAccess>]
 module IO =
