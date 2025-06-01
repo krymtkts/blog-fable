@@ -320,7 +320,7 @@ module Rendering =
         let postRoot = postRoot |> normalizeUrlPath
 
         files
-        |> List.filter (fun s -> s |> normalizeUrlPath |> _.Contains(postRoot))
+        |> List.filter (normalizeUrlPath >> _.Contains(postRoot))
         |> List.map IO.leaf
         |> List.filter isInvalidPostsFilenamePattern
         |> function
