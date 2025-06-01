@@ -312,7 +312,7 @@ module Misc =
 
     let sourceToSitemap root source =
         let leaf: string = Directory.leaf source
-        Util.mdToHtml leaf|> Directory.join3 "/" root |> normalizeUrlPath
+        Util.mdToHtml leaf |> Directory.join3 "/" root |> normalizeUrlPath
 
     let now = DateTime.Now
 
