@@ -27,9 +27,17 @@
   - main:
     - heading "Booklog - C book" [level=1]
     - paragraph
+    - paragraph: "2024-11-30, read count: 1, page: i ~ viii, 1 ~ 12, pages read: 20"
+    - paragraph
+    - paragraph: "2024-12-01, read count: 1, page: 13 ~ 20, pages read: 8"
+    - paragraph
+    - paragraph: "2024-12-30, read count: 1, page: 20 ~ 20, pages read: 1"
+    - paragraph
+    - paragraph: "2024-12-31, read count: 1, page: 21 ~ 30, pages read: 10"
+    - paragraph
     - paragraph: read again in the same day. the order of the booklog is latest to oldest.
     - paragraph
-    - paragraph: "2024-12-31, read count: 1, page: 31 ~ 40"
+    - paragraph: "2024-12-31, read count: 1, page: 31 ~ 40, pages read: 10"
     - list:
       - listitem:
         - heading "Years" [level=2]
