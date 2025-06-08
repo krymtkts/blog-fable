@@ -263,6 +263,13 @@ module Misc =
             | Some notes -> Html.p [ prop.dangerouslySetInnerHTML (Parser.parseMarkdown notes) ]
             | None -> Html.p []
 
+    let private countReadPages (pages: string) =
+        pages
+        |> readPages
+        |> function
+            | 0 -> ""
+            | i -> $", pages read: {i}"
+
     let private generateBooklogList
         baseUrl
         links
@@ -275,13 +282,6 @@ module Misc =
             Html.h1 [ prop.className "title"; prop.children (Html.text $"Booklog {year}") ]
 
         let booklogCalendar = generateCalendar year logs
-
-        let readPages (pages: string) =
-            pages
-            |> readPages
-            |> function
-                | 0 -> ""
-                | i -> $", pages read: {i}"
 
         let booklogRows =
             logs
@@ -325,7 +325,7 @@ module Misc =
                                 )
                                 Html.text ", page: "
                                 Html.text log.pages
-                                log.pages |> readPages |> Html.text
+                                log.pages |> countReadPages |> Html.text
                             ]
                         ]
                         notes
@@ -343,11 +343,8 @@ module Misc =
 
         let booklogRows =
             logs
-            |> List.filter (_.notes >> Option.isSome)
             |> List.map (fun log ->
-                let notes = log.notes |> generateBooklogNotes
-
-                [ notes
+                [ log.notes |> generateBooklogNotes
                   Html.p [
                       prop.className "content is-small booklog-info"
                       prop.children [
@@ -367,6 +364,7 @@ module Misc =
                           )
                           Html.text ", page: "
                           Html.text log.pages
+                          log.pages |> countReadPages |> Html.text
                       ]
                   ] ])
 

@@ -29,35 +29,49 @@
     - paragraph
     - paragraph: start day of Jan.
     - paragraph
-    - paragraph: "2023-01-01, read count: n+1, page: 1 ~ 9"
+    - paragraph: "2023-01-01, read count: n+1, page: 1 ~ 9, pages read: 9"
     - paragraph
     - paragraph: start day of Feb.
     - paragraph
-    - paragraph: "2023-02-01, read count: n+1, page: 10 ~ 19"
+    - paragraph: "2023-02-01, read count: n+1, page: 10 ~ 19, pages read: 10"
+    - paragraph
+    - paragraph: "2023-02-28, read count: n+1, page: 20 ~ 29, pages read: 10"
     - paragraph
     - paragraph: start day of Mar.
     - paragraph
-    - paragraph: "2023-03-01, read count: n+1, page: 30 ~ 39"
+    - paragraph: "2023-03-01, read count: n+1, page: 30 ~ 39, pages read: 10"
     - paragraph
     - paragraph: start day of Apr.
     - paragraph
-    - paragraph: "2023-04-01, read count: n+1, page: 40 ~ 49"
+    - paragraph: "2023-04-01, read count: n+1, page: 40 ~ 49, pages read: 10"
+    - paragraph
+    - paragraph: "2023-04-30, read count: n+1, page: 50 ~ 59, pages read: 10"
     - paragraph
     - paragraph: start day of May.
     - paragraph
-    - paragraph: "2023-05-01, read count: n+1, page: 60 ~ 69"
+    - paragraph: "2023-05-01, read count: n+1, page: 60 ~ 69, pages read: 10"
     - paragraph
     - paragraph: start day of Jun.
     - paragraph
-    - paragraph: "2023-06-01, read count: n+1, page: 70 ~ 79"
+    - paragraph: "2023-06-01, read count: n+1, page: 70 ~ 79, pages read: 10"
+    - paragraph
+    - paragraph: "2023-06-30, read count: n+1, page: 80 ~ 89, pages read: 10"
     - paragraph
     - paragraph: start day of Jul.
     - paragraph
-    - paragraph: "2023-07-01, read count: n+1, page: 90 ~ 99"
+    - paragraph: "2023-07-01, read count: n+1, page: 90 ~ 99, pages read: 10"
     - paragraph
     - paragraph: read again.
     - paragraph
-    - paragraph: "2024-08-01, read count: n+2, page: i ~ xix, 1 ~ 20"
+    - paragraph: "2024-08-01, read count: n+2, page: i ~ xix, 1 ~ 20, pages read: 39"
+    - paragraph
+    - paragraph: "2024-09-01, read count: n+2, page: 21 ~ 40, pages read: 20"
+    - paragraph
+    - paragraph: "2024-09-30, read count: n+2, page: 41 ~ 60, pages read: 20"
+    - paragraph
+    - paragraph: "2024-10-01, read count: n+2, page: 61 ~ 80, pages read: 20"
+    - paragraph
+    - paragraph: "2024-11-01, read count: n+2, page: 81 ~ 99, pages read: 19"
     - list:
       - listitem:
         - heading "Years" [level=2]

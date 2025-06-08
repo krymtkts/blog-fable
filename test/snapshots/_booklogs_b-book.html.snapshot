@@ -33,19 +33,25 @@
     - paragraph
     - paragraph: start day of Sep.
     - paragraph
-    - paragraph: "2023-09-01, read count: 2, page: 1 ~ 10"
+    - paragraph: "2023-09-01, read count: 2, page: 1 ~ 10, pages read: 10"
+    - paragraph
+    - paragraph: "2023-09-30, read count: 2, page: 11 ~ 20, pages read: 10"
     - paragraph
     - paragraph: start day of Oct.
     - paragraph
-    - paragraph: "2023-10-01, read count: 2, page: 21 ~ 30"
+    - paragraph: "2023-10-01, read count: 2, page: 21 ~ 30, pages read: 10"
     - paragraph
     - paragraph: start day of Nov.
     - paragraph
-    - paragraph: "2023-11-01, read count: 2, page: 31 ~ 40"
+    - paragraph: "2023-11-01, read count: 2, page: 31 ~ 40, pages read: 10"
+    - paragraph
+    - paragraph: "2023-11-30, read count: 2, page: 41 ~ 50, pages read: 10"
     - paragraph
     - paragraph: start day of Dec.
     - paragraph
-    - paragraph: "2023-12-01, read count: 2, page: 51 ~ 60"
+    - paragraph: "2023-12-01, read count: 2, page: 51 ~ 60, pages read: 10"
+    - paragraph
+    - paragraph: "2023-12-31, read count: 2, page: 61 ~ 70, pages read: 10"
     - paragraph
     - paragraph:
       - emphasis:
@@ -62,19 +68,35 @@
             - blockquote:
               - paragraph: blockquote
     - paragraph
-    - paragraph: "2024-01-01, read count: 1, page: 71 ~ 80"
+    - paragraph: "2024-01-01, read count: 1, page: 71 ~ 80, pages read: 10"
+    - paragraph
+    - paragraph: "2024-02-01, read count: 1, page: 81 ~ 90, pages read: 10"
     - paragraph
     - paragraph: read again in the same day.
     - paragraph
-    - paragraph: "2024-02-01, read count: 1, page: 81 ~ 90"
+    - paragraph: "2024-02-01, read count: 1, page: 81 ~ 90, pages read: 10"
+    - paragraph
+    - paragraph: "2024-02-29, read count: 1, page: 91 ~ 100, pages read: 10"
+    - paragraph
+    - paragraph: "2024-03-01, read count: 1, page: 101 ~ 110, pages read: 10"
+    - paragraph
+    - paragraph: "2024-04-01, read count: 1, page: 121 ~ 130, pages read: 10"
     - paragraph
     - paragraph: read again in the same day.
     - paragraph
-    - paragraph: "2024-04-01, read count: 1, page: 121 ~ 130"
+    - paragraph: "2024-04-01, read count: 1, page: 121 ~ 130, pages read: 10"
     - paragraph
     - paragraph: read again and again in the same day.
     - paragraph
-    - paragraph: "2024-04-01, read count: 1, page: 121 ~ 130"
+    - paragraph: "2024-04-01, read count: 1, page: 121 ~ 130, pages read: 10"
+    - paragraph
+    - paragraph: "2024-04-30, read count: 1, page: 131 ~ 140, pages read: 10"
+    - paragraph
+    - paragraph: "2024-05-01, read count: 1, page: 141 ~ 150, pages read: 10"
+    - paragraph
+    - paragraph: "2024-06-01, read count: 1, page: 151 ~ 160, pages read: 10"
+    - paragraph
+    - paragraph: "2024-06-30, read count: 1, page: 161 ~ 170, pages read: 10"
     - list:
       - listitem:
         - heading "Years" [level=2]
