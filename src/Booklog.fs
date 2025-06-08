@@ -343,11 +343,8 @@ module Misc =
 
         let booklogRows =
             logs
-            |> List.filter (_.notes >> Option.isSome)
             |> List.map (fun log ->
-                let notes = log.notes |> generateBooklogNotes
-
-                [ notes
+                [ log.notes |> generateBooklogNotes
                   Html.p [
                       prop.className "content is-small booklog-info"
                       prop.children [
