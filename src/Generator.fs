@@ -485,9 +485,9 @@ module Rendering =
                 Html.ul [
                     prop.children [
                         Html.li [ Html.h2 "Years" ]
-                        Html.li [ yearLinks ]
+                        yearLinks
                         Html.li [ Html.h2 "Books" ]
-                        Html.li [ bookLinks ]
+                        bookLinks
                     ]
                 ]
 
