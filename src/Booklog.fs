@@ -332,7 +332,19 @@ module Misc =
                     ]
                 ])
 
-        [ header; booklogStreaks; booklogCalendar; Html.div booklogRows; links ]
+        let booksOfYear =
+            logs
+            |> List.map _.bookTitle
+            |> List.distinct
+            |> List.choose (fun bookTitle -> Map.tryFind bookTitle books)
+            |> generateBookLinks baseUrl
+
+        [ header
+          booklogStreaks
+          booklogCalendar
+          Html.div booklogRows
+          Html.ul [ Html.h2 $"Books of %d{year}"; booksOfYear ]
+          links ]
 
     let private generateBooklogSummary links (book: Book) (logs: Booklog list) =
         let header =
