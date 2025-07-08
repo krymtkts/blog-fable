@@ -664,33 +664,43 @@
               - paragraph: blockquote
     - paragraph
     - list:
+      - heading "Books of 2024" [level=2]
+      - list:
+        - listitem:
+          - link "B book":
+            - /url: /blog-fable/booklogs/b-book.html
+        - listitem:
+          - link "A book":
+            - /url: /blog-fable/booklogs/a-book.html
+        - listitem:
+          - link "C book":
+            - /url: /blog-fable/booklogs/c-book.html
+    - list:
       - listitem:
         - heading "Years" [level=2]
-      - listitem:
-        - list:
-          - listitem:
-            - link "2022":
-              - /url: /blog-fable/booklogs/2022.html
-          - listitem:
-            - link "2023":
-              - /url: /blog-fable/booklogs/2023.html
-          - listitem:
-            - link "2024":
-              - /url: /blog-fable/booklogs/2024.html
+      - list:
+        - listitem:
+          - link "2022":
+            - /url: /blog-fable/booklogs/2022.html
+        - listitem:
+          - link "2023":
+            - /url: /blog-fable/booklogs/2023.html
+        - listitem:
+          - link "2024":
+            - /url: /blog-fable/booklogs/2024.html
       - listitem:
         - heading "Books" [level=2]
-      - listitem:
-        - list:
-          - listitem:
-            - link "A book":
-              - /url: /blog-fable/booklogs/a-book.html
-          - listitem:
-            - link "B book":
-              - /url: /blog-fable/booklogs/b-book.html
-          - listitem:
-            - link "C book":
-              - /url: /blog-fable/booklogs/c-book.html
-          - listitem:
-            - link "D book":
-              - /url: /blog-fable/booklogs/d-book.html
+      - list:
+        - listitem:
+          - link "A book":
+            - /url: /blog-fable/booklogs/a-book.html
+        - listitem:
+          - link "B book":
+            - /url: /blog-fable/booklogs/b-book.html
+        - listitem:
+          - link "C book":
+            - /url: /blog-fable/booklogs/c-book.html
+        - listitem:
+          - link "D book":
+            - /url: /blog-fable/booklogs/d-book.html
   - contentinfo: Copyright © 2023 krymtkts
