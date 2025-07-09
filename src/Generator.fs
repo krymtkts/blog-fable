@@ -484,9 +484,9 @@ module Rendering =
             let links =
                 Html.ul [
                     prop.children [
-                        Html.li [ Html.h2 "Years" ]
+                        Html.li [ Html.h2 $"Years (%d{years |> List.length})" ]
                         yearLinks
-                        Html.li [ Html.h2 "Books" ]
+                        Html.li [ Html.h2 $"Books (%d{bookMap |> Map.count})" ]
                         bookLinks
                     ]
                 ]
