@@ -3391,14 +3391,14 @@
       - text: ", read count: 1, page: 1, pages read: 1"
     - paragraph
     - list:
-      - heading "Books of 2022" [level=2]
+      - heading "Books of 2022 (1)" [level=2]
       - list:
         - listitem:
           - link "D book":
             - /url: /blog-fable/booklogs/d-book.html
     - list:
       - listitem:
-        - heading "Years" [level=2]
+        - heading "Years (3)" [level=2]
       - list:
         - listitem:
           - link "2022":
@@ -3410,7 +3410,7 @@
           - link "2024":
             - /url: /blog-fable/booklogs/2024.html
       - listitem:
-        - heading "Books" [level=2]
+        - heading "Books (4)" [level=2]
       - list:
         - listitem:
           - link "A book":

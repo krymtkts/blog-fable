@@ -639,7 +639,7 @@
     - paragraph: start day of Jan.
     - paragraph
     - list:
-      - heading "Books of 2023" [level=2]
+      - heading "Books of 2023 (2)" [level=2]
       - list:
         - listitem:
           - link "A book":
@@ -649,7 +649,7 @@
             - /url: /blog-fable/booklogs/b-book.html
     - list:
       - listitem:
-        - heading "Years" [level=2]
+        - heading "Years (3)" [level=2]
       - list:
         - listitem:
           - link "2022":
@@ -661,7 +661,7 @@
           - link "2024":
             - /url: /blog-fable/booklogs/2024.html
       - listitem:
-        - heading "Books" [level=2]
+        - heading "Books (4)" [level=2]
       - list:
         - listitem:
           - link "A book":

@@ -74,7 +74,7 @@
     - paragraph: "2024-11-01, read count: n+2, page: 81 ~ 99, pages read: 19"
     - list:
       - listitem:
-        - heading "Years" [level=2]
+        - heading "Years (3)" [level=2]
       - list:
         - listitem:
           - link "2022":
@@ -86,7 +86,7 @@
           - link "2024":
             - /url: /blog-fable/booklogs/2024.html
       - listitem:
-        - heading "Books" [level=2]
+        - heading "Books (4)" [level=2]
       - list:
         - listitem:
           - link "A book":
