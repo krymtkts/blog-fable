@@ -26,6 +26,7 @@
         - button "🖥️"
   - main:
     - heading "Booklog - C book" [level=1]
+    - paragraph: No name
     - paragraph
     - paragraph: "2024-11-30, read count: 1, page: i ~ viii, 1 ~ 12, pages read: 20"
     - paragraph

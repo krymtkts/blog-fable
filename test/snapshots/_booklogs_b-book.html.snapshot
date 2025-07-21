@@ -26,6 +26,7 @@
         - button "🖥️"
   - main:
     - heading "Booklog - B book" [level=1]
+    - paragraph: John Doe
     - paragraph
     - paragraph: start day of Aug. read again.
     - paragraph
