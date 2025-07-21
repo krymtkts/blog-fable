@@ -357,6 +357,9 @@ module Misc =
                 prop.children (Html.text $"Booklog - {book.bookTitle}")
             ]
 
+        let bookAuthor =
+            Html.p [ prop.className "subtitle"; prop.children [ Html.text book.bookAuthor ] ]
+
         let booklogRows =
             logs
             |> List.map (fun log ->
@@ -386,6 +389,7 @@ module Misc =
 
 
         [ header
+          bookAuthor
           Html.div [ prop.className "section"; prop.children (booklogRows |> List.concat) ]
           links ]
 
@@ -408,7 +412,6 @@ module Misc =
         (conf: FrameConfiguration)
         (def: 'D)
         (getId: 'D -> string)
-        (getTitle: 'D -> string)
         (generate: 'D -> 'T list -> Fable.React.ReactElement list)
         (primary: 'D -> bool)
         (booklogs: 'T list)
@@ -450,7 +453,6 @@ module Misc =
             conf
             def
             (fun def -> def.year |> string)
-            (fun def -> def.year |> string)
             (fun def -> generateBooklogList def.basePath def.links def.stats def.books def.year)
             (fun def -> def.index)
             booklogs
@@ -466,7 +468,6 @@ module Misc =
             conf
             def
             (fun def -> def.book.id)
-            (fun def -> def.book.bookTitle)
             (fun def -> generateBooklogSummary def.links def.book)
             (fun _ -> false)
             booklogs

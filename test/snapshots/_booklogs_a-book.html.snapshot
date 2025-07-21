@@ -26,6 +26,7 @@
         - button "🖥️"
   - main:
     - heading "Booklog - A book" [level=1]
+    - paragraph: Jane Doe
     - paragraph
     - paragraph: start day of Jan.
     - paragraph
