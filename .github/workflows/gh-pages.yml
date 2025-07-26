@@ -30,12 +30,12 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --all-projects --exclude=fable_modules --sarif-file-output=snyk.sarif --org=krymtkts
+          args: --sarif-file-output=snyk.sarif --org=krymtkts
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk.sarif
-          category: Snyk Vulnerabilities
+          category: Snyk Vulnerabilities(Node.js)
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
