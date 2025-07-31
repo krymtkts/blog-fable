@@ -28,8 +28,8 @@
     "marked": "^16.1.1",
     "marked-footnote": "^1.4.0",
     "marked-highlight": "^2.2.2",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "yaml": "^2.8.0"
   }
 }
