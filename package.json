@@ -19,8 +19,8 @@
   "version": "1.0.0",
   "devDependencies": {
     "bulma": "^1.0.4",
-    "pagefind": "^1.3.0",
-    "sass": "^1.91.0",
+    "pagefind": "^1.4.0",
+    "sass": "^1.92.1",
     "ts2fable": "^0.7.1"
   },
   "dependencies": {
