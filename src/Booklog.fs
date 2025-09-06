@@ -269,18 +269,20 @@ module Misc =
             | 0 -> ""
             | i -> $", pages read: {i}"
 
-    let private generateBooklogList
-        baseUrl
-        links
-        booklogStreaks
-        (books: Map<string, Book>)
-        (year: int)
-        (logs: Booklog list)
-        =
-        let header =
-            Html.h1 [ prop.className "title"; prop.children (Html.text $"Booklog {year}") ]
+    type BooklogDef =
+        { priority: string
+          basePath: string
+          links: Fable.React.ReactElement
+          books: Map<string, Book>
+          year: int
+          stats: Fable.React.ReactElement
+          index: bool }
 
-        let booklogCalendar = generateCalendar year logs
+    let private generateBooklogList (def: BooklogDef) (logs: Booklog list) =
+        let header =
+            Html.h1 [ prop.className "title"; prop.children (Html.text $"Booklog {def.year}") ]
+
+        let booklogCalendar = generateCalendar def.year logs
 
         let booklogRows =
             logs
@@ -290,7 +292,7 @@ module Misc =
             |> List.rev
             |> List.map (fun (i, log) ->
                 let notes = log.notes |> generateBooklogNotes
-                let book = Map.tryFind log.bookTitle books
+                let book = Map.tryFind log.bookTitle def.books
 
                 Html.div [
                     prop.className "section"
@@ -304,7 +306,7 @@ module Misc =
                             prop.className "subtitle content is-small"
                             prop.children [
                                 match book with
-                                | Some book -> book |> generateBookLink baseUrl
+                                | Some book -> book |> generateBookLink def.basePath
                                 | None -> Html.text log.bookTitle
                                 Html.text ", read count: "
                                 Html.text (
@@ -335,19 +337,19 @@ module Misc =
             logs
             |> List.map _.bookTitle
             |> List.distinct
-            |> List.choose (fun bookTitle -> Map.tryFind bookTitle books)
+            |> List.choose (fun bookTitle -> Map.tryFind bookTitle def.books)
 
-        let booksOfYearLinks = booksOfYear |> generateBookLinks baseUrl
+        let booksOfYearLinks = booksOfYear |> generateBookLinks def.basePath
 
         [ header
-          booklogStreaks
+          def.stats
           booklogCalendar
           Html.div booklogRows
           Html.ul [
-              Html.h2 $"Books of %d{year} (%d{booksOfYear |> List.length})"
+              Html.h2 $"Books of %d{def.year} (%d{booksOfYear |> List.length})"
               booksOfYearLinks
           ]
-          links ]
+          def.links ]
 
     let private generateBooklogSummary links (book: Book) (logs: Booklog list) =
         let header =
@@ -438,21 +440,12 @@ module Misc =
 
         content, loc, id
 
-    type BooklogDef =
-        { priority: string
-          basePath: string
-          links: Fable.React.ReactElement
-          books: Map<string, Book>
-          year: int
-          stats: Fable.React.ReactElement
-          index: bool }
-
     let generateYearlyBooklogContent (conf: FrameConfiguration) (def: BooklogDef) (booklogs: Booklog list) =
         parseBooklog
             conf
             def
             (fun def -> def.year |> string)
-            (fun def -> generateBooklogList def.basePath def.links def.stats def.books def.year)
+            (fun def -> generateBooklogList def)
             (fun def -> def.index)
             booklogs
 
