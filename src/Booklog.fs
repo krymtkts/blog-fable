@@ -75,7 +75,20 @@ module Misc =
                     Some(date, date.AddDays(1.0)))
             startDate
 
-    let private generateCalendar (year: int) (logs: Booklog list) =
+    let private generateYearLink baseUrl year (className: string) =
+        Html.a [
+            prop.className className
+            prop.href $"{baseUrl}/{year}.html"
+            prop.children [ Html.span [ Html.text (string year) ] ]
+        ]
+
+    let private generateCalendar
+        (year: int)
+        (prevYear: int option)
+        (nextYear: int option)
+        basePath
+        (logs: Booklog list)
+        =
         let dateMap =
             logs
             |> List.map (_.date >> DateTime.Parse)
@@ -137,7 +150,28 @@ module Misc =
             prop.children [
                 Html.table [
                     prop.className "calendar"
-                    prop.children [ Html.thead [ Html.tr (empty :: header) ]; Html.tbody calendar ]
+                    prop.children [
+                        Html.thead [
+                            Html.tr [
+                                Html.th [
+                                    prop.className "nav"
+                                    prop.colSpan (List.length header + 1)
+                                    prop.children [
+                                        prevYear
+                                        |> function
+                                            | Some year -> generateYearLink basePath year "prev"
+                                            | None -> Html.span []
+                                        nextYear
+                                        |> function
+                                            | Some year -> generateYearLink basePath year "next"
+                                            | None -> Html.span []
+                                    ]
+                                ]
+                            ]
+                            Html.tr (empty :: header)
+                        ]
+                        Html.tbody calendar
+                    ]
                 ]
             ]
         ]
@@ -275,6 +309,8 @@ module Misc =
           links: Fable.React.ReactElement
           books: Map<string, Book>
           year: int
+          prevYear: int option
+          nextYear: int option
           stats: Fable.React.ReactElement
           index: bool }
 
@@ -282,7 +318,8 @@ module Misc =
         let header =
             Html.h1 [ prop.className "title"; prop.children (Html.text $"Booklog {def.year}") ]
 
-        let booklogCalendar = generateCalendar def.year logs
+        let booklogCalendar =
+            generateCalendar def.year def.prevYear def.nextYear def.basePath logs
 
         let booklogRows =
             logs

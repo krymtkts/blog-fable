@@ -291,6 +291,28 @@ pre code {
         position: absolute;
       }
     }
+    th.nav {
+      border: none;
+      padding: 0;
+      margin: 0;
+
+      height: 24px;
+      width: 100%;
+      position: relative;
+
+      a {
+        position: static;
+        width: 50%;
+      }
+      .prev > span {
+        position: absolute;
+        left: 0.5em;
+      }
+      .next > span {
+        position: absolute;
+        right: 0.5em;
+      }
+    }
   }
 
   > tbody > tr {
