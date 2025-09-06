@@ -44,7 +44,6 @@ module Parser =
 
 [<AutoOpen>]
 module Misc =
-    open System
     open Feliz
 
     let private datesInYear year =
