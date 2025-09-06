@@ -29,6 +29,10 @@
     - text: "current: 2, longest: 366, max pages read: 39"
     - table:
       - rowgroup:
+        - row "« 2023":
+          - cell "« 2023":
+            - link "« 2023":
+              - /url: /blog-fable/booklogs/2023.html
         - row "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec":
           - cell
           - cell "Jan"

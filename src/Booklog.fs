@@ -44,7 +44,6 @@ module Parser =
 
 [<AutoOpen>]
 module Misc =
-    open System
     open Feliz
 
     let private datesInYear year =
@@ -76,7 +75,20 @@ module Misc =
                     Some(date, date.AddDays(1.0)))
             startDate
 
-    let private generateCalendar (year: int) (logs: Booklog list) =
+    let private generateYearLink baseUrl year (className: string) =
+        Html.a [
+            prop.className className
+            prop.href $"{baseUrl}/{year}.html"
+            prop.children [ Html.span [ Html.text (string year) ] ]
+        ]
+
+    let private generateCalendar
+        (year: int)
+        (prevYear: int option)
+        (nextYear: int option)
+        basePath
+        (logs: Booklog list)
+        =
         let dateMap =
             logs
             |> List.map (_.date >> DateTime.Parse)
@@ -138,7 +150,28 @@ module Misc =
             prop.children [
                 Html.table [
                     prop.className "calendar"
-                    prop.children [ Html.thead [ Html.tr (empty :: header) ]; Html.tbody calendar ]
+                    prop.children [
+                        Html.thead [
+                            Html.tr [
+                                Html.th [
+                                    prop.className "nav"
+                                    prop.colSpan (List.length header + 1)
+                                    prop.children [
+                                        prevYear
+                                        |> function
+                                            | Some year -> generateYearLink basePath year "prev"
+                                            | None -> Html.span []
+                                        nextYear
+                                        |> function
+                                            | Some year -> generateYearLink basePath year "next"
+                                            | None -> Html.span []
+                                    ]
+                                ]
+                            ]
+                            Html.tr (empty :: header)
+                        ]
+                        Html.tbody calendar
+                    ]
                 ]
             ]
         ]
@@ -270,18 +303,23 @@ module Misc =
             | 0 -> ""
             | i -> $", pages read: {i}"
 
-    let private generateBooklogList
-        baseUrl
-        links
-        booklogStreaks
-        (books: Map<string, Book>)
-        (year: int)
-        (logs: Booklog list)
-        =
-        let header =
-            Html.h1 [ prop.className "title"; prop.children (Html.text $"Booklog {year}") ]
+    type BooklogDef =
+        { priority: string
+          basePath: string
+          links: Fable.React.ReactElement
+          books: Map<string, Book>
+          year: int
+          prevYear: int option
+          nextYear: int option
+          stats: Fable.React.ReactElement
+          index: bool }
 
-        let booklogCalendar = generateCalendar year logs
+    let private generateBooklogList (def: BooklogDef) (logs: Booklog list) =
+        let header =
+            Html.h1 [ prop.className "title"; prop.children (Html.text $"Booklog {def.year}") ]
+
+        let booklogCalendar =
+            generateCalendar def.year def.prevYear def.nextYear def.basePath logs
 
         let booklogRows =
             logs
@@ -291,7 +329,7 @@ module Misc =
             |> List.rev
             |> List.map (fun (i, log) ->
                 let notes = log.notes |> generateBooklogNotes
-                let book = Map.tryFind log.bookTitle books
+                let book = Map.tryFind log.bookTitle def.books
 
                 Html.div [
                     prop.className "section"
@@ -305,7 +343,7 @@ module Misc =
                             prop.className "subtitle content is-small"
                             prop.children [
                                 match book with
-                                | Some book -> book |> generateBookLink baseUrl
+                                | Some book -> book |> generateBookLink def.basePath
                                 | None -> Html.text log.bookTitle
                                 Html.text ", read count: "
                                 Html.text (
@@ -336,19 +374,19 @@ module Misc =
             logs
             |> List.map _.bookTitle
             |> List.distinct
-            |> List.choose (fun bookTitle -> Map.tryFind bookTitle books)
+            |> List.choose (fun bookTitle -> Map.tryFind bookTitle def.books)
 
-        let booksOfYearLinks = booksOfYear |> generateBookLinks baseUrl
+        let booksOfYearLinks = booksOfYear |> generateBookLinks def.basePath
 
         [ header
-          booklogStreaks
+          def.stats
           booklogCalendar
           Html.div booklogRows
           Html.ul [
-              Html.h2 $"Books of %d{year} (%d{booksOfYear |> List.length})"
+              Html.h2 $"Books of %d{def.year} (%d{booksOfYear |> List.length})"
               booksOfYearLinks
           ]
-          links ]
+          def.links ]
 
     let private generateBooklogSummary links (book: Book) (logs: Booklog list) =
         let header =
@@ -439,21 +477,12 @@ module Misc =
 
         content, loc, id
 
-    type BooklogDef =
-        { priority: string
-          basePath: string
-          links: Fable.React.ReactElement
-          books: Map<string, Book>
-          year: int
-          stats: Fable.React.ReactElement
-          index: bool }
-
     let generateYearlyBooklogContent (conf: FrameConfiguration) (def: BooklogDef) (booklogs: Booklog list) =
         parseBooklog
             conf
             def
             (fun def -> def.year |> string)
-            (fun def -> generateBooklogList def.basePath def.links def.stats def.books def.year)
+            (fun def -> generateBooklogList def)
             (fun def -> def.index)
             booklogs
 
