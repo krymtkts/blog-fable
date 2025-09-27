@@ -543,7 +543,8 @@ module Component =
           pagefindStyle: string
           pagefindScript: string
           scriptInjection: string list
-          additionalMetaContents: ReactElement list }
+          additionalMetaContents: ReactElement list
+          future: bool }
 
     let frame (conf: FrameConfiguration) (content: Fable.React.ReactElement list) =
         let themeSelector =

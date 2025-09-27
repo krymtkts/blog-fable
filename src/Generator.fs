@@ -335,7 +335,12 @@ module Rendering =
             files |> checkPostsFilenamePattern site.postRoot
 
             let! metas = files |> List.map readSource |> Promise.all
-            let metas = metas |> Array.filter _.publish
+
+            let metas =
+                if conf.future then
+                    metas
+                else
+                    metas |> Array.filter _.publish
 
             let getMeta i =
                 match i >= Seq.length metas with
@@ -674,7 +679,9 @@ type RenderOptions =
 
       sitemap: sitemap
 
-      highlightStyle: string }
+      highlightStyle: string
+
+      future: bool }
 
 module RenderOptions =
     let indexPath = "/index.html"
@@ -831,7 +838,8 @@ let render (opts: RenderOptions) =
               pagefindStyle = RenderOptions.pagefindStylePath opts
               pagefindScript = RenderOptions.pagefindScriptPath opts
               scriptInjection = jsInjection
-              additionalMetaContents = additionalMetaContents }
+              additionalMetaContents = additionalMetaContents
+              future = opts.future }
 
         let renderPostAndPages = renderMarkdowns conf site
 
@@ -909,7 +917,7 @@ let render (opts: RenderOptions) =
     }
     |> ignore
 
-let dev =
+let dev, future =
     match List.ofSeq argv with
-    | [ _; _; mode ] when mode = "dev" -> Development
-    | _ -> Production
+    | [ _; _; mode ] when mode = "dev" -> Development, true
+    | _ -> Production, false

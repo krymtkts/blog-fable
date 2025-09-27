@@ -44,4 +44,6 @@ render
           tags = 0.8
           posts = 0.9
           pages = 0.8
-          booklogs = 0.9 } }
+          booklogs = 0.9 }
+
+      future = future }
