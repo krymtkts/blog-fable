@@ -3,7 +3,7 @@ module App
 open StaticWebGenerator
 
 render
-    { stage = dev
+    { stage = stage
       lang = "ja"
       siteName = "Blog Fable"
       description = "A small Fable app project to generate static pages"

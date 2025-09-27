@@ -917,7 +917,7 @@ let render (opts: RenderOptions) =
     }
     |> ignore
 
-let dev, future =
+let stage, future =
     match List.ofSeq argv with
     | [ _; _; mode ] when mode = "dev" -> Development, true
     | _ -> Production, false
