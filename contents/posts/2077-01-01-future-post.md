@@ -1,6 +1,6 @@
 ---
 title: Future post
-tags: sample
+tags: [sample]
 ---
 
-Future posts are automatically considered as drafts and are not published.
+The system treats future-dated posts as drafts and excludes them from production. These posts render in development mode.
