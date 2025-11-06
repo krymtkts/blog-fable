@@ -21,7 +21,6 @@ updates:
     directories:
       - "/.config"
       - "/src"
-      - "/test"
     schedule:
       interval: "weekly"
       day: "friday"
@@ -39,6 +38,17 @@ updates:
           - "Feliz"
     assignees:
       - "krymtkts"
+  - package-ecosystem: "nuget"
+    directories:
+      - "/test"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "06:00"
+      timezone: "Asia/Tokyo"
+    groups:
+      test:
+        - "*"
   # Maintain dependencies for npm
   - package-ecosystem: "npm"
     directory: "/"
