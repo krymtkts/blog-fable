@@ -48,7 +48,8 @@ updates:
       timezone: "Asia/Tokyo"
     groups:
       test:
-        - "*"
+        patterns:
+          - "*"
   # Maintain dependencies for npm
   - package-ecosystem: "npm"
     directory: "/"
