@@ -14,8 +14,6 @@ updates:
       workflow:
         patterns:
           - "*"
-    assignees:
-      - "krymtkts"
   # Maintain dependencies for NuGet
   - package-ecosystem: "nuget"
     directories:
@@ -46,8 +44,6 @@ updates:
           - "Feliz"
         patterns:
           - "*"
-    assignees:
-      - "krymtkts"
   # Maintain dependencies for npm
   - package-ecosystem: "npm"
     directory: "/"
@@ -67,5 +63,3 @@ updates:
           - "react*"
       dev-dependencies:
         dependency-type: "development"
-    assignees:
-      - "krymtkts"
