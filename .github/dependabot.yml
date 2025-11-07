@@ -14,13 +14,12 @@ updates:
       workflow:
         patterns:
           - "*"
-    assignees:
-      - "krymtkts"
   # Maintain dependencies for NuGet
   - package-ecosystem: "nuget"
     directories:
       - "/.config"
       - "/src"
+      - "/test"
     schedule:
       interval: "weekly"
       day: "friday"
@@ -36,18 +35,13 @@ updates:
         patterns:
           - "Fable.*"
           - "Feliz"
-    assignees:
-      - "krymtkts"
-  - package-ecosystem: "nuget"
-    directories:
-      - "/test"
-    schedule:
-      interval: "weekly"
-      day: "friday"
-      time: "06:00"
-      timezone: "Asia/Tokyo"
-    groups:
       test:
+        exclude-patterns:
+          - "fable"
+          - "fantomas"
+          - "femto"
+          - "Fable.*"
+          - "Feliz"
         patterns:
           - "*"
   # Maintain dependencies for npm
@@ -69,5 +63,3 @@ updates:
           - "react*"
       dev-dependencies:
         dependency-type: "development"
-    assignees:
-      - "krymtkts"
