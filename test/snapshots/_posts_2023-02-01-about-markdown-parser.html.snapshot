@@ -83,74 +83,65 @@
         - /url: "#list"
     - list:
       - listitem:
-        - paragraph: bullet list item a
+        - text: bullet list item a
         - list:
           - listitem:
             - checkbox "Checkbox" [checked] [disabled]
-            - paragraph: level 2 task item 1
+            - text: level 2 task item 1
           - listitem:
             - checkbox "Checkbox" [disabled]
-            - paragraph: level 2 task item 2
+            - text: level 2 task item 2
             - list:
               - listitem:
-                - paragraph: level 3
+                - text: level 3
                 - list:
-                  - listitem:
-                    - paragraph: level 4
+                  - listitem: level 4
     - list:
       - listitem:
-        - paragraph: ordered list
+        - text: ordered list
         - list:
           - listitem:
             - checkbox "Checkbox" [disabled]
-            - paragraph: level 2 task item
+            - text: level 2 task item
             - list:
-              - listitem:
-                - paragraph: level 3
+              - listitem: level 3
             - list:
               - listitem:
                 - checkbox "Checkbox" [disabled]
-                - paragraph: level 4
-          - listitem:
-            - paragraph: level 2 item b
+                - text: level 4
+          - listitem: level 2 item b
         - list:
           - listitem:
             - checkbox "Checkbox" [disabled]
-            - paragraph: level 3
+            - text: level 3
     - list:
       - listitem:
         - paragraph: composition
         - list:
           - listitem:
             - checkbox "Checkbox" [checked] [disabled]
-            - paragraph: ordered item 1
+            - text: ordered item 1
             - list:
               - listitem:
-                - paragraph:
-                  - deletion: strikethrough
+                - deletion: strikethrough
         - list:
-          - listitem:
-            - paragraph: unordered item 1 has extreme long label text ......................................
+          - listitem: unordered item 1 has extreme long label text ......................................
           - listitem:
             - checkbox "Checkbox" [disabled]
-            - paragraph: unordered item 2 has extreme long label text ......................................
+            - text: unordered item 2 has extreme long label text ......................................
             - list:
               - listitem:
-                - paragraph:
-                  - code: inline code
+                - code: inline code
             - list:
               - listitem:
-                - paragraph:
-                  - emphasis: italic
+                - emphasis: italic
                 - list:
                   - listitem:
-                    - paragraph:
-                      - strong: bold
+                    - strong: bold
                     - list:
                       - listitem:
-                        - paragraph:
-                          - strong:
-                            - emphasis: italic bold
+                        - strong:
+                          - emphasis: italic bold
           - listitem:
             - blockquote:
               - paragraph: blockquote

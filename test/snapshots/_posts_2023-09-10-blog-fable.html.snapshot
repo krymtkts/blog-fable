@@ -37,46 +37,38 @@
     - paragraph: blog-fable is a small Fable app project to generate static pages.
     - list:
       - listitem:
-        - paragraph: Samples
+        - text: Samples
         - list:
           - listitem:
-            - paragraph:
-              - link "About Markdown parser":
-                - /url: /blog-fable/posts/2023-02-01-about-markdown-parser.html
+            - link "About Markdown parser":
+              - /url: /blog-fable/posts/2023-02-01-about-markdown-parser.html
           - listitem:
-            - paragraph: Posts
+            - text: Posts
             - list:
               - listitem:
-                - paragraph:
-                  - link "Sample post":
-                    - /url: /blog-fable/posts/2023-03-01-sample-post.html
+                - link "Sample post":
+                  - /url: /blog-fable/posts/2023-03-01-sample-post.html
               - listitem:
-                - paragraph:
-                  - link "Sample post without front matter":
-                    - /url: /blog-fable/posts/2023-01-01-sample-post-without-front-matter.html
+                - link "Sample post without front matter":
+                  - /url: /blog-fable/posts/2023-01-01-sample-post-without-front-matter.html
               - listitem:
-                - paragraph:
-                  - link "Flatten posts in nested directory":
-                    - /url: /blog-fable/posts/2022-12-31-flatten-posts-in-nested-directory.html
+                - link "Flatten posts in nested directory":
+                  - /url: /blog-fable/posts/2022-12-31-flatten-posts-in-nested-directory.html
               - listitem:
-                - paragraph:
-                  - link "Default color scheme":
-                    - /url: /blog-fable/posts/2023-04-01-default-color-scheme.html
+                - link "Default color scheme":
+                  - /url: /blog-fable/posts/2023-04-01-default-color-scheme.html
           - listitem:
-            - paragraph: Pages
+            - text: Pages
             - list:
               - listitem:
-                - paragraph:
-                  - link "Sample page":
-                    - /url: /blog-fable/pages/sampla-page.html
+                - link "Sample page":
+                  - /url: /blog-fable/pages/sampla-page.html
               - listitem:
-                - paragraph:
-                  - link "Sample page without front matter":
-                    - /url: /blog-fable/pages/sampla-page-without-front-matter.html
+                - link "Sample page without front matter":
+                  - /url: /blog-fable/pages/sampla-page-without-front-matter.html
               - listitem:
-                - paragraph:
-                  - link "About":
-                    - /url: /blog-fable/pages/about.html
+                - link "About":
+                  - /url: /blog-fable/pages/about.html
     - link "« 2023-04-01 Default color scheme":
       - /url: /blog-fable/posts/2023-04-01-default-color-scheme.html
   - contentinfo: Copyright © 2023 krymtkts

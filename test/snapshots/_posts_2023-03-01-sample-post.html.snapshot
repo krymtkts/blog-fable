@@ -44,26 +44,22 @@
     - code: "--- title: Sample post tags: [sample, yaml, t, tag, this-is-extreme-long-tag-name] date: 2023-03-02 ---"
     - list:
       - listitem:
-        - paragraph:
-          - code: title
-          - text: is post title. render as h1
+        - code: title
+        - text: is post title. render as h1
       - listitem:
-        - paragraph:
-          - code: tags
-          - text: is list of tag. Tags page generation based on the content of the
-          - code: tags
+        - code: tags
+        - text: is list of tag. Tags page generation based on the content of the
+        - code: tags
       - listitem:
-        - paragraph:
-          - code: date
-          - text: is update date. optional field. it overrides publication date.
+        - code: date
+        - text: is update date. optional field. it overrides publication date.
         - list:
           - listitem:
-            - paragraph: Define publication date of a post in the title of the Markdown file
+            - text: Define publication date of a post in the title of the Markdown file
             - list:
               - listitem:
-                - paragraph:
-                  - text: ex)
-                  - code: blog-fable/contents/posts/2023-02-01-this-is-sample-post.md
+                - text: ex)
+                - code: blog-fable/contents/posts/2023-02-01-this-is-sample-post.md
     - paragraph:
       - text: Use
       - 'link "eemeli/yaml: YAML parser and stringifier for JavaScript"':

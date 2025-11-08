@@ -62,10 +62,10 @@
     - code: code block
     - list:
       - listitem:
-        - paragraph: bullet list
+        - text: bullet list
         - list:
           - listitem:
-            - paragraph: numbered list
+            - text: numbered list
             - blockquote:
               - paragraph: blockquote
     - paragraph
