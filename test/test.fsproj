@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
 
     <OutputType>Exe</OutputType>
     <GenerateProgramFile>false</GenerateProgramFile>
@@ -29,6 +29,5 @@
     <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.15.5" />
     <!-- NOTE: To address vulnerabilities in Fake.DotNet.Cli -->
     <PackageReference Include="System.Drawing.Common" Version="10.0.0" />
-    <PackageReference Include="System.Formats.Asn1" Version="10.0.0" />
   </ItemGroup>
 </Project>
