@@ -25,14 +25,11 @@
         - button "🌙"
         - button "🖥️"
   - main:
+    - heading "t (1)" [level=2]
     - list:
       - listitem:
-        - heading "t (1)" [level=2]
-      - listitem:
-        - list:
-          - listitem:
-            - link "2023-03-01 - Sample post - subtitle":
-              - /url: /blog-fable/posts/2023-03-01-sample-post.html
-              - text: 2023-03-01 - Sample post -
-              - emphasis: subtitle
+        - link "2023-03-01 - Sample post - subtitle":
+          - /url: /blog-fable/posts/2023-03-01-sample-post.html
+          - text: 2023-03-01 - Sample post -
+          - emphasis: subtitle
   - contentinfo: Copyright © 2023 krymtkts

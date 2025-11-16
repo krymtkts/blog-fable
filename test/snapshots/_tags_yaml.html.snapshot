@@ -25,21 +25,18 @@
         - button "🌙"
         - button "🖥️"
   - main:
+    - heading "yaml (2)" [level=2]
     - list:
       - listitem:
-        - heading "yaml (2)" [level=2]
+        - link "Sample page code sample - subtitle":
+          - /url: /blog-fable/pages/sampla-page.html
+          - text: Sample page
+          - code: code sample
+          - text: "-"
+          - emphasis: subtitle
       - listitem:
-        - list:
-          - listitem:
-            - link "Sample page code sample - subtitle":
-              - /url: /blog-fable/pages/sampla-page.html
-              - text: Sample page
-              - code: code sample
-              - text: "-"
-              - emphasis: subtitle
-          - listitem:
-            - link "2023-03-01 - Sample post - subtitle":
-              - /url: /blog-fable/posts/2023-03-01-sample-post.html
-              - text: 2023-03-01 - Sample post -
-              - emphasis: subtitle
+        - link "2023-03-01 - Sample post - subtitle":
+          - /url: /blog-fable/posts/2023-03-01-sample-post.html
+          - text: 2023-03-01 - Sample post -
+          - emphasis: subtitle
   - contentinfo: Copyright © 2023 krymtkts

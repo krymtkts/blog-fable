@@ -25,75 +25,66 @@
         - button "🌙"
         - button "🖥️"
   - main:
+    - heading "Archives" [level=1]
     - search:
       - textbox "Search"
       - button "Clear"
     - list:
-      - listitem:
-        - heading "Posts" [level=2]
-      - listitem:
-        - list:
-          - listitem:
-            - heading "2023-09 (1)" [level=3]
-          - listitem:
-            - list:
-              - listitem:
-                - link "2023-09-10 - blog-fable":
-                  - /url: /blog-fable/posts/2023-09-10-blog-fable.html
-          - listitem:
-            - heading "2023-04 (1)" [level=3]
-          - listitem:
-            - list:
-              - listitem:
-                - link "2023-04-01 - Default color scheme":
-                  - /url: /blog-fable/posts/2023-04-01-default-color-scheme.html
-          - listitem:
-            - heading "2023-03 (1)" [level=3]
-          - listitem:
-            - list:
-              - listitem:
-                - link "2023-03-01 - Sample post - subtitle":
-                  - /url: /blog-fable/posts/2023-03-01-sample-post.html
-                  - text: 2023-03-01 - Sample post -
-                  - emphasis: subtitle
-          - listitem:
-            - heading "2023-02 (1)" [level=3]
-          - listitem:
-            - list:
-              - listitem:
-                - link "2023-02-01 - About Markdown parser code sample":
-                  - /url: /blog-fable/posts/2023-02-01-about-markdown-parser.html
-                  - text: 2023-02-01 - About Markdown parser
-                  - code: code sample
-          - listitem:
-            - heading "2023-01 (1)" [level=3]
-          - listitem:
-            - list:
-              - listitem:
-                - link "2023-01-01-sample-post-without-front-matter.md":
-                  - /url: /blog-fable/posts/2023-01-01-sample-post-without-front-matter.html
-          - listitem:
-            - heading "2022-12 (1)" [level=3]
-          - listitem:
-            - list:
-              - listitem:
-                - link "2022-12-31 - Flatten posts in nested directory":
-                  - /url: /blog-fable/posts/2022-12-31-flatten-posts-in-nested-directory.html
-      - listitem:
-        - heading "Pages" [level=2]
-      - listitem:
-        - list:
-          - listitem:
-            - link "About":
-              - /url: /blog-fable/pages/about.html
-          - listitem:
-            - link "sampla-page-without-front-matter.md":
-              - /url: /blog-fable/pages/sampla-page-without-front-matter.html
-          - listitem:
-            - link "Sample page code sample - subtitle":
-              - /url: /blog-fable/pages/sampla-page.html
-              - text: Sample page
-              - code: code sample
-              - text: "-"
-              - emphasis: subtitle
+      - heading "Posts" [level=2]
+      - list:
+        - listitem:
+          - heading "2023-09 (1)" [level=3]
+          - list:
+            - listitem:
+              - link "2023-09-10 - blog-fable":
+                - /url: /blog-fable/posts/2023-09-10-blog-fable.html
+        - listitem:
+          - heading "2023-04 (1)" [level=3]
+          - list:
+            - listitem:
+              - link "2023-04-01 - Default color scheme":
+                - /url: /blog-fable/posts/2023-04-01-default-color-scheme.html
+        - listitem:
+          - heading "2023-03 (1)" [level=3]
+          - list:
+            - listitem:
+              - link "2023-03-01 - Sample post - subtitle":
+                - /url: /blog-fable/posts/2023-03-01-sample-post.html
+                - text: 2023-03-01 - Sample post -
+                - emphasis: subtitle
+        - listitem:
+          - heading "2023-02 (1)" [level=3]
+          - list:
+            - listitem:
+              - link "2023-02-01 - About Markdown parser code sample":
+                - /url: /blog-fable/posts/2023-02-01-about-markdown-parser.html
+                - text: 2023-02-01 - About Markdown parser
+                - code: code sample
+        - listitem:
+          - heading "2023-01 (1)" [level=3]
+          - list:
+            - listitem:
+              - link "2023-01-01-sample-post-without-front-matter.md":
+                - /url: /blog-fable/posts/2023-01-01-sample-post-without-front-matter.html
+        - listitem:
+          - heading "2022-12 (1)" [level=3]
+          - list:
+            - listitem:
+              - link "2022-12-31 - Flatten posts in nested directory":
+                - /url: /blog-fable/posts/2022-12-31-flatten-posts-in-nested-directory.html
+      - heading "Pages" [level=2]
+      - list:
+        - listitem:
+          - link "About":
+            - /url: /blog-fable/pages/about.html
+        - listitem:
+          - link "sampla-page-without-front-matter.md":
+            - /url: /blog-fable/pages/sampla-page-without-front-matter.html
+        - listitem:
+          - link "Sample page code sample - subtitle":
+            - /url: /blog-fable/pages/sampla-page.html
+            - text: Sample page
+            - code: code sample
+            - text: "-"
+            - emphasis: subtitle
   - contentinfo: Copyright © 2023 krymtkts

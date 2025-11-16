@@ -25,12 +25,9 @@
         - button "🌙"
         - button "🖥️"
   - main:
+    - heading "image (1)" [level=2]
     - list:
       - listitem:
-        - heading "image (1)" [level=2]
-      - listitem:
-        - list:
-          - listitem:
-            - link "2023-04-01 - Default color scheme":
-              - /url: /blog-fable/posts/2023-04-01-default-color-scheme.html
+        - link "2023-04-01 - Default color scheme":
+          - /url: /blog-fable/posts/2023-04-01-default-color-scheme.html
   - contentinfo: Copyright © 2023 krymtkts
