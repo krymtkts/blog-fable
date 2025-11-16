@@ -21,8 +21,7 @@ module Generation =
                 |> Seq.map (fun (yearMonth, metas) ->
                     let lis = metas |> Seq.map (metaToLi root) |> List.ofSeq
 
-                    [ Html.li [ Html.h3 $"{yearMonth} ({List.length lis})" ]
-                      Html.li [ Html.ul lis ] ])
+                    [ Html.li [ Html.h3 $"{yearMonth} ({List.length lis})"; Html.ul lis ] ])
 
             return Html.ul [ prop.children (List.concat archives) ]
         }
@@ -63,13 +62,17 @@ module Generation =
                               priority = def.priority })
 
                     generate def.metas $"%s{pathRoot}%s{def.root}"
-                    |> Promise.map (fun content -> [ Html.li [ Html.h2 def.title ]; Html.li [ content ] ], refs))
+                    |> Promise.map (fun content -> [ Html.h2 def.title; content ], refs))
                 |> Promise.all
 
             let a, refs = a |> List.ofSeq |> List.unzip
             let locs = refs |> Seq.concat
 
-            return [ Html.div [ prop.id "search" ]; Html.ul [ prop.children (List.concat a) ] ], locs
+            return
+                [ Html.h1 [ prop.text "Archives" ]
+                  Html.div [ prop.id "search" ]
+                  Html.ul [ prop.children (List.concat a) ] ],
+                locs
         }
 
     type TagDef =
@@ -104,7 +107,7 @@ module Generation =
                 |> Map.toList
                 |> List.map (fun (tag, metas) -> Component.tagToLi def.tagRoot tag <| List.length metas)
 
-            [ Html.ul [ Html.li [ Html.h2 def.title ]; Html.li [ Html.ul [ prop.children tags ] ] ] ]
+            [ Html.h2 def.title; Html.ul [ prop.children tags ] ]
 
         let tagPageContents =
             tagAndPage
@@ -120,7 +123,7 @@ module Generation =
 
                         metaToLi parent meta)
 
-                tag, [ Html.ul [ Html.li [ Html.h2 $"{tag} ({List.length metas})" ]; Html.li [ Html.ul lis ] ] ])
+                tag, [ Html.h2 $"{tag} ({List.length metas})"; Html.ul lis ])
 
         let locs: Xml.SiteLocation seq =
             tagAndPage
