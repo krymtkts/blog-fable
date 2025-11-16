@@ -107,7 +107,7 @@ module Generation =
                 |> Map.toList
                 |> List.map (fun (tag, metas) -> Component.tagToLi def.tagRoot tag <| List.length metas)
 
-            [ Html.ul [ Html.li [ Html.h2 def.title ]; Html.li [ Html.ul [ prop.children tags ] ] ] ]
+            [ Html.h2 def.title; Html.ul [ prop.children tags ] ]
 
         let tagPageContents =
             tagAndPage
@@ -123,7 +123,7 @@ module Generation =
 
                         metaToLi parent meta)
 
-                tag, [ Html.ul [ Html.li [ Html.h2 $"{tag} ({List.length metas})" ]; Html.li [ Html.ul lis ] ] ])
+                tag, [ Html.h2 $"{tag} ({List.length metas})"; Html.ul lis ])
 
         let locs: Xml.SiteLocation seq =
             tagAndPage
