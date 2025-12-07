@@ -95,6 +95,12 @@ let loadSnapshot (path: string) =
             return None
     }
 
+let overwriteSnapshotsEnabled () =
+    match Environment.GetEnvironmentVariable "BLOG_FABLE_UPDATE_SNAPSHOTS" with
+    | null
+    | "" -> false
+    | _ -> true
+
 [<Tests>]
 let tests =
     testList "snapshot testing" [
@@ -143,6 +149,7 @@ let tests =
             let! (playwright: IPlaywright) = Playwright.CreateAsync()
             use _ = PlaywrightAsyncDisposable playwright
             let! (page: IPage) = playwright.NewChromiumPage()
+            let overwriteSnapshots = overwriteSnapshotsEnabled ()
 
             for path in paths do
                 let url = baseUrl + path
@@ -159,9 +166,12 @@ let tests =
                 let! content = "html" |> page.Locator |> _.AriaSnapshotAsync()
                 let! expectedContent = snapshotPath |> loadSnapshot
 
-                match expectedContent with
-                | Some expectedContent -> content |> Expect.equal $"Content mismatch for %s{url}" expectedContent
-                | None ->
+                match expectedContent, overwriteSnapshots with
+                | Some _, true ->
+                    do! saveSnapshot snapshotPath content
+                    printfn $"Updated snapshot for %s{url} to %s{snapshotPath}"
+                | Some expectedContent, false -> content |> Expect.equal $"Content mismatch for %s{url}" expectedContent
+                | None, _ ->
                     do! saveSnapshot snapshotPath content
                     printfn $"Saved new snapshot for %s{url} to %s{snapshotPath}"
 
