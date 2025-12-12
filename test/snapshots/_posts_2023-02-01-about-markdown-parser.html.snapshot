@@ -154,10 +154,10 @@
     - table:
       - rowgroup:
         - row "col1 col2 col3 col4":
-          - cell "col1"
-          - cell "col2"
-          - cell "col3"
-          - cell "col4"
+          - columnheader "col1"
+          - columnheader "col2"
+          - columnheader "col3"
+          - columnheader "col4"
       - rowgroup:
         - row "1 2 3 4":
           - cell "1"

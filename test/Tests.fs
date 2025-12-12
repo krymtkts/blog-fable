@@ -20,11 +20,12 @@ type DevServer() =
     let home = IO.Path.Join [| __SOURCE_DIRECTORY__; ".."; "docs" |]
     let port = port
     let root = "/blog-fable"
-    let webServer = startWebServerAsync (suaveConfig home) (webpart root) |> snd
     let cancellationTokenSource = new CancellationTokenSource()
 
     do
-        Async.Start(webServer, cancellationTokenSource.Token)
+        startWebServerAsync (suaveConfig home cancellationTokenSource.Token) (webpart root)
+        |> ignore
+
         printfn $"Dev server started at http://localhost:%d{port}%s{root}"
 
     member __.Port = port
@@ -65,9 +66,9 @@ type IPage with
             let! response = url |> __.GotoAsync
 
             match response with
-            | null -> return Error "Failed to load page: %s{url}"
-            | r when not r.Ok -> return Error "Failed to load page: %s{url}"
-            | r -> return Ok r
+            | null -> return Result.Error "Failed to load page: %s{url}"
+            | r when not r.Ok -> return Result.Error "Failed to load page: %s{url}"
+            | r -> return Result.Ok r
         }
 
 let snapshotDir = IO.Path.Combine(__SOURCE_DIRECTORY__, "snapshots")
@@ -96,10 +97,8 @@ let loadSnapshot (path: string) =
     }
 
 let overwriteSnapshotsEnabled () =
-    match Environment.GetEnvironmentVariable "BLOG_FABLE_UPDATE_SNAPSHOTS" with
-    | null
-    | "" -> false
-    | _ -> true
+    String.IsNullOrEmpty
+    <| Environment.GetEnvironmentVariable "BLOG_FABLE_UPDATE_SNAPSHOTS"
 
 [<Tests>]
 let tests =
@@ -160,8 +159,8 @@ let tests =
                 let! response = url |> page.GotoAndCheck
 
                 match response with
-                | Error msg -> failwith $"%s{msg}"
-                | Ok _ -> ()
+                | Result.Error msg -> failwith $"%s{msg}"
+                | Result.Ok _ -> ()
 
                 let! content = "html" |> page.Locator |> _.AriaSnapshotAsync()
                 let! expectedContent = snapshotPath |> loadSnapshot

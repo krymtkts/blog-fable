@@ -30,64 +30,64 @@
     - table:
       - rowgroup:
         - row "2023 »":
-          - cell "2023 »":
+          - columnheader "2023 »":
             - link "2023 »":
               - /url: /blog-fable/booklogs/2023.html
         - row "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec":
-          - cell
-          - cell "Jan"
-          - cell
-          - cell
-          - cell
-          - cell
-          - cell "Feb"
-          - cell
-          - cell
-          - cell
-          - cell "Mar"
-          - cell
-          - cell
-          - cell
-          - cell "Apr"
-          - cell
-          - cell
-          - cell
-          - cell
-          - cell "May"
-          - cell
-          - cell
-          - cell
-          - cell "Jun"
-          - cell
-          - cell
-          - cell
-          - cell "Jul"
-          - cell
-          - cell
-          - cell
-          - cell
-          - cell "Aug"
-          - cell
-          - cell
-          - cell
-          - cell "Sep"
-          - cell
-          - cell
-          - cell
-          - cell "Oct"
-          - cell
-          - cell
-          - cell
-          - cell
-          - cell "Nov"
-          - cell
-          - cell
-          - cell
-          - cell "Dec"
-          - cell
-          - cell
-          - cell
-          - cell
+          - columnheader
+          - columnheader "Jan"
+          - columnheader
+          - columnheader
+          - columnheader
+          - columnheader
+          - columnheader "Feb"
+          - columnheader
+          - columnheader
+          - columnheader
+          - columnheader "Mar"
+          - columnheader
+          - columnheader
+          - columnheader
+          - columnheader "Apr"
+          - columnheader
+          - columnheader
+          - columnheader
+          - columnheader
+          - columnheader "May"
+          - columnheader
+          - columnheader
+          - columnheader
+          - columnheader "Jun"
+          - columnheader
+          - columnheader
+          - columnheader
+          - columnheader "Jul"
+          - columnheader
+          - columnheader
+          - columnheader
+          - columnheader
+          - columnheader "Aug"
+          - columnheader
+          - columnheader
+          - columnheader
+          - columnheader "Sep"
+          - columnheader
+          - columnheader
+          - columnheader
+          - columnheader "Oct"
+          - columnheader
+          - columnheader
+          - columnheader
+          - columnheader
+          - columnheader "Nov"
+          - columnheader
+          - columnheader
+          - columnheader
+          - columnheader "Dec"
+          - columnheader
+          - columnheader
+          - columnheader
+          - columnheader
       - rowgroup:
         - row "2022-01-02 (1) 2022-01-09 (1) 2022-01-16 (1) 2022-01-23 (1) 2022-01-30 (1) 2022-02-06 (1) 2022-02-13 (1) 2022-02-20 (1) 2022-02-27 (1) 2022-03-06 (1) 2022-03-13 (1) 2022-03-20 (1) 2022-03-27 (1) 2022-04-03 (1) 2022-04-10 (1) 2022-04-17 (1) 2022-04-24 (1) 2022-05-01 (1) 2022-05-08 (1) 2022-05-15 (1) 2022-05-22 (1) 2022-05-29 (1) 2022-06-05 (1) 2022-06-12 (1) 2022-06-19 (1) 2022-06-26 (1) 2022-07-03 (1) 2022-07-10 (1) 2022-07-17 (1) 2022-07-24 (1) 2022-07-31 (1) 2022-08-07 (1) 2022-08-14 (1) 2022-08-21 (1) 2022-08-28 (1) 2022-09-04 (1) 2022-09-11 (1) 2022-09-18 (1) 2022-09-25 (1) 2022-10-02 (1) 2022-10-09 (1) 2022-10-16 (1) 2022-10-23 (1) 2022-10-30 (1) 2022-11-06 (1) 2022-11-13 (1) 2022-11-20 (1) 2022-11-27 (1) 2022-12-04 (1) 2022-12-11 (1) 2022-12-18 (1) 2022-12-25 (1)":
           - cell
