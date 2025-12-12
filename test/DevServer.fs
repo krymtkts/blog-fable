@@ -88,15 +88,16 @@ let (handleWatcherEvents: FileChange seq -> unit), socketHandler =
         | _ -> printfn "refresh event not triggered."
 
     let socketHandler (ws: WebSocket) _ =
-        let rec refreshLoop () =
-            async {
+        let rec refreshLoop (ct: CancellationToken) =
+            task {
+                ct.ThrowIfCancellationRequested()
                 do! refreshEvent.Publish |> Async.AwaitEvent
 
                 printfn "refresh client."
                 let seg = ASCII.bytes "refreshed" |> ByteSegment
                 let! _ = ws.send Text seg true
 
-                return! refreshLoop ()
+                return! refreshLoop ct
             }
 
         let rec mainLoop (cts: CancellationTokenSource) =
@@ -105,7 +106,7 @@ let (handleWatcherEvents: FileChange seq -> unit), socketHandler =
 
                 match msg with
                 | Close, _, _ ->
-                    use _ = cts
+                    // use _ = cts
                     cts.Cancel()
 
                     let emptyResponse = [||] |> ByteSegment
@@ -115,7 +116,7 @@ let (handleWatcherEvents: FileChange seq -> unit), socketHandler =
             }
 
         let cts = new CancellationTokenSource()
-        Async.Start(refreshLoop (), cts.Token)
+        refreshLoop cts.Token |> ignore
         mainLoop cts
 
     handleWatcherEvents, socketHandler
@@ -124,24 +125,26 @@ let suaveConfig (home: string) =
     let home = IO.Path.GetFullPath home
     printfn $"watch '%s{home}'"
 
+    let extendedMimeTypesMap (ext: string) =
+        // NOTE: Add custom mime types for pagefind to prevent 404 error.
+        match ext with
+        | ".pagefind"
+        | ".pf_fragment"
+        | ".pf_index"
+        | ".pf_meta" -> Writers.createMimeType "application/octet-stream" false
+        | ext -> Writers.defaultMimeTypesMap ext
+
     { defaultConfig with
         homeFolder = Some(home)
         compressedFilesFolder = Some(home)
         bindings = [ HttpBinding.create HTTP IPAddress.Loopback port ]
         listenTimeout = TimeSpan.FromMilliseconds 3000.
-        mimeTypesMap =
-            Writers.defaultMimeTypesMap
-            // NOTE: Add custom mime types for pagefind to prevent 404 error.
-            @@ function
-                | ".pagefind"
-                | ".pf_fragment"
-                | ".pf_index"
-                | ".pf_meta" -> Writers.createMimeType "application/octet-stream" false
-                | _ -> None }
+        mimeTypesMap = extendedMimeTypesMap }
 
 
 let webpart (root: string) : WebPart =
-    let logger = Logging.Log.create "dev-server"
+    // TODO: Logging module is missing in Suave 3.2.
+    // let logger = Suave.Logging.Log.create "dev-server"
 
     choose [
 
@@ -159,10 +162,10 @@ let webpart (root: string) : WebPart =
             Files.browseHome
 
         ]
-        >=> log logger logFormat
+        // >=> log logger logFormat
 
         Writers.setStatus HTTP_404
-        >=> logWithLevel Logging.Error logger logFormat
+        // >=> logWithLevel Logging.Error logger logFormat
         >=> Files.browseFileHome $"{root}/404.html"
     ]
 
