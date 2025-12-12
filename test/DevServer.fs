@@ -40,10 +40,10 @@ let (handleWatcherEvents: FileChange seq -> unit), socketHandler =
         let result = DotNet.exec (fun x -> { x with DotNetCliPath = "dotnet" }) cmd args
 
         match result.OK with
-        | true -> Ok true
+        | true -> Result.Ok true
         | false ->
             printfn $"`dotnet %s{cmd} %s{args}` failed"
-            Error false
+            Result.Error false
 
     let buildMd () =
         Npm.run "build-md dev" id
