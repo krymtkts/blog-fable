@@ -11,11 +11,14 @@ open Fake.IO.Globbing.Operators
 open Suave
 
 open DevServer
+open System.Threading
 
 let root =
     match fsi.CommandLineArgs with
     | [| _; root |] -> root
     | _ -> ""
+
+let ct = new CancellationTokenSource()
 
 try
     use _ =
@@ -32,7 +35,8 @@ try
 
     printfn "Starting dev server..."
     let home = IO.Path.Join [| __SOURCE_DIRECTORY__; "docs" |]
-    startWebServer (suaveConfig home) (webpart root)
+    startWebServer (suaveConfig home ct.Token) (webpart root)
 
 finally
-    ()
+    use _ = ct
+    ct.Cancel()

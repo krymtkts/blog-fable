@@ -121,7 +121,7 @@ let (handleWatcherEvents: FileChange seq -> unit), socketHandler =
 
     handleWatcherEvents, socketHandler
 
-let suaveConfig (home: string) =
+let suaveConfig (home: string) (ct: CancellationToken) =
     let home = IO.Path.GetFullPath home
     printfn $"watch '%s{home}'"
 
@@ -139,7 +139,8 @@ let suaveConfig (home: string) =
         compressedFilesFolder = Some(home)
         bindings = [ HttpBinding.create HTTP IPAddress.Loopback port ]
         listenTimeout = TimeSpan.FromMilliseconds 3000.
-        mimeTypesMap = extendedMimeTypesMap }
+        mimeTypesMap = extendedMimeTypesMap
+        cancellationToken = ct }
 
 
 let webpart (root: string) : WebPart =
