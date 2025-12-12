@@ -97,10 +97,8 @@ let loadSnapshot (path: string) =
     }
 
 let overwriteSnapshotsEnabled () =
-    match Environment.GetEnvironmentVariable "BLOG_FABLE_UPDATE_SNAPSHOTS" with
-    | null
-    | "" -> false
-    | _ -> true
+    String.IsNullOrEmpty
+    <| Environment.GetEnvironmentVariable "BLOG_FABLE_UPDATE_SNAPSHOTS"
 
 [<Tests>]
 let tests =
