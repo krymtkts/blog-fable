@@ -24,7 +24,7 @@
     <PackageReference Include="Expecto" Version="10.2.3" />
     <PackageReference Include="Fake.DotNet.Cli" Version="6.1.4" />
     <PackageReference Include="Fake.JavaScript.Npm" Version="6.1.4" />
-  <PackageReference Include="FSharp.Core" Version="10.0.101" />
+    <PackageReference Include="FSharp.Core" Version="10.0.101" />
     <PackageReference Include="Microsoft.Playwright" Version="1.57.0" />
     <PackageReference Include="Suave" Version="3.2.0" />
     <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.15.5" />
