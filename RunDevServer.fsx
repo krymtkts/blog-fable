@@ -1,7 +1,7 @@
 // NOTE: requires all dependencies references.
 #r "nuget: Fake.DotNet.Cli"
 #r "nuget: Fake.JavaScript.Npm"
-#r "nuget: Suave, >= 2.7.0-beta1"
+#r "nuget: Suave, = 3.2.0"
 // NOTE: loading the dev server from test project.
 #load "./test/DevServer.fs"
 
