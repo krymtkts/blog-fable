@@ -10,9 +10,9 @@ open Suave.Operators
 open Suave.Sockets
 open Suave.Sockets.Control
 open Suave.Utils
-open Suave.WebSocket
 open System
 open System.Net
+open System.Net.Sockets
 open System.Threading
 open System.Threading.Tasks
 
@@ -34,7 +34,7 @@ type BuildEvent =
     | BuildStyle
     | Noop
 
-let (handleWatcherEvents: FileChange seq -> unit), socketHandler =
+let (handleWatcherEvents: FileChange seq -> unit), sseHandler =
     let refreshEvent = new Event<unit>()
 
     let buildFable () =
@@ -92,41 +92,33 @@ let (handleWatcherEvents: FileChange seq -> unit), socketHandler =
             printfn "refresh event is triggered."
         | _ -> printfn "refresh event not triggered."
 
-    let socketHandler (ws: WebSocket) _ =
-        let refreshLoop (ct: CancellationToken) : Task<unit> =
-            task {
-                try
-                    while not ct.IsCancellationRequested do
-                        do! Async.StartAsTask(refreshEvent.Publish |> Async.AwaitEvent, cancellationToken = ct)
+    let sseHandler (conn: Connection) : Task<unit> =
+        task {
+            try
+                // NOTE: Tell the browser how long to wait before retrying the connection.
+                do! EventSource.retry conn 1000u
 
-                        if not ct.IsCancellationRequested then
-                            let seg = ASCII.bytes "refreshed" |> ByteSegment
-                            let! _ = ws.send Text seg true
-                            ()
-                with :? OperationCanceledException ->
-                    ()
-            }
+                // NOTE: Initial event so the client can confirm it is connected.
+                do! EventSource.eventType conn "connected"
+                do! EventSource.data conn "ok"
+                do! EventSource.dispatch conn
 
-        let rec mainLoop (cts: CancellationTokenSource) =
-            socket {
-                let! msg = ws.read ()
+                while true do
+                    do!
+                        Async.StartAsTask(
+                            refreshEvent.Publish |> Async.AwaitEvent,
+                            cancellationToken = CancellationToken.None
+                        )
 
-                match msg with
-                | Close, _, _ ->
-                    // use _ = cts
-                    cts.Cancel()
+                    do! EventSource.eventType conn "refresh"
+                    do! EventSource.data conn "refreshed"
+                    do! EventSource.dispatch conn
+            with
+            | :? OperationCanceledException -> ()
+            | :? SocketException -> ()
+        }
 
-                    let emptyResponse = [||] |> ByteSegment
-                    do! ws.send Close emptyResponse true
-                    printfn "WebSocket connection closed gracefully."
-                | _ -> return! mainLoop cts
-            }
-
-        let cts = new CancellationTokenSource()
-        refreshLoop cts.Token |> ignore
-        mainLoop cts
-
-    handleWatcherEvents, socketHandler
+    handleWatcherEvents, sseHandler
 
 let suaveConfig (home: string) (ct: CancellationToken) =
     let home = IO.Path.GetFullPath home
@@ -156,7 +148,7 @@ let webpart (root: string) : WebPart =
 
     choose [
 
-        path "/websocket" >=> handShake socketHandler
+        path "/sse" >=> EventSource.handShake sseHandler
 
         GET
         >=> Writers.setHeader "Cache-Control" "no-cache, no-store, must-revalidate"
