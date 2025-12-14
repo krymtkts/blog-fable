@@ -14,6 +14,7 @@ open Suave.WebSocket
 open System
 open System.Net
 open System.Threading
+open System.Threading.Tasks
 
 let port =
     let rec findPort port =
@@ -92,16 +93,18 @@ let (handleWatcherEvents: FileChange seq -> unit), socketHandler =
         | _ -> printfn "refresh event not triggered."
 
     let socketHandler (ws: WebSocket) _ =
-        let rec refreshLoop (ct: CancellationToken) =
+        let refreshLoop (ct: CancellationToken) : Task<unit> =
             task {
-                ct.ThrowIfCancellationRequested()
-                do! refreshEvent.Publish |> Async.AwaitEvent
+                try
+                    while not ct.IsCancellationRequested do
+                        do! Async.StartAsTask(refreshEvent.Publish |> Async.AwaitEvent, cancellationToken = ct)
 
-                printfn "refresh client."
-                let seg = ASCII.bytes "refreshed" |> ByteSegment
-                let! _ = ws.send Text seg true
-
-                return! refreshLoop ct
+                        if not ct.IsCancellationRequested then
+                            let seg = ASCII.bytes "refreshed" |> ByteSegment
+                            let! _ = ws.send Text seg true
+                            ()
+                with :? OperationCanceledException ->
+                    ()
             }
 
         let rec mainLoop (cts: CancellationTokenSource) =
