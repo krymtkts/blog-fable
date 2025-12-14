@@ -61,12 +61,14 @@ let (handleWatcherEvents: FileChange seq -> unit), socketHandler =
             |> Seq.map (fun e ->
                 let fi = FileInfo.ofPath e.FullPath
 
-                Trace.traceImportant $"%s{fi.FullName} was changed."
+                Trace.traceImportant $"%s{fi.FullName} was changed. ext: %s{fi.Extension}"
 
-                match fi.FullName with
-                | x when x.EndsWith(".fs") -> BuildEvent.BuildFable
-                | x when x.EndsWith(".md") || x.EndsWith(".yml") || x.EndsWith(".yaml") -> BuildEvent.BuildMd
-                | x when x.EndsWith(".scss") -> BuildEvent.BuildStyle
+                match fi.Extension with
+                | ".fs" -> BuildEvent.BuildFable
+                | ".md"
+                | ".yml"
+                | ".yaml" -> BuildEvent.BuildMd
+                | ".scss" -> BuildEvent.BuildStyle
                 | _ -> BuildEvent.Noop)
             |> Set.ofSeq
 
