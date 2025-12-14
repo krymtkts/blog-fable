@@ -34,7 +34,7 @@ type BuildEvent =
     | Noop
 
 let (handleWatcherEvents: FileChange seq -> unit), socketHandler =
-    let refreshEvent = new Event<_>()
+    let refreshEvent = new Event<unit>()
 
     let buildFable () =
         let cmd = "fable src"
