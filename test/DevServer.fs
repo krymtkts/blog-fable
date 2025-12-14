@@ -25,6 +25,8 @@ let port =
 
     findPort 8080us
 
+[<RequireQualifiedAccess>]
+[<Struct>]
 type BuildEvent =
     | BuildFable
     | BuildMd
@@ -62,21 +64,21 @@ let (handleWatcherEvents: FileChange seq -> unit), socketHandler =
                 Trace.traceImportant $"%s{fi.FullName} was changed."
 
                 match fi.FullName with
-                | x when x.EndsWith(".fs") -> BuildFable
-                | x when x.EndsWith(".md") || x.EndsWith(".yml") || x.EndsWith(".yaml") -> BuildMd
-                | x when x.EndsWith(".scss") -> BuildStyle
-                | _ -> Noop)
+                | x when x.EndsWith(".fs") -> BuildEvent.BuildFable
+                | x when x.EndsWith(".md") || x.EndsWith(".yml") || x.EndsWith(".yaml") -> BuildEvent.BuildMd
+                | x when x.EndsWith(".scss") -> BuildEvent.BuildStyle
+                | _ -> BuildEvent.Noop)
             |> Set.ofSeq
 
         let fableOrMd =
-            match [ BuildFable; BuildMd ] |> List.map es.Contains with
+            match [ BuildEvent.BuildFable; BuildEvent.BuildMd ] |> List.map es.Contains with
             | [ true; true ] -> buildFable ()
             | [ _; true ] -> buildMd ()
             | [ true; _ ] -> buildFable ()
             | _ -> Ok false
 
         let style =
-            match es |> Set.contains BuildStyle with
+            match es |> Set.contains BuildEvent.BuildStyle with
             | true -> buildStyle ()
             | _ -> Ok false
 
