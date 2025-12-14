@@ -8,8 +8,6 @@ open Suave
 open Suave.Filters
 open Suave.Operators
 open Suave.Sockets
-open Suave.Sockets.Control
-open Suave.Utils
 open System
 open System.Net
 open System.Net.Sockets
