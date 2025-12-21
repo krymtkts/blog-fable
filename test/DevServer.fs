@@ -112,15 +112,17 @@ let (handleWatcherEvents: FileChange seq -> unit), sseHandler =
                     do! EventSource.data conn "refreshed"
                     do! EventSource.dispatch conn
             with
-            | :? OperationCanceledException -> ()
+            | :? OperationCanceledException
             | :? SocketException -> ()
         }
 
     handleWatcherEvents, sseHandler
 
 let suaveConfig (home: string) (ct: CancellationToken) =
-    let home = IO.Path.GetFullPath home
-    printfn $"watch '%s{home}'"
+    let home =
+        let home = IO.Path.GetFullPath home
+        printfn $"watch '%s{home}'"
+        home |> Some
 
     let extendedMimeTypesMap (ext: string) =
         // NOTE: Add custom mime types for pagefind to prevent 404 error.
@@ -131,9 +133,10 @@ let suaveConfig (home: string) (ct: CancellationToken) =
         | ".pf_meta" -> Writers.createMimeType "application/octet-stream" false
         | ext -> Writers.defaultMimeTypesMap ext
 
+
     { defaultConfig with
-        homeFolder = Some(home)
-        compressedFilesFolder = Some(home)
+        homeFolder = home
+        compressedFilesFolder = home
         bindings = [ HttpBinding.create HTTP IPAddress.Loopback port ]
         listenTimeout = TimeSpan.FromMilliseconds 3000.
         mimeTypesMap = extendedMimeTypesMap
