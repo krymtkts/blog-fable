@@ -32,6 +32,13 @@ type BuildEvent =
     | BuildStyle
     | Noop
 
+[<RequireQualifiedAccess>]
+[<Struct>]
+type BuildResult =
+    | Ok
+    | Error of string
+    | Noop
+
 let (handleWatcherEvents: FileChange seq -> unit), sseHandler =
     let refreshEvent = new Event<unit>()
 
@@ -41,18 +48,26 @@ let (handleWatcherEvents: FileChange seq -> unit), sseHandler =
         let result = DotNet.exec (fun x -> { x with DotNetCliPath = "dotnet" }) cmd args
 
         match result.OK with
-        | true -> Result.Ok true
+        | true -> BuildResult.Ok
         | false ->
             printfn $"`dotnet %s{cmd} %s{args}` failed"
-            Result.Error false
+            result.Messages |> String.concat "\n" |> BuildResult.Error
 
     let buildMd () =
-        Npm.run "build-md dev" id
-        Ok true
+        try
+            Npm.run "build-md" id
+            BuildResult.Ok
+        with ex ->
+            printfn $"`[error] npm run build-md` failed: %s{ex.Message}"
+            BuildResult.Error ex.Message
 
     let buildStyle () =
-        Npm.run "build-css" id
-        Ok true
+        try
+            Npm.run "build-css" id
+            BuildResult.Ok
+        with ex ->
+            printfn $"`[error] npm run build-css` failed: %s{ex.Message}"
+            BuildResult.Error ex.Message
 
     let handleWatcherEvents (events: FileChange seq) =
         let es =
@@ -76,16 +91,16 @@ let (handleWatcherEvents: FileChange seq -> unit), sseHandler =
             | [ true; true ] -> buildFable ()
             | [ _; true ] -> buildMd ()
             | [ true; _ ] -> buildFable ()
-            | _ -> Ok false
+            | _ -> BuildResult.Noop
 
         let style =
             match es |> Set.contains BuildEvent.BuildStyle with
             | true -> buildStyle ()
-            | _ -> Ok false
+            | _ -> BuildResult.Noop
 
         match fableOrMd, style with
-        | Ok true, _
-        | _, Ok true ->
+        | BuildResult.Ok, _
+        | _, BuildResult.Ok ->
             refreshEvent.Trigger()
             printfn "refresh event is triggered."
         | _ -> printfn "refresh event not triggered."
