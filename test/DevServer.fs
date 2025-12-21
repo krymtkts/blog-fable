@@ -133,7 +133,6 @@ let suaveConfig (home: string) (ct: CancellationToken) =
         | ".pf_meta" -> Writers.createMimeType "application/octet-stream" false
         | ext -> Writers.defaultMimeTypesMap ext
 
-
     { defaultConfig with
         homeFolder = home
         compressedFilesFolder = home
@@ -141,7 +140,6 @@ let suaveConfig (home: string) (ct: CancellationToken) =
         listenTimeout = TimeSpan.FromMilliseconds 3000.
         mimeTypesMap = extendedMimeTypesMap
         cancellationToken = ct }
-
 
 let webpart (root: string) : WebPart =
     // TODO: Logging module is missing in Suave 3.2.
