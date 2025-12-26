@@ -102,8 +102,9 @@ let loadSnapshot (path: string) =
     }
 
 let overwriteSnapshotsEnabled () =
-    String.IsNullOrEmpty
-    <| Environment.GetEnvironmentVariable "BLOG_FABLE_UPDATE_SNAPSHOTS"
+    Environment.GetEnvironmentVariable "BLOG_FABLE_UPDATE_SNAPSHOTS"
+    |> String.IsNullOrEmpty
+    |> not
 
 [<Tests>]
 let tests =
