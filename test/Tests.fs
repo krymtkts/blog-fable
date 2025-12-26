@@ -115,6 +115,7 @@ let tests =
             let paths =
                 [
 
+                  ""
                   "/index.html"
                   "/archives.html"
                   "/pages/about.html"
