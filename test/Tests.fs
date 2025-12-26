@@ -71,8 +71,8 @@ type IPage with
             let! response = __.GotoAsync(url, opt)
 
             match response with
-            | null -> return Result.Error "Failed to load page: %s{url}"
-            | r when not r.Ok -> return Result.Error "Failed to load page: %s{url}"
+            | null -> return Result.Error $"Failed to load page: %s{url}"
+            | r when not r.Ok -> return Result.Error $"Failed to load page: %s{url}"
             | r -> return Result.Ok r
         }
 
