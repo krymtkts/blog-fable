@@ -12,7 +12,7 @@ open System.Threading
 open System.Threading.Tasks
 
 (*
-This tests requires the Playwright CLI to be installed.
+NOTE: This tests requires the Playwright CLI to be installed.
 ex) PS> ./test/bin/Debug/*/playwright.ps1 install
 *)
 
@@ -63,11 +63,16 @@ type PlaywrightAsyncDisposable(playwright: IPlaywright) =
 type IPage with
     member __.GotoAndCheck(url: string) =
         task {
-            let! response = url |> __.GotoAsync
+            let opt =
+                let opt = PageGotoOptions()
+                opt.WaitUntil <- WaitUntilState.DOMContentLoaded
+                opt
+
+            let! response = __.GotoAsync(url, opt)
 
             match response with
-            | null -> return Result.Error "Failed to load page: %s{url}"
-            | r when not r.Ok -> return Result.Error "Failed to load page: %s{url}"
+            | null -> return Result.Error $"Failed to load page: %s{url}"
+            | r when not r.Ok -> return Result.Error $"Failed to load page: %s{url}"
             | r -> return Result.Ok r
         }
 
@@ -97,8 +102,9 @@ let loadSnapshot (path: string) =
     }
 
 let overwriteSnapshotsEnabled () =
-    String.IsNullOrEmpty
-    <| Environment.GetEnvironmentVariable "BLOG_FABLE_UPDATE_SNAPSHOTS"
+    Environment.GetEnvironmentVariable "BLOG_FABLE_UPDATE_SNAPSHOTS"
+    |> String.IsNullOrEmpty
+    |> not
 
 [<Tests>]
 let tests =
@@ -138,6 +144,7 @@ let tests =
                   "/booklogs/c-book.html"
                   "/booklogs/d-book.html"
                   "/404.html"
+                  "/xxx.html" // Test for 404 page
 
                   ]
 
@@ -160,19 +167,18 @@ let tests =
 
                 match response with
                 | Result.Error msg -> failwith $"%s{msg}"
-                | Result.Ok _ -> ()
+                | _ -> ()
 
-                let! content = "html" |> page.Locator |> _.AriaSnapshotAsync()
+                let! actual = "html" |> page.Locator |> _.AriaSnapshotAsync()
                 let! expectedContent = snapshotPath |> loadSnapshot
 
-                match expectedContent, overwriteSnapshots with
-                | Some _, true ->
-                    do! saveSnapshot snapshotPath content
-                    printfn $"Updated snapshot for %s{url} to %s{snapshotPath}"
-                | Some expectedContent, false -> content |> Expect.equal $"Content mismatch for %s{url}" expectedContent
-                | None, _ ->
-                    do! saveSnapshot snapshotPath content
-                    printfn $"Saved new snapshot for %s{url} to %s{snapshotPath}"
+                if overwriteSnapshots then
+                    do! saveSnapshot snapshotPath actual
+                    printfn $"Overwrote snapshot for %s{url} to %s{snapshotPath}"
+
+                expectedContent
+                |> Expect.wantSome $"Snapshot not found for %s{url}. Expected at %s{snapshotPath}"
+                |> fun expected -> Expect.equal $"Content mismatch for %s{url}" expected actual
 
         }
 
