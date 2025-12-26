@@ -12,7 +12,7 @@ open System.Threading
 open System.Threading.Tasks
 
 (*
-This tests requires the Playwright CLI to be installed.
+NOTE: This tests requires the Playwright CLI to be installed.
 ex) PS> ./test/bin/Debug/*/playwright.ps1 install
 *)
 
@@ -167,7 +167,7 @@ let tests =
 
                 match response with
                 | Result.Error msg -> failwith $"%s{msg}"
-                | Result.Ok _ -> ()
+                | _ -> ()
 
                 let! actual = "html" |> page.Locator |> _.AriaSnapshotAsync()
                 let! expectedContent = snapshotPath |> loadSnapshot
