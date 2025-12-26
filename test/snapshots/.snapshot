@@ -1,0 +1,74 @@
+﻿- document:
+  - navigation:
+    - list:
+      - listitem:
+        - link "Blog Fable":
+          - /url: /blog-fable/index.html
+          - paragraph: Blog Fable
+      - listitem:
+        - link "Archives":
+          - /url: /blog-fable/archives.html
+      - listitem:
+        - link "Tags":
+          - /url: /blog-fable/tags.html
+      - listitem:
+        - link "Booklogs":
+          - /url: /blog-fable/booklogs.html
+      - listitem:
+        - link "About":
+          - /url: /blog-fable/pages/about.html
+      - listitem:
+        - link "RSS":
+          - /url: /blog-fable/feed.xml
+      - listitem:
+        - button "🌞"
+        - button "🌙"
+        - button "🖥️"
+  - main:
+    - text: 2023-09-10 - Last updated on 2023-10-01
+    - heading "blog-fable" [level=1]
+    - link "sample":
+      - /url: /blog-fable/tags/sample.html
+    - paragraph:
+      - text: This page generated with
+      - link "krymtkts/blog-fable":
+        - /url: https://github.com/krymtkts/blog-fable
+      - text: .
+    - paragraph: blog-fable is a small Fable app project to generate static pages.
+    - list:
+      - listitem:
+        - text: Samples
+        - list:
+          - listitem:
+            - link "About Markdown parser":
+              - /url: /blog-fable/posts/2023-02-01-about-markdown-parser.html
+          - listitem:
+            - text: Posts
+            - list:
+              - listitem:
+                - link "Sample post":
+                  - /url: /blog-fable/posts/2023-03-01-sample-post.html
+              - listitem:
+                - link "Sample post without front matter":
+                  - /url: /blog-fable/posts/2023-01-01-sample-post-without-front-matter.html
+              - listitem:
+                - link "Flatten posts in nested directory":
+                  - /url: /blog-fable/posts/2022-12-31-flatten-posts-in-nested-directory.html
+              - listitem:
+                - link "Default color scheme":
+                  - /url: /blog-fable/posts/2023-04-01-default-color-scheme.html
+          - listitem:
+            - text: Pages
+            - list:
+              - listitem:
+                - link "Sample page":
+                  - /url: /blog-fable/pages/sampla-page.html
+              - listitem:
+                - link "Sample page without front matter":
+                  - /url: /blog-fable/pages/sampla-page-without-front-matter.html
+              - listitem:
+                - link "About":
+                  - /url: /blog-fable/pages/about.html
+    - link "« 2023-04-01 Default color scheme":
+      - /url: /blog-fable/posts/2023-04-01-default-color-scheme.html
+  - contentinfo: Copyright © 2023 krymtkts

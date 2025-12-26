@@ -160,6 +160,8 @@ let webpart (root: string) : WebPart =
     // TODO: Logging module is missing in Suave 3.2.
     // let logger = Suave.Logging.Log.create "dev-server"
 
+    let root = root.Trim '/'
+
     choose [
 
         path "/sse" >=> EventSource.handShake sseHandler
@@ -170,8 +172,8 @@ let webpart (root: string) : WebPart =
         >=> Writers.setHeader "Expires" "0"
         >=> choose [
 
-            path $"{root}/" >=> Files.browseFileHome "blog-fable/index.html"
-            path $"{root}" >=> Redirection.redirect $"/blog-fable/"
+            path $"/{root}/" >=> Files.browseFileHome $"{root}/index.html"
+            path $"/{root}" >=> Redirection.redirect $"/{root}/"
 
             Files.browseHome
 
@@ -181,7 +183,7 @@ let webpart (root: string) : WebPart =
         Writers.setStatus HTTP_404
         // >=> logWithLevel Logging.Error logger logFormat
         >=> choose [
-            Files.browseFileHome $"blog-fable/404.html"
+            Files.browseFileHome $"{root}/404.html"
             RequestErrors.NOT_FOUND "404 - Not Found" // NOTE: Fallback 404 page.
         ]
 
