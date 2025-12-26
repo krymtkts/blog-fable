@@ -63,7 +63,12 @@ type PlaywrightAsyncDisposable(playwright: IPlaywright) =
 type IPage with
     member __.GotoAndCheck(url: string) =
         task {
-            let! response = url |> __.GotoAsync
+            let opt =
+                let opt = PageGotoOptions()
+                opt.WaitUntil <- WaitUntilState.DOMContentLoaded
+                opt
+
+            let! response = __.GotoAsync(url, opt)
 
             match response with
             | null -> return Result.Error "Failed to load page: %s{url}"
