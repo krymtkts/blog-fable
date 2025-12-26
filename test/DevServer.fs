@@ -180,7 +180,11 @@ let webpart (root: string) : WebPart =
 
         Writers.setStatus HTTP_404
         // >=> logWithLevel Logging.Error logger logFormat
-        >=> Files.browseFileHome $"{root}/404.html"
+        >=> choose [
+            Files.browseFileHome $"blog-fable/404.html"
+            RequestErrors.NOT_FOUND "404 - Not Found" // NOTE: Fallback 404 page.
+        ]
+
     ]
 
 let openIndex url =
