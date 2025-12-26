@@ -169,17 +169,16 @@ let tests =
                 | Result.Error msg -> failwith $"%s{msg}"
                 | Result.Ok _ -> ()
 
-                let! content = "html" |> page.Locator |> _.AriaSnapshotAsync()
+                let! actual = "html" |> page.Locator |> _.AriaSnapshotAsync()
                 let! expectedContent = snapshotPath |> loadSnapshot
 
-                match expectedContent, overwriteSnapshots with
-                | Some _, true ->
-                    do! saveSnapshot snapshotPath content
-                    printfn $"Updated snapshot for %s{url} to %s{snapshotPath}"
-                | Some expectedContent, false -> content |> Expect.equal $"Content mismatch for %s{url}" expectedContent
-                | None, _ ->
-                    do! saveSnapshot snapshotPath content
-                    printfn $"Saved new snapshot for %s{url} to %s{snapshotPath}"
+                if overwriteSnapshots then
+                    do! saveSnapshot snapshotPath actual
+                    printfn $"Overwrote snapshot for %s{url} to %s{snapshotPath}"
+
+                expectedContent
+                |> Expect.wantSome $"Snapshot not found for %s{url}. Expected at %s{snapshotPath}"
+                |> fun expected -> Expect.equal $"Content mismatch for %s{url}" expected actual
 
         }
 
