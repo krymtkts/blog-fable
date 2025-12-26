@@ -143,6 +143,7 @@ let tests =
                   "/booklogs/c-book.html"
                   "/booklogs/d-book.html"
                   "/404.html"
+                  "/xxx.html" // Test for 404 page
 
                   ]
 
