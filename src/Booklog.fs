@@ -287,8 +287,34 @@ module Misc =
     let private generateBookLink baseUrl (book: Book) =
         generateLink (fun (book: Book) -> $"{baseUrl}/{book.id}.html") _.bookTitle book
 
-    let generateBookLinks baseUrl (books: Book list) =
-        generateLinks "book-links" (fun (book: Book) -> $"{baseUrl}/{book.id}.html") _.bookTitle books
+    let private tryGetDateRange (logs: Booklog list) =
+        match logs with
+        | [] -> None
+        | _ ->
+            let startDate, endDate =
+                logs
+                |> List.map (_.date >> DateTime.Parse)
+                |> List.fold
+                    (fun (minD, maxD) d -> (if d < minD then d else minD), (if d > maxD then d else maxD))
+                    (DateTime.MaxValue, DateTime.MinValue)
+                |> fun (startDate, endDate) -> DateTime.toRFC3339Date startDate, DateTime.toRFC3339Date endDate
+
+            Some(startDate, endDate)
+
+    let generateBookLinks baseUrl (booklogsByTitle: Map<string, Booklog list>) (books: Book list) =
+        generateLinks
+            "book-links"
+            (fun (book: Book) -> $"{baseUrl}/{book.id}.html")
+            (fun (book: Book) ->
+                let suffix =
+                    booklogsByTitle
+                    |> Map.tryFind book.bookTitle
+                    |> Option.bind tryGetDateRange
+                    |> Option.map (fun (s, e) -> $" ({s}〜{e})")
+                    |> Option.defaultValue ""
+
+                $"{book.bookTitle}{suffix}")
+            books
 
     let generateBooklogNotes (notes: string option) =
         notes
@@ -376,7 +402,10 @@ module Misc =
             |> List.distinct
             |> List.choose (fun bookTitle -> Map.tryFind bookTitle def.books)
 
-        let booksOfYearLinks = booksOfYear |> generateBookLinks def.basePath
+        let booklogsByTitleInYear = logs |> List.groupBy _.bookTitle |> Map.ofList
+
+        let booksOfYearLinks =
+            booksOfYear |> generateBookLinks def.basePath booklogsByTitleInYear
 
         [ header
           def.stats

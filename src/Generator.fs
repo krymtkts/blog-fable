@@ -487,7 +487,12 @@ module Rendering =
             let basePath = $"%s{site.siteRoot}/%s{IO.leaf destDir}"
             let stats = generateBooklogStats booklogs
             let yearLinks = generateBooklogLinks basePath years
-            let bookLinks = bookMap |> Map.toList |> List.map snd |> generateBookLinks basePath
+
+            let bookLinks =
+                bookMap
+                |> Map.toList
+                |> List.map snd
+                |> generateBookLinks basePath booklogPerTitle
 
             let links =
                 Html.ul [
