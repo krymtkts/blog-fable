@@ -273,19 +273,26 @@ module Misc =
             ]
         ]
 
-    let private generateLink (href: 'T -> string) (text: 'T -> string) (x: 'T) =
-        Html.a [ prop.href (href x); prop.children [ Html.text (text x) ] ]
+    let private generateLink (href: 'T -> string) (children: 'T -> ReactElement list) (x: 'T) =
+        Html.a [ prop.href (href x); prop.children (children x) ]
 
-    let private generateLinks (className: string) (href: 'T -> string) (text: 'T -> string) pages =
-        let links = pages |> List.map (fun x -> Html.li [ generateLink href text x ])
+    let private generateLinks (className: string) (href: 'T -> string) (children: 'T -> ReactElement list) pages =
+        let links = pages |> List.map (fun x -> Html.li [ generateLink href children x ])
 
         Html.ul [ prop.className className; prop.children links ]
 
     let generateBooklogLinks baseUrl years =
-        generateLinks "booklog-links" (fun year -> $"{baseUrl}/{year}.html") string years
+        generateLinks
+            "booklog-links"
+            (fun year -> $"{baseUrl}/{year}.html")
+            (fun year -> [ Html.text (string year) ])
+            years
+
+    let bookIdLink (baseUrl: string) (book: Book) = $"{baseUrl}/{book.id}.html"
+    let bookTitleText (book: Book) = [ Html.text book.bookTitle ]
 
     let private generateBookLink baseUrl (book: Book) =
-        generateLink (fun (book: Book) -> $"{baseUrl}/{book.id}.html") _.bookTitle book
+        generateLink (bookIdLink baseUrl) bookTitleText book
 
     let private tryGetDateRange (logs: Booklog list) =
         match logs with
@@ -302,19 +309,26 @@ module Misc =
             Some(startDate, endDate)
 
     let generateBookLinks baseUrl (booklogsByTitle: Map<string, Booklog list>) (books: Book list) =
-        generateLinks
-            "book-links"
-            (fun (book: Book) -> $"{baseUrl}/{book.id}.html")
-            (fun (book: Book) ->
-                let suffix =
+        let links =
+            books
+            |> List.map (fun (book: Book) ->
+                let rangeText =
                     booklogsByTitle
                     |> Map.tryFind book.bookTitle
                     |> Option.bind tryGetDateRange
-                    |> Option.map (fun (s, e) -> $" ({s}〜{e})")
-                    |> Option.defaultValue ""
+                    |> Option.map (fun (s, e) -> $"{s}〜{e}")
 
-                $"{book.bookTitle}{suffix}")
-            books
+                Html.li [
+                    prop.className "book-link"
+                    prop.children [
+                        generateLink (bookIdLink baseUrl) bookTitleText book
+                        match rangeText with
+                        | Some t -> Html.span [ prop.className "content is-small"; prop.children [ Html.text t ] ]
+                        | None -> Html.none
+                    ]
+                ])
+
+        Html.ul [ prop.className "book-links"; prop.children links ]
 
     let generateBooklogNotes (notes: string option) =
         notes
