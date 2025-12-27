@@ -487,17 +487,18 @@ module Rendering =
             let basePath = $"%s{site.siteRoot}/%s{IO.leaf destDir}"
             let stats = generateBooklogStats booklogs
             let yearLinks = generateBooklogLinks basePath years
-            let bookLinks = bookMap |> Map.toList |> List.map snd |> generateBookLinks basePath
+
+            let bookLinks =
+                bookMap
+                |> Map.toList
+                |> List.map snd
+                |> generateBookLinks basePath booklogPerTitle
 
             let links =
-                Html.ul [
-                    prop.children [
-                        Html.li [ Html.h2 $"Years (%d{years |> List.length})" ]
-                        yearLinks
-                        Html.li [ Html.h2 $"Books (%d{bookMap |> Map.count})" ]
-                        bookLinks
-                    ]
-                ]
+                [ Html.h2 $"Years (%d{years |> List.length})"
+                  yearLinks
+                  Html.h2 $"Books (%d{bookMap |> Map.count})"
+                  bookLinks ]
 
             let getPrevYear year =
                 if year > minYear then Some(year - 1) else None

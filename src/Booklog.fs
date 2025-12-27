@@ -273,22 +273,60 @@ module Misc =
             ]
         ]
 
-    let private generateLink (href: 'T -> string) (text: 'T -> string) (x: 'T) =
-        Html.a [ prop.href (href x); prop.children [ Html.text (text x) ] ]
+    let private generateLink (href: 'T -> string) (children: 'T -> ReactElement list) (x: 'T) =
+        Html.a [ prop.href (href x); prop.children (children x) ]
 
-    let private generateLinks (className: string) (href: 'T -> string) (text: 'T -> string) pages =
-        let links = pages |> List.map (fun x -> Html.li [ generateLink href text x ])
+    let private generateLinks (className: string) (href: 'T -> string) (children: 'T -> ReactElement list) pages =
+        let links = pages |> List.map (fun x -> Html.li [ generateLink href children x ])
 
         Html.ul [ prop.className className; prop.children links ]
 
     let generateBooklogLinks baseUrl years =
-        generateLinks "booklog-links" (fun year -> $"{baseUrl}/{year}.html") string years
+        generateLinks
+            "booklog-links"
+            (fun year -> $"{baseUrl}/{year}.html")
+            (fun year -> [ Html.text (string year) ])
+            years
+
+    let bookIdLink (baseUrl: string) (book: Book) = $"{baseUrl}/{book.id}.html"
+    let bookTitleText (book: Book) = [ Html.text book.bookTitle ]
 
     let private generateBookLink baseUrl (book: Book) =
-        generateLink (fun (book: Book) -> $"{baseUrl}/{book.id}.html") _.bookTitle book
+        generateLink (bookIdLink baseUrl) bookTitleText book
 
-    let generateBookLinks baseUrl (books: Book list) =
-        generateLinks "book-links" (fun (book: Book) -> $"{baseUrl}/{book.id}.html") _.bookTitle books
+    let private tryGetDateRange (logs: Booklog list) =
+        match logs with
+        | [] -> None
+        | _ ->
+            let startDate, endDate =
+                logs
+                |> List.map (_.date >> DateTime.Parse)
+                |> List.fold (fun (minD, maxD) d -> min d minD, max d maxD) (DateTime.MaxValue, DateTime.MinValue)
+                |> fun (startDate, endDate) -> DateTime.toRFC3339Date startDate, DateTime.toRFC3339Date endDate
+
+            Some(startDate, endDate)
+
+    let generateBookLinks baseUrl (booklogsByTitle: Map<string, Booklog list>) (books: Book list) =
+        let links =
+            books
+            |> List.map (fun (book: Book) ->
+                let rangeText =
+                    booklogsByTitle
+                    |> Map.tryFind book.bookTitle
+                    |> Option.bind tryGetDateRange
+                    |> Option.map (fun (s, e) -> $"{s}〜{e}")
+
+                Html.li [
+                    prop.className "book-link"
+                    prop.children [
+                        generateLink (bookIdLink baseUrl) bookTitleText book
+                        match rangeText with
+                        | Some t -> Html.span [ prop.className "content is-small"; prop.children [ Html.text t ] ]
+                        | None -> Html.none
+                    ]
+                ])
+
+        Html.ul [ prop.className "book-links"; prop.children links ]
 
     let generateBooklogNotes (notes: string option) =
         notes
@@ -306,7 +344,7 @@ module Misc =
     type BooklogDef =
         { priority: string
           basePath: string
-          links: Fable.React.ReactElement
+          links: Fable.React.ReactElement list
           books: Map<string, Book>
           year: int
           prevYear: int option
@@ -376,19 +414,20 @@ module Misc =
             |> List.distinct
             |> List.choose (fun bookTitle -> Map.tryFind bookTitle def.books)
 
-        let booksOfYearLinks = booksOfYear |> generateBookLinks def.basePath
+        let booklogsByTitleInYear = logs |> List.groupBy _.bookTitle |> Map.ofList
+
+        let booksOfYearLinks =
+            booksOfYear |> generateBookLinks def.basePath booklogsByTitleInYear
 
         [ header
           def.stats
           booklogCalendar
           Html.div booklogRows
-          Html.ul [
-              Html.h2 $"Books of %d{def.year} (%d{booksOfYear |> List.length})"
-              booksOfYearLinks
-          ]
-          def.links ]
+          Html.h2 $"Books of %d{def.year} (%d{booksOfYear |> List.length})"
+          booksOfYearLinks ]
+        @ def.links
 
-    let private generateBooklogSummary links (book: Book) (logs: Booklog list) =
+    let private generateBooklogSummary (links: Fable.React.ReactElement list) (book: Book) (logs: Booklog list) =
         let header =
             Html.h1 [
                 prop.className "title"
@@ -428,8 +467,8 @@ module Misc =
 
         [ header
           bookAuthor
-          Html.div [ prop.className "section"; prop.children (booklogRows |> List.concat) ]
-          links ]
+          Html.div [ prop.className "section"; prop.children (booklogRows |> List.concat) ] ]
+        @ links
 
     let groupBooklogsByYear (booklogs: Booklog list) =
         let minYear = booklogs |> List.map (_.date >> DateTime.Parse >> _.Year) |> List.min
@@ -489,7 +528,7 @@ module Misc =
     type BookDef =
         { priority: string
           basePath: string
-          links: Fable.React.ReactElement
+          links: Fable.React.ReactElement list
           book: Book }
 
     let generateBooklogSummaryContent (conf: FrameConfiguration) (def: BookDef) (booklogs: Booklog list) =

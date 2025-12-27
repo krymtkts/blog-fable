@@ -157,6 +157,7 @@ let tests =
             use _ = PlaywrightAsyncDisposable playwright
             let! (page: IPage) = playwright.NewChromiumPage()
             let overwriteSnapshots = overwriteSnapshotsEnabled ()
+            let failures = ResizeArray<string>()
 
             for path in paths do
                 let url = baseUrl + path
@@ -177,9 +178,15 @@ let tests =
                     do! saveSnapshot snapshotPath actual
                     printfn $"Overwrote snapshot for %s{url} to %s{snapshotPath}"
 
-                expectedContent
-                |> Expect.wantSome $"Snapshot not found for %s{url}. Expected at %s{snapshotPath}"
-                |> fun expected -> Expect.equal $"Content mismatch for %s{url}" expected actual
+                try
+                    expectedContent
+                    |> Expect.wantSome $"Snapshot not found for %s{url}. Expected at %s{snapshotPath}"
+                    |> fun expected -> Expect.equal $"Content mismatch for %s{url}" expected actual
+                with ex ->
+                    failures.Add $"Snapshot test failed for %s{url}: %s{ex.Message}"
+
+            if failures.Count > 0 then
+                failtestf "Snapshot test failed for the following URLs:\n%s" (String.concat "\n" failures)
 
         }
 
