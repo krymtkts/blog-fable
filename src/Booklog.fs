@@ -301,9 +301,7 @@ module Misc =
             let startDate, endDate =
                 logs
                 |> List.map (_.date >> DateTime.Parse)
-                |> List.fold
-                    (fun (minD, maxD) d -> (if d < minD then d else minD), (if d > maxD then d else maxD))
-                    (DateTime.MaxValue, DateTime.MinValue)
+                |> List.fold (fun (minD, maxD) d -> min d minD, max d maxD) (DateTime.MaxValue, DateTime.MinValue)
                 |> fun (startDate, endDate) -> DateTime.toRFC3339Date startDate, DateTime.toRFC3339Date endDate
 
             Some(startDate, endDate)
