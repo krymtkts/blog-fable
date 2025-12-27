@@ -344,7 +344,7 @@ module Misc =
     type BooklogDef =
         { priority: string
           basePath: string
-          links: Fable.React.ReactElement
+          links: Fable.React.ReactElement list
           books: Map<string, Book>
           year: int
           prevYear: int option
@@ -423,13 +423,11 @@ module Misc =
           def.stats
           booklogCalendar
           Html.div booklogRows
-          Html.ul [
-              Html.h2 $"Books of %d{def.year} (%d{booksOfYear |> List.length})"
-              booksOfYearLinks
-          ]
-          def.links ]
+          Html.h2 $"Books of %d{def.year} (%d{booksOfYear |> List.length})"
+          booksOfYearLinks ]
+        @ def.links
 
-    let private generateBooklogSummary links (book: Book) (logs: Booklog list) =
+    let private generateBooklogSummary (links: Fable.React.ReactElement list) (book: Book) (logs: Booklog list) =
         let header =
             Html.h1 [
                 prop.className "title"
@@ -469,8 +467,8 @@ module Misc =
 
         [ header
           bookAuthor
-          Html.div [ prop.className "section"; prop.children (booklogRows |> List.concat) ]
-          links ]
+          Html.div [ prop.className "section"; prop.children (booklogRows |> List.concat) ] ]
+        @ links
 
     let groupBooklogsByYear (booklogs: Booklog list) =
         let minYear = booklogs |> List.map (_.date >> DateTime.Parse >> _.Year) |> List.min
@@ -530,7 +528,7 @@ module Misc =
     type BookDef =
         { priority: string
           basePath: string
-          links: Fable.React.ReactElement
+          links: Fable.React.ReactElement list
           book: Book }
 
     let generateBooklogSummaryContent (conf: FrameConfiguration) (def: BookDef) (booklogs: Booklog list) =
