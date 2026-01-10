@@ -182,7 +182,7 @@ let webpart (root: string) : WebPart =
 
     choose [
 
-        path "/sse" >=> EventSource.handShake sseHandler
+        path "/sse" >=> EventSource.handShake sseHandler >=> Logging.log Logging.logger
 
         GET
         >=> Writers.setHeader "Cache-Control" "no-cache, no-store, must-revalidate"
