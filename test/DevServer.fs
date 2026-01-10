@@ -20,16 +20,22 @@ module Logging =
     open Serilog
 
     let logger =
-        LoggerConfiguration().MinimumLevel.Debug().WriteTo.Console().CreateLogger()
+        LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.Console(
+                outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}"
+            )
+            .CreateLogger()
 
     let log (logger: ILogger) : WebPart =
         fun ctx ->
             async {
                 logger.Information(
-                    "HTTP {Method} {Path} -> {Status}",
+                    "HTTP {Method} {Path} -> {Status} {Reason}",
                     ctx.request.``method``.ToString(),
                     ctx.request.rawPath,
-                    ctx.response.status
+                    ctx.response.status.code,
+                    ctx.response.status.reason
                 )
 
                 return Some ctx
