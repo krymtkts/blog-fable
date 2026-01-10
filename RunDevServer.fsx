@@ -1,6 +1,8 @@
 // NOTE: requires all dependencies references.
 #r "nuget: Fake.DotNet.Cli"
 #r "nuget: Fake.JavaScript.Npm"
+#r "nuget: Serilog"
+#r "nuget: Serilog.Sinks.Console"
 #r "nuget: Suave, = 3.2.0"
 #r "nuget: System.Drawing.Common" // NOTE: To address vulnerabilities in Fake.DotNet.Cli
 // NOTE: loading the dev server from test project.

@@ -9,10 +9,37 @@ open Suave.Filters
 open Suave.Operators
 open Suave.Sockets
 open System
+open System.Diagnostics
 open System.Net
 open System.Net.Sockets
 open System.Threading
 open System.Threading.Tasks
+
+
+module Logging =
+    open Serilog
+
+    let logger =
+        LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.Console(
+                outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}"
+            )
+            .CreateLogger()
+
+    let log (logger: ILogger) : WebPart =
+        fun ctx ->
+            async {
+                logger.Information(
+                    "HTTP {Method} {Path} -> {Status} {Reason}",
+                    ctx.request.``method``.ToString(),
+                    ctx.request.rawPath,
+                    ctx.response.status.code,
+                    ctx.response.status.reason
+                )
+
+                return Some ctx
+            }
 
 let port =
     let rec findPort port =
@@ -157,14 +184,11 @@ let suaveConfig (home: string) (ct: CancellationToken) =
         cancellationToken = ct }
 
 let webpart (root: string) : WebPart =
-    // TODO: Logging module is missing in Suave 3.2.
-    // let logger = Suave.Logging.Log.create "dev-server"
-
     let root = root.Trim '/'
 
     choose [
 
-        path "/sse" >=> EventSource.handShake sseHandler
+        path "/sse" >=> EventSource.handShake sseHandler >=> Logging.log Logging.logger
 
         GET
         >=> Writers.setHeader "Cache-Control" "no-cache, no-store, must-revalidate"
@@ -178,19 +202,19 @@ let webpart (root: string) : WebPart =
             Files.browseHome
 
         ]
-        // >=> log logger logFormat
+        >=> Logging.log Logging.logger
 
         Writers.setStatus HTTP_404
-        // >=> logWithLevel Logging.Error logger logFormat
         >=> choose [
             Files.browseFileHome $"{root}/404.html"
             RequestErrors.NOT_FOUND "404 - Not Found" // NOTE: Fallback 404 page.
         ]
+        >=> Logging.log Logging.logger
 
     ]
 
 let openIndex url =
-    let p = new Diagnostics.ProcessStartInfo(url)
+    let p = new ProcessStartInfo(url)
 
     p.UseShellExecute <- true
-    Diagnostics.Process.Start(p) |> ignore
+    Process.Start(p) |> ignore
