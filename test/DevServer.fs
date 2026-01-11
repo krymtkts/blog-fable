@@ -4,6 +4,7 @@ open Fake.Core
 open Fake.DotNet
 open Fake.IO
 open Fake.JavaScript
+open Serilog
 open Suave
 open Suave.Filters
 open Suave.Operators
@@ -15,9 +16,7 @@ open System.Net.Sockets
 open System.Threading
 open System.Threading.Tasks
 
-
 module Logging =
-    open Serilog
 
     let logger =
         LoggerConfiguration()
@@ -27,10 +26,11 @@ module Logging =
             )
             .CreateLogger()
 
-    let log (logger: ILogger) : WebPart =
-        fun ctx ->
+    let logWithLevel (level: Events.LogEventLevel) (logger: ILogger) : WebPart =
+        fun (ctx: HttpContext) ->
             async {
-                logger.Information(
+                logger.Write(
+                    level,
                     "HTTP {Method} {Path} -> {Status} {Reason}",
                     ctx.request.``method``.ToString(),
                     ctx.request.rawPath,
@@ -188,7 +188,9 @@ let webpart (root: string) : WebPart =
 
     choose [
 
-        path "/sse" >=> EventSource.handShake sseHandler >=> Logging.log Logging.logger
+        path "/sse"
+        >=> EventSource.handShake sseHandler
+        >=> Logging.logWithLevel Events.LogEventLevel.Information Logging.logger
 
         GET
         >=> Writers.setHeader "Cache-Control" "no-cache, no-store, must-revalidate"
@@ -202,14 +204,14 @@ let webpart (root: string) : WebPart =
             Files.browseHome
 
         ]
-        >=> Logging.log Logging.logger
+        >=> Logging.logWithLevel Events.LogEventLevel.Information Logging.logger
 
         Writers.setStatus HTTP_404
         >=> choose [
             Files.browseFileHome $"{root}/404.html"
             RequestErrors.NOT_FOUND "404 - Not Found" // NOTE: Fallback 404 page.
         ]
-        >=> Logging.log Logging.logger
+        >=> Logging.logWithLevel Events.LogEventLevel.Error Logging.logger
 
     ]
 
