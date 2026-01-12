@@ -594,8 +594,8 @@ module Rendering =
                 booklogIndex |> fun (content, _, _) -> IO.writeFile booklogsDest content
 
             return
-                [ booklogContents |> List.unzip3 |> (fun (_, locs, _) -> locs)
-                  bookContents |> List.unzip3 |> (fun (_, locs, _) -> locs) ]
+                [ booklogContents |> List.unzip3 |> sndOfTriple
+                  bookContents |> List.unzip3 |> sndOfTriple ]
                 |> List.concat
         }
 

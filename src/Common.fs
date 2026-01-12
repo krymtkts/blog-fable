@@ -236,6 +236,8 @@ module Parser =
 module Misc =
     let argv = Process.argv
 
+    let sndOfTriple (_, b, _) = b
+
     type Layout =
         | Post of string
         | Page
