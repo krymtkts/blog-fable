@@ -464,7 +464,7 @@ module Rendering =
         (booklogsSourceDir: string)
         (booklogsDest: string)
         (booksSourceDir: string)
-        (booksDest: string)
+        (booksDest: string) // TODO: unused booksDest.
         =
         let title = $"%s{conf.title} - Booklogs"
 
