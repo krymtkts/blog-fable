@@ -487,12 +487,13 @@ module Rendering =
 
             let booklogContents =
                 [ minYear .. now.Year ]
-                |> List.map (fun year ->
-                    year,
-                    match booklogPerYear |> Map.tryFind year with
-                    | None -> []
-                    | Some logs -> logs)
-                |> List.filter (fun (_, logs) -> List.length logs > 0)
+                |> List.choose (fun year ->
+                    let logs =
+                        match booklogPerYear |> Map.tryFind year with
+                        | None -> []
+                        | Some logs -> logs
+
+                    if List.length logs > 0 then Some(year, logs) else None)
 
             let years = booklogContents |> List.map fst
             let maxYear = years |> List.max
