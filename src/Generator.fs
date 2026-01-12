@@ -13,8 +13,7 @@ module Generation =
         promise {
             let archives =
                 meta
-                |> Seq.sortBy (fun meta -> IO.leaf meta.source)
-                |> Seq.rev
+                |> Seq.sortByDescending (fun meta -> IO.leaf meta.source)
                 |> Seq.groupBy (fun meta ->
                     let leaf = IO.leaf meta.source
                     leaf.Substring(0, 7))
@@ -313,8 +312,13 @@ module Rendering =
 
     let private checkFilenamePattern (files: string list) =
         files
-        |> List.map IO.leaf
-        |> List.filter isInvalidMarkdownFilenamePattern
+        |> List.choose (fun filename ->
+            let filename = IO.leaf filename
+
+            if isInvalidMarkdownFilenamePattern filename then
+                Some filename
+            else
+                None)
         |> function
             | [] -> ()
             | x -> x |> String.concat " " |> failwithf "Invalid filename patterns: %s"
@@ -323,9 +327,16 @@ module Rendering =
         let postRoot = postRoot |> normalizeUrlPath
 
         files
-        |> List.filter (normalizeUrlPath >> _.Contains(postRoot))
-        |> List.map IO.leaf
-        |> List.filter isInvalidPostsFilenamePattern
+        |> List.choose (fun filename ->
+            if (normalizeUrlPath >> _.Contains(postRoot)) filename then
+                let filename = IO.leaf filename
+
+                if isInvalidPostsFilenamePattern filename then
+                    Some filename
+                else
+                    None
+            else
+                None)
         |> function
             | [] -> ()
             | x -> x |> String.concat " " |> failwithf "Invalid posts filename patterns: %s"
@@ -373,8 +384,7 @@ module Rendering =
         let meta, metaPrev =
             match
                 metaPosts
-                |> Seq.sortBy (fun m -> IO.leaf m.source)
-                |> Seq.rev
+                |> Seq.sortByDescending (fun m -> IO.leaf m.source)
                 |> Seq.take 2
                 |> List.ofSeq
             with
@@ -454,7 +464,7 @@ module Rendering =
         (booklogsSourceDir: string)
         (booklogsDest: string)
         (booksSourceDir: string)
-        (booksDest: string)
+        (booksDest: string) // TODO: unused booksDest.
         =
         let title = $"%s{conf.title} - Booklogs"
 
@@ -475,12 +485,13 @@ module Rendering =
 
             let booklogContents =
                 [ minYear .. now.Year ]
-                |> List.map (fun year ->
-                    year,
-                    match booklogPerYear |> Map.tryFind year with
-                    | None -> []
-                    | Some logs -> logs)
-                |> List.filter (fun (_, logs) -> List.length logs > 0)
+                |> List.choose (fun year ->
+                    let logs =
+                        match booklogPerYear |> Map.tryFind year with
+                        | None -> []
+                        | Some logs -> logs
+
+                    if List.length logs > 0 then Some(year, logs) else None)
 
             let years = booklogContents |> List.map fst
             let maxYear = years |> List.max
@@ -581,8 +592,8 @@ module Rendering =
                 booklogIndex |> fun (content, _, _) -> IO.writeFile booklogsDest content
 
             return
-                [ booklogContents |> List.unzip3 |> (fun (_, locs, _) -> locs)
-                  bookContents |> List.unzip3 |> (fun (_, locs, _) -> locs) ]
+                [ booklogContents |> List.unzip3 |> sndOfTriple
+                  bookContents |> List.unzip3 |> sndOfTriple ]
                 |> List.concat
         }
 
