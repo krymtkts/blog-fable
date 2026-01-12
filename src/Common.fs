@@ -284,9 +284,11 @@ module Misc =
 
             let files =
                 paths
-                |> List.filter predict
-                |> List.map (Directory.join2 dir)
-                |> List.map IO.resolve
+                |> List.choose (fun path ->
+                    if predict path then
+                        path |> (Directory.join2 dir >> IO.resolve) |> Some
+                    else
+                        None)
 
             return files
         }
