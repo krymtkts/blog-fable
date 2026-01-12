@@ -328,9 +328,16 @@ module Rendering =
         let postRoot = postRoot |> normalizeUrlPath
 
         files
-        |> List.filter (normalizeUrlPath >> _.Contains(postRoot))
-        |> List.map IO.leaf
-        |> List.filter isInvalidPostsFilenamePattern
+        |> List.choose (fun filename ->
+            if (normalizeUrlPath >> _.Contains(postRoot)) filename then
+                let filename = IO.leaf filename
+
+                if isInvalidPostsFilenamePattern filename then
+                    Some filename
+                else
+                    None
+            else
+                None)
         |> function
             | [] -> ()
             | x -> x |> String.concat " " |> failwithf "Invalid posts filename patterns: %s"
