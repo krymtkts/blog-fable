@@ -13,8 +13,7 @@ module Generation =
         promise {
             let archives =
                 meta
-                |> Seq.sortBy (fun meta -> IO.leaf meta.source)
-                |> Seq.rev
+                |> Seq.sortByDescending (fun meta -> IO.leaf meta.source)
                 |> Seq.groupBy (fun meta ->
                     let leaf = IO.leaf meta.source
                     leaf.Substring(0, 7))
@@ -385,8 +384,7 @@ module Rendering =
         let meta, metaPrev =
             match
                 metaPosts
-                |> Seq.sortBy (fun m -> IO.leaf m.source)
-                |> Seq.rev
+                |> Seq.sortByDescending (fun m -> IO.leaf m.source)
                 |> Seq.take 2
                 |> List.ofSeq
             with
