@@ -313,8 +313,13 @@ module Rendering =
 
     let private checkFilenamePattern (files: string list) =
         files
-        |> List.map IO.leaf
-        |> List.filter isInvalidMarkdownFilenamePattern
+        |> List.choose (fun filename ->
+            let filename = IO.leaf filename
+
+            if isInvalidMarkdownFilenamePattern filename then
+                Some filename
+            else
+                None)
         |> function
             | [] -> ()
             | x -> x |> String.concat " " |> failwithf "Invalid filename patterns: %s"
