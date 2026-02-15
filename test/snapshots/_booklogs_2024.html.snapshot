@@ -662,10 +662,9 @@
       - listitem:
         - text: bullet list
         - list:
-          - listitem:
-            - text: numbered list
-            - blockquote:
-              - paragraph: blockquote
+          - listitem: numbered list
+    - blockquote:
+      - paragraph: blockquote
     - paragraph
     - heading "Books of 2024 (3)" [level=2]
     - list:

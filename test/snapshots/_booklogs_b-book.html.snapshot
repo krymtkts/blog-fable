@@ -64,10 +64,9 @@
       - listitem:
         - text: bullet list
         - list:
-          - listitem:
-            - text: numbered list
-            - blockquote:
-              - paragraph: blockquote
+          - listitem: numbered list
+    - blockquote:
+      - paragraph: blockquote
     - paragraph
     - paragraph: "2024-01-01, read count: 1, page: 71 ~ 80, pages read: 10"
     - paragraph
