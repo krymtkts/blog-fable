@@ -44,6 +44,10 @@ updates:
           - "Feliz"
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "FSharp.Core"
+        update-types:
+          - "version-update:semver-major"
   # Maintain dependencies for npm
   - package-ecosystem: "npm"
     directory: "/"
