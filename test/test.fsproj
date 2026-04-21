@@ -32,7 +32,9 @@
     <!-- NOTE: Use Update to avoid a duplicate references FSharp.Core 10.0.101. -->
     <!-- NOTE: Pin the FSharp.Core version to satisfy Suave's requirements. -->
     <PackageReference Update="FSharp.Core" Version="10.0.103" />
-    <!-- NOTE: To address vulnerabilities in Fake.DotNet.Cli -->
+    <!-- NOTE: Add explicit dependency overrides to address vulnerabilities related to Fake.DotNet.Cli. -->
     <PackageReference Include="System.Drawing.Common" Version="10.0.6" />
+    <PackageReference Include="NuGet.Packaging" Version="6.12.5" />
+    <PackageReference Include="NuGet.Protocol" Version="6.12.5" />
   </ItemGroup>
 </Project>
