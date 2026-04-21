@@ -29,8 +29,9 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageReference Include="Suave" Version="3.2.3" />
     <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.15.6" />
-    <!-- NOTE: use Update to avoid duplicate references FSharp.Core 10.0.101 -->
-    <PackageReference Update="FSharp.Core" Version="10.1.202" />
+    <!-- NOTE: Use Update to avoid a duplicate references FSharp.Core 10.0.101. -->
+    <!-- NOTE: Pin the FSharp.Core version to satisfy Suave's requirements. -->
+    <PackageReference Update="FSharp.Core" Version="10.0.103" />
     <!-- NOTE: To address vulnerabilities in Fake.DotNet.Cli -->
     <PackageReference Include="System.Drawing.Common" Version="10.0.6" />
   </ItemGroup>
