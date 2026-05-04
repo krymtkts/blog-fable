@@ -26,9 +26,7 @@
         - button "🖥️"
   - main:
     - heading "Archives" [level=1]
-    - search:
-      - textbox "Search"
-      - button "Clear"
+    - combobox "Search"
     - list:
       - heading "Posts" [level=2]
       - list:
@@ -87,4 +85,8 @@
             - code: code sample
             - text: "-"
             - emphasis: subtitle
+  - status
+  - status
+  - status
+  - status
   - contentinfo: Copyright © 2023 krymtkts
