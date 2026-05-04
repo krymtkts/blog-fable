@@ -89,21 +89,29 @@ $sl-green: #859900;
 
   --bulma-border: #{$sl-base1};
 
-  --pagefind-ui-scale: 0.8;
-  --pagefind-ui-primary: #{$sl-base01};
-  --pagefind-ui-text: #{$sl-base01};
-  --pagefind-ui-background: #{$sl-base3};
-  --pagefind-ui-border: #{$sl-base1};
-  --pagefind-ui-tag: #{$sl-base1};
-  --pagefind-ui-border-width: 1px;
-  --pagefind-ui-border-radius: 8px;
-  --pagefind-ui-image-border-radius: 8px;
-  --pagefind-ui-image-box-ratio: 3 / 2;
+  --pf-text: #{$sl-base01};
+  --pf-text-secondary: #{$sl-base00};
+  --pf-text-muted: #{$sl-base0};
+  --pf-background: #{$sl-base3};
+  --pf-border: #{$sl-base1};
+  --pf-border-focus: #{$sl-base01};
+  --pf-skeleton: #{$sl-base2};
+  --pf-skeleton-shine: #{$sl-base3};
+  --pf-hover: #{$sl-base2};
+  --pf-mark: #{$sl-base01};
+  --pf-scroll-shadow: #{rgba($sl-base01, 0.15)};
+  --pf-shadow-sm: 0 2px 8px #{rgba($sl-base01, 0.08)};
+  --pf-shadow-md: 0 4px 12px #{rgba($sl-base01, 0.12)};
+  --pf-shadow-lg: 0 16px 48px #{rgba($sl-base01, 0.18)};
+  --pf-outline-focus: #{$sl-blue};
+  --pf-modal-backdrop: #{rgba($sl-base03, 0.35)};
+  --pf-border-radius: 8px;
+  --pf-checkbox-color-scheme: light;
 
   --mark-color: #{$sl-base3};
 
   --scrollbar-bg: transparent;
-  --scrollbar-color: rgba(238, 232, 213, 1);
+  --scrollbar-color: #{$sl-base2};
 
   --bulma-family-primary: sans-serif;
   --bulma-family-secondary: sans-serif;
@@ -151,21 +159,29 @@ $sl-green: #859900;
 
   --bulma-border: #{$sl-base01};
 
-  --pagefind-ui-scale: 0.8;
-  --pagefind-ui-primary: #{$sl-base1};
-  --pagefind-ui-text: #{$sl-base1};
-  --pagefind-ui-background: #{$sl-base03};
-  --pagefind-ui-border: #{$sl-base01};
-  --pagefind-ui-tag: #{$sl-base01};
-  --pagefind-ui-border-width: 1px;
-  --pagefind-ui-border-radius: 8px;
-  --pagefind-ui-image-border-radius: 8px;
-  --pagefind-ui-image-box-ratio: 3 / 2;
+  --pf-text: #{$sl-base1};
+  --pf-text-secondary: #{$sl-base0};
+  --pf-text-muted: #{$sl-base00};
+  --pf-background: #{$sl-base03};
+  --pf-border: #{$sl-base01};
+  --pf-border-focus: #{$sl-base0};
+  --pf-skeleton: #{$sl-base02};
+  --pf-skeleton-shine: #{$sl-base01};
+  --pf-hover: #{$sl-base02};
+  --pf-mark: #{$sl-base1};
+  --pf-scroll-shadow: #{rgba($sl-base1, 0.15)};
+  --pf-shadow-sm: 0 2px 8px #{rgba($sl-base03, 0.28)};
+  --pf-shadow-md: 0 4px 12px #{rgba($sl-base03, 0.36)};
+  --pf-shadow-lg: 0 16px 48px #{rgba($sl-base03, 0.5)};
+  --pf-outline-focus: #{$sl-blue};
+  --pf-modal-backdrop: #{rgba($sl-base03, 0.7)};
+  --pf-border-radius: 8px;
+  --pf-checkbox-color-scheme: dark;
 
   --mark-color: #{$sl-base03};
 
   --scrollbar-bg: transparent;
-  --scrollbar-color: rgba(7, 54, 66, 1);
+  --scrollbar-color: #{$sl-base02};
 
   --bulma-family-primary: sans-serif;
   --bulma-family-secondary: sans-serif;
@@ -194,6 +210,10 @@ $sl-green: #859900;
 
 html {
   scrollbar-color: var(--scrollbar-color) var(--scrollbar-bg);
+}
+
+:is(*, #\#):is(*, #\#):is(*, #\#) .pf-checkbox-input {
+  color-scheme: var(--pf-checkbox-color-scheme, light);
 }
 
 // NOTE: adjust non-parameterized styles.

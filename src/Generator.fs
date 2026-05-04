@@ -69,7 +69,15 @@ module Generation =
 
             return
                 [ Html.h1 [ prop.text "Archives" ]
-                  Html.div [ prop.id "search" ]
+                  HtmlHelper.createElement "pagefind-config" [
+                      prop.custom ("bundle-path", $"%s{pathRoot}/pagefind/")
+                      prop.custom ("base-url", $"%s{pathRoot}/")
+                      prop.custom ("lang", "en")
+                  ]
+                  HtmlHelper.createElement "pagefind-searchbox" [
+                      prop.custom ("max-results", "5")
+                      prop.custom ("show-keyboard-hints", "false")
+                  ]
                   Html.ul [ prop.children (List.concat a) ] ],
                 locs
         }
@@ -711,13 +719,13 @@ module RenderOptions =
         $"%s{opts.pathRoot}/css/%s{IO.leaf opts.highlightStyle}"
 
     let pagefindStylePath opts =
-        $"%s{opts.pathRoot}/pagefind/pagefind-ui.css"
+        $"%s{opts.pathRoot}/pagefind/pagefind-component-ui.css"
 
     let devScriptPath opts = $"%s{opts.pathRoot}/js/dev.js"
     let handlerScriptPath opts = $"%s{opts.pathRoot}/js/handler.js"
 
     let pagefindScriptPath opts =
-        $"%s{opts.pathRoot}/pagefind/pagefind-ui.js"
+        $"%s{opts.pathRoot}/pagefind/pagefind-component-ui.js"
 
     let faviconPath opts = $"%s{opts.pathRoot}%s{opts.favicon}"
 
