@@ -21,9 +21,15 @@
         - link "RSS":
           - /url: /blog-fable/feed.xml
       - listitem:
+        - button "search"
+      - listitem:
         - button "🌞"
         - button "🌙"
         - button "🖥️"
+  - status
+  - status
+  - status
+  - status
   - main:
     - text: 2022-12-31
     - heading "Flatten posts in nested directory" [level=1]

@@ -21,12 +21,17 @@
         - link "RSS":
           - /url: /blog-fable/feed.xml
       - listitem:
+        - button "search"
+      - listitem:
         - button "🌞"
         - button "🌙"
         - button "🖥️"
+  - status
+  - status
+  - status
+  - status
   - main:
     - heading "Archives" [level=1]
-    - combobox "Search"
     - list:
       - heading "Posts" [level=2]
       - list:
@@ -85,8 +90,4 @@
             - code: code sample
             - text: "-"
             - emphasis: subtitle
-  - status
-  - status
-  - status
-  - status
   - contentinfo: Copyright © 2023 krymtkts
