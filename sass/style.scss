@@ -272,6 +272,14 @@ pre code {
 .theme-toggle-system:before {
   content: "🖥️";
 }
+.tabs li:has(> pagefind-modal-trigger) {
+  display: flex;
+  align-items: center;
+}
+
+.tabs li > pagefind-modal-trigger {
+  display: flex;
+}
 
 // NOTE: apply style directly without using PagefindHighlight.
 #search {

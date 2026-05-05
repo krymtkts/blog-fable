@@ -67,19 +67,7 @@ module Generation =
             let a, refs = a |> List.ofSeq |> List.unzip
             let locs = refs |> Seq.concat
 
-            return
-                [ Html.h1 [ prop.text "Archives" ]
-                  HtmlHelper.createElement "pagefind-config" [
-                      prop.custom ("bundle-path", $"%s{pathRoot}/pagefind/")
-                      prop.custom ("base-url", $"%s{pathRoot}/")
-                      prop.custom ("lang", "en")
-                  ]
-                  HtmlHelper.createElement "pagefind-searchbox" [
-                      prop.custom ("max-results", "5")
-                      prop.custom ("show-keyboard-hints", "false")
-                  ]
-                  Html.ul [ prop.children (List.concat a) ] ],
-                locs
+            return [ Html.h1 [ prop.text "Archives" ]; Html.ul [ prop.children (List.concat a) ] ], locs
         }
 
     type TagDef =
@@ -154,6 +142,7 @@ module Generation =
     type Nav =
         | Title of NavItem
         | Link of NavItem
+        | Search
 
     let generateNavbar pathRoot (navs: Nav list) =
         let toSitemap =
@@ -167,13 +156,27 @@ module Generation =
                           Xml.SiteLocation.lastmod = now |> DateTime.toRFC3339Date
                           Xml.SiteLocation.priority = n }
                 | No -> None
+            | Search -> None
 
         navs
         |> List.map (function
             | Title navi ->
                 liA $"%s{pathRoot}%s{navi.path}"
                 <| Element(navi.text, Html.p [ prop.text navi.text ])
-            | Link navi -> liA $"%s{pathRoot}%s{navi.path}" <| Text navi.text),
+            | Link navi -> liA $"%s{pathRoot}%s{navi.path}" <| Text navi.text
+            | Search ->
+                Html.li [
+                    HtmlHelper.createElement "pagefind-config" [
+                        prop.custom ("bundle-path", $"%s{pathRoot}/pagefind/")
+                        prop.custom ("base-url", $"%s{pathRoot}/")
+                        prop.custom ("lang", "en")
+                    ]
+                    HtmlHelper.createElement "pagefind-modal-trigger" [
+                        prop.custom ("shortcut", "/")
+                        prop.custom ("compact", "true")
+                    ]
+                    HtmlHelper.createElement "pagefind-modal" []
+                ]),
         navs |> Seq.choose toSitemap
 
     type MetaContent = { name: string; content: string }
@@ -816,7 +819,8 @@ let private buildNavList opts =
         [ Link
               { text = "RSS"
                 path = feed
-                sitemap = No } ]
+                sitemap = No }
+          Search ]
     ]
 
 let private buildBundledScripts opts =
