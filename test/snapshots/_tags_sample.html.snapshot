@@ -21,9 +21,15 @@
         - link "RSS":
           - /url: /blog-fable/feed.xml
       - listitem:
+        - button "search"
+      - listitem:
         - button "🌞"
         - button "🌙"
         - button "🖥️"
+  - status
+  - status
+  - status
+  - status
   - main:
     - heading "sample (6)" [level=2]
     - list:

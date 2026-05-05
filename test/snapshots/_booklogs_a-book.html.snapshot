@@ -21,9 +21,15 @@
         - link "RSS":
           - /url: /blog-fable/feed.xml
       - listitem:
+        - button "search"
+      - listitem:
         - button "🌞"
         - button "🌙"
         - button "🖥️"
+  - status
+  - status
+  - status
+  - status
   - main:
     - heading "Booklog - A book" [level=1]
     - paragraph: Jane Doe
