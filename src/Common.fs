@@ -587,7 +587,7 @@ module Component =
                     Html.link [ prop.rel "canonical"; prop.href conf.url ]
                     Html.link [ prop.rel "icon"; prop.href conf.favicon ]
                     Html.link [ prop.rel "stylesheet"; prop.href conf.pagefindStyle ]
-                    Html.script [ prop.src conf.pagefindScript ]
+                    Html.script [ prop.src conf.pagefindScript; prop.type' "module" ]
                     Html.link [ prop.rel "stylesheet"; prop.type' "text/css"; prop.href conf.style ]
                     Html.link [ prop.rel "stylesheet"; prop.type' "text/css"; prop.href conf.highlightStyle ] ]
                   @ conf.additionalMetaContents
