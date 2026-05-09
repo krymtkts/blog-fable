@@ -26,10 +26,6 @@
         - button "🌞"
         - button "🌙"
         - button "🖥️"
-  - status
-  - status
-  - status
-  - status
   - main:
     - heading "markdown (1)" [level=2]
     - list:
@@ -39,3 +35,7 @@
           - text: 2023-02-01 - About Markdown parser
           - code: code sample
   - contentinfo: Copyright © 2023 krymtkts
+  - status
+  - status
+  - status
+  - status

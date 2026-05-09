@@ -26,10 +26,6 @@
         - button "🌞"
         - button "🌙"
         - button "🖥️"
-  - status
-  - status
-  - status
-  - status
   - main:
     - text: 2023-04-01
     - heading "Default color scheme" [level=1]
@@ -54,3 +50,7 @@
     - link "2023-10-01 blog-fable »":
       - /url: /blog-fable/posts/2023-09-10-blog-fable.html
   - contentinfo: Copyright © 2023 krymtkts
+  - status
+  - status
+  - status
+  - status

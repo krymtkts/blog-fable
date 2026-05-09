@@ -26,10 +26,6 @@
         - button "🌞"
         - button "🌙"
         - button "🖥️"
-  - status
-  - status
-  - status
-  - status
   - main:
     - heading "Sample page without front matter code sample" [level=2]:
       - link "Sample page without front matter code sample":
@@ -60,3 +56,7 @@
       - link "sample-page-without-front-matter.md":
         - /url: /blog-fable/pages/sampla-page-without-front-matter.html
   - contentinfo: Copyright © 2023 krymtkts
+  - status
+  - status
+  - status
+  - status
