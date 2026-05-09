@@ -3,7 +3,7 @@
 #r "nuget: Fake.JavaScript.Npm"
 #r "nuget: Serilog"
 #r "nuget: Serilog.Sinks.Console"
-#r "nuget: Suave, = 3.2.0"
+#r "nuget: Suave, = 3.3.0"
 #r "nuget: System.Drawing.Common" // NOTE: To address vulnerabilities in Fake.DotNet.Cli
 // NOTE: loading the dev server from test project.
 #load "./test/DevServer.fs"
