@@ -26,10 +26,6 @@
         - button "🌞"
         - button "🌙"
         - button "🖥️"
-  - status
-  - status
-  - status
-  - status
   - main:
     - heading "Sample post without front matter code sample" [level=2]:
       - link "Sample post without front matter code sample":
@@ -63,3 +59,7 @@
       - code: code sample
       - text: »
   - contentinfo: Copyright © 2023 krymtkts
+  - status
+  - status
+  - status
+  - status

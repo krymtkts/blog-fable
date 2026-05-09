@@ -26,10 +26,6 @@
         - button "🌞"
         - button "🌙"
         - button "🖥️"
-  - status
-  - status
-  - status
-  - status
   - main:
     - heading "Booklog - C book" [level=1]
     - paragraph: No name
@@ -75,3 +71,7 @@
           - /url: /blog-fable/booklogs/d-book.html
         - text: 2022-01-01〜2022-12-31
   - contentinfo: Copyright © 2023 krymtkts
+  - status
+  - status
+  - status
+  - status

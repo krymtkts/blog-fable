@@ -26,10 +26,6 @@
         - button "🌞"
         - button "🌙"
         - button "🖥️"
-  - status
-  - status
-  - status
-  - status
   - main:
     - heading "Archives" [level=1]
     - list:
@@ -91,3 +87,7 @@
             - text: "-"
             - emphasis: subtitle
   - contentinfo: Copyright © 2023 krymtkts
+  - status
+  - status
+  - status
+  - status

@@ -26,11 +26,11 @@
         - button "🌞"
         - button "🌙"
         - button "🖥️"
-  - status
-  - status
-  - status
-  - status
   - main:
     - heading "404 Page not found" [level=1]
     - paragraph: Sorry! The page you're looking for does not exist.
   - contentinfo: Copyright © 2023 krymtkts
+  - status
+  - status
+  - status
+  - status

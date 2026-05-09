@@ -26,10 +26,6 @@
         - button "🌞"
         - button "🌙"
         - button "🖥️"
-  - status
-  - status
-  - status
-  - status
   - main:
     - heading "Tags" [level=2]
     - list:
@@ -58,3 +54,7 @@
         - link "yaml (2)":
           - /url: /blog-fable/tags/yaml.html
   - contentinfo: Copyright © 2023 krymtkts
+  - status
+  - status
+  - status
+  - status

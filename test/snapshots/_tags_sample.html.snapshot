@@ -26,10 +26,6 @@
         - button "🌞"
         - button "🌙"
         - button "🖥️"
-  - status
-  - status
-  - status
-  - status
   - main:
     - heading "sample (6)" [level=2]
     - list:
@@ -60,3 +56,7 @@
         - link "2022-12-31 - Flatten posts in nested directory":
           - /url: /blog-fable/posts/2022-12-31-flatten-posts-in-nested-directory.html
   - contentinfo: Copyright © 2023 krymtkts
+  - status
+  - status
+  - status
+  - status

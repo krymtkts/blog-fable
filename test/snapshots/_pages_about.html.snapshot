@@ -26,10 +26,6 @@
         - button "🌞"
         - button "🌙"
         - button "🖥️"
-  - status
-  - status
-  - status
-  - status
   - main:
     - text: 2023-09-10
     - heading "About" [level=1]
@@ -39,3 +35,7 @@
         - /url: https://github.com/krymtkts
       - text: .
   - contentinfo: Copyright © 2023 krymtkts
+  - status
+  - status
+  - status
+  - status

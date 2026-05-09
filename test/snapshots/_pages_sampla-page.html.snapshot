@@ -26,10 +26,6 @@
         - button "🌞"
         - button "🌙"
         - button "🖥️"
-  - status
-  - status
-  - status
-  - status
   - main:
     - text: 2023-09-01
     - heading "Sample page code sample" [level=1]:
@@ -50,3 +46,7 @@
       - link "sample-page-without-front-matter.md":
         - /url: /blog-fable/pages/sampla-page-without-front-matter.html
   - contentinfo: Copyright © 2023 krymtkts
+  - status
+  - status
+  - status
+  - status

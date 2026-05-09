@@ -26,10 +26,6 @@
         - button "🌞"
         - button "🌙"
         - button "🖥️"
-  - status
-  - status
-  - status
-  - status
   - main:
     - text: 2022-12-31
     - heading "Flatten posts in nested directory" [level=1]
@@ -43,3 +39,7 @@
     - link "2023-01-01 2023-01-01-sample-post-without-front-matter.html »":
       - /url: /blog-fable/posts/2023-01-01-sample-post-without-front-matter.html
   - contentinfo: Copyright © 2023 krymtkts
+  - status
+  - status
+  - status
+  - status

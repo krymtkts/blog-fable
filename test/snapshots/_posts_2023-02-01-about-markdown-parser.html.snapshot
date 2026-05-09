@@ -26,10 +26,6 @@
         - button "🌞"
         - button "🌙"
         - button "🖥️"
-  - status
-  - status
-  - status
-  - status
   - main:
     - text: 2023-02-01
     - heading "About Markdown parser code sample" [level=1]:
@@ -203,3 +199,7 @@
     - link "2023-03-02 Sample post »":
       - /url: /blog-fable/posts/2023-03-01-sample-post.html
   - contentinfo: Copyright © 2023 krymtkts
+  - status
+  - status
+  - status
+  - status
