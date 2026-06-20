@@ -193,6 +193,7 @@ module Generation =
 
     type FeedConf =
         { title: string
+          author: string
           description: string
           link: string
           feed: string
@@ -208,6 +209,7 @@ module Generation =
 
         Xml.createRss
             { title = conf.title
+              author = conf.author
               description = conf.description
               link = conf.link
               xml = conf.feed
@@ -927,6 +929,7 @@ let render (opts: RenderOptions) =
         do!
             renderFeed
                 { title = opts.siteName
+                  author = opts.author
                   description = opts.description
                   link = RenderOptions.siteUrl opts
                   feed = feed

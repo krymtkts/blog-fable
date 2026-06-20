@@ -400,6 +400,7 @@ module Xml =
 
     type RssChannel =
         { title: string
+          author: string
           description: string
           link: string
           xml: string
@@ -414,6 +415,7 @@ module Xml =
                     node "guid" [] [ text item.guid ]
                     node "link" [] [ text item.link ]
                     node "title" [] [ text item.title ]
+                    node "dc:creator" [] [ text channel.author ]
                     node "description" [] [ text item.description ]
                     node "pubDate" [] [ text item.pubDate ]
                 ])
