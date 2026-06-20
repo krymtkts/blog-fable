@@ -432,6 +432,7 @@ module Xml =
 
         node "rss" [
             attr.value ("version", "2.0")
+            attr.value ("xmlns:dc", "http://purl.org/dc/elements/1.1/")
             attr.value ("xmlns:atom", "http://www.w3.org/2005/Atom")
         ] [
             node "channel" []
