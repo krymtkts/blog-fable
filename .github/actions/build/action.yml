@@ -1,6 +1,15 @@
 name: "Build pages Action"
 description: "Setup .NET and Node.js, install dependencies and build pages."
 
+inputs:
+  snyk_token:
+    description: "Snyk token"
+    required: true
+  snyk_continue_on_error:
+    description: "Continue when Snyk finds vulnerabilities"
+    required: false
+    default: "false"
+
 runs:
   using: "composite"
   steps:
@@ -30,3 +39,25 @@ runs:
     - name: Snapshot tests
       shell: bash
       run: dotnet test --nologo --verbosity detailed --blame-hang-timeout 5s --blame-hang-dump-type full
+    - name: Run Snyk to check for vulnerabilities (Node.js)
+      uses: snyk/actions/node@master
+      continue-on-error: ${{ inputs.snyk_continue_on_error == 'true' }}
+      env:
+        SNYK_TOKEN: ${{ inputs.snyk_token }}
+      with:
+        command: test
+        args: >-
+          --file=package.json
+          --sarif-file-output=snyk-node.sarif
+          --org=krymtkts
+    - name: Run Snyk to check for vulnerabilities (.NET)
+      uses: snyk/actions/dotnet@master
+      continue-on-error: ${{ inputs.snyk_continue_on_error == 'true' }}
+      env:
+        SNYK_TOKEN: ${{ inputs.snyk_token }}
+      with:
+        command: test
+        args: >-
+          --file=test/test.fsproj
+          --sarif-file-output=snyk-dotnet.sarif
+          --org=krymtkts
