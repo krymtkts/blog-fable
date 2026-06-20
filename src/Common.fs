@@ -179,6 +179,7 @@ module Parser =
     type FrontMatter =
         abstract title: string
         abstract subtitle: string option
+        abstract author: string option
         abstract tags: string array option
         abstract date: string option
 
@@ -374,6 +375,7 @@ module Xml =
         { guid: string
           link: string
           title: string
+          author: string option
           description: string
           pubDate: string }
 
@@ -395,6 +397,10 @@ module Xml =
             match meta.frontMatter with
             | Some fm -> Parser.getTextTitle fm
             | None -> meta.leaf
+          author =
+            match meta.frontMatter with
+            | Some fm -> fm.author
+            | None -> None
           description = meta.content |> Parser.parseReactStaticMarkup |> simpleEscape
           pubDate = pubDate }
 
@@ -408,6 +414,8 @@ module Xml =
           generator: string }
 
     let createRss (channel: RssChannel) (items: RssItem seq) =
+        let x = [] @ []
+
         let itemNodes =
             items
             |> Seq.map (fun item ->
@@ -415,7 +423,12 @@ module Xml =
                     node "guid" [] [ text item.guid ]
                     node "link" [] [ text item.link ]
                     node "title" [] [ text item.title ]
-                    node "dc:creator" [] [ text channel.author ]
+                    node "dc:creator" [] [
+                        text
+                        <| match item.author with
+                           | Some author -> author
+                           | None -> channel.author
+                    ]
                     node "description" [] [ text item.description ]
                     node "pubDate" [] [ text item.pubDate ]
                 ])
