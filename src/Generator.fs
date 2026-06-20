@@ -193,7 +193,7 @@ module Generation =
 
     type FeedConf =
         { title: string
-          author: string
+          author: string option
           description: string
           link: string
           feed: string
@@ -301,6 +301,13 @@ module Rendering =
                 | false, Some fm -> $"%s{conf.title} - %s{Parser.getTextTitle fm}"
                 | _ -> conf.title
 
+            let author =
+                match meta.frontMatter, conf.author with
+                | Some fm, Some author -> fm.author |> Option.defaultValue author |> Some
+                | Some fm, None -> fm.author
+                | None, Some author -> Some author
+                | None, None -> None
+
             let header =
                 Component.header $"%s{root.siteRoot}%s{root.tagRoot}/" meta.pubDate meta.frontMatter
 
@@ -314,6 +321,7 @@ module Rendering =
                 |> frame
                     { conf with
                         title = title
+                        author = author
                         description = meta.description
                         url = $"%s{conf.url}%s{root.siteRoot}/%s{path}" }
                 |> Parser.parseReactStaticHtml
@@ -680,7 +688,7 @@ type sitemap =
 type RenderOptions =
     { stage: Mode
       siteName: string
-      author: string
+      author: string option
       description: string
       siteUrl: string
       pathRoot: string
@@ -859,7 +867,7 @@ let render (opts: RenderOptions) =
               navItems = navItems
               name = opts.siteName
               title = opts.siteName
-              author = opts.author
+              author = None
               description = opts.description
               url = opts.siteUrl
               copyright = opts.copyright
@@ -872,7 +880,9 @@ let render (opts: RenderOptions) =
               additionalMetaContents = additionalMetaContents
               future = opts.future }
 
-        let renderPostAndPages = renderMarkdowns conf site
+        let confWithAuthor = { conf with author = opts.author }
+
+        let renderPostAndPages = renderMarkdowns confWithAuthor site
 
         let! metaPosts =
             renderPostAndPages
@@ -884,7 +894,9 @@ let render (opts: RenderOptions) =
             <| RenderOptions.pagesSourceRoot opts
             <| RenderOptions.pagesDestinationRoot opts
 
-        do! renderIndex conf site metaPosts <| RenderOptions.indexDestinationPath opts
+        do!
+            renderIndex confWithAuthor site metaPosts
+            <| RenderOptions.indexDestinationPath opts
 
         let archiveDefs =
             [ Posts
@@ -913,7 +925,7 @@ let render (opts: RenderOptions) =
         let! tagLocs = renderTags conf site tagDef <| RenderOptions.tagsDestinationPath opts
 
         let! booklogLocs =
-            renderBooklogs conf site (opts.sitemap.booklogs |> string)
+            renderBooklogs confWithAuthor site (opts.sitemap.booklogs |> string)
             <| RenderOptions.booklogsSourceRoot opts
             <| RenderOptions.booklogsDestinationPath opts
             <| RenderOptions.booksSourceRoot opts

@@ -406,7 +406,7 @@ module Xml =
 
     type RssChannel =
         { title: string
-          author: string
+          author: string option
           description: string
           link: string
           xml: string
@@ -414,8 +414,6 @@ module Xml =
           generator: string }
 
     let createRss (channel: RssChannel) (items: RssItem seq) =
-        let x = [] @ []
-
         let itemNodes =
             items
             |> Seq.map (fun item ->
@@ -423,12 +421,10 @@ module Xml =
                     node "guid" [] [ text item.guid ]
                     node "link" [] [ text item.link ]
                     node "title" [] [ text item.title ]
-                    node "dc:creator" [] [
-                        text
-                        <| match item.author with
-                           | Some author -> author
-                           | None -> channel.author
-                    ]
+                    match item.author, channel.author with
+                    | Some author, _
+                    | None, Some author -> node "dc:creator" [] [ text author ]
+                    | None, None -> ()
                     node "description" [] [ text item.description ]
                     node "pubDate" [] [ text item.pubDate ]
                 ])
@@ -553,7 +549,7 @@ module Component =
           navItems: ReactElement list
           name: string
           title: string
-          author: string
+          author: string option
           description: string
           url: string
           copyright: string
@@ -594,7 +590,9 @@ module Component =
             [ Html.head (
                   [ Html.title [ prop.text conf.title ]
                     Html.meta [ prop.charset "utf-8" ]
-                    Html.meta [ prop.name "author"; prop.content conf.author ]
+                    match conf.author with
+                    | Some author -> Html.meta [ prop.name "author"; prop.content author ]
+                    | None -> ()
                     Html.meta [ prop.name "description"; prop.content conf.description ]
                     Html.meta [ prop.name "viewport"; prop.content "width=device-width, initial-scale=1" ]
                     Html.meta [ prop.custom ("property", "og:site_name"); prop.content conf.name ]
