@@ -50,14 +50,16 @@ runs:
           --file=package.json
           --sarif-file-output=snyk-node.sarif
           --org=krymtkts
-    - name: Run Snyk to check for vulnerabilities (.NET)
-      uses: snyk/actions/dotnet@master
-      continue-on-error: ${{ inputs.snyk_continue_on_error == 'true' }}
-      env:
-        SNYK_TOKEN: ${{ inputs.snyk_token }}
-      with:
-        command: test
-        args: >-
-          --file=test/test.fsproj
-          --sarif-file-output=snyk-dotnet.sarif
-          --org=krymtkts
+    # TODO: Currently, Snyk's .NET action does not work with test project.
+    # TODO: Revisit when Snyk provides a supported replacement.
+    # - name: Run Snyk to check for vulnerabilities (.NET)
+    #   uses: snyk/actions/dotnet@master
+    #   continue-on-error: ${{ inputs.snyk_continue_on_error == 'true' }}
+    #   env:
+    #     SNYK_TOKEN: ${{ inputs.snyk_token }}
+    #   with:
+    #     command: test
+    #     args: >-
+    #       --file=test/test.fsproj
+    #       --sarif-file-output=snyk-dotnet.sarif
+    #       --org=krymtkts
