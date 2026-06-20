@@ -15,10 +15,5 @@ jobs:
         uses: actions/checkout@v6
       - name: Build pages
         uses: ./.github/actions/build
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          command: test
-          args: --all-projects --exclude=fable_modules --org=krymtkts
+          snyk_token: ${{ secrets.SNYK_TOKEN }}
