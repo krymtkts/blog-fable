@@ -6,6 +6,7 @@ render
     { stage = stage
       lang = "ja"
       siteName = "Blog Fable"
+      author = "krymtkts" |> Some
       description = "A small Fable app project to generate static pages"
       siteUrl = "https://krymtkts.github.io"
       pathRoot = "/blog-fable"

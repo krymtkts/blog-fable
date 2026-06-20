@@ -179,6 +179,7 @@ module Parser =
     type FrontMatter =
         abstract title: string
         abstract subtitle: string option
+        abstract author: string option
         abstract tags: string array option
         abstract date: string option
 
@@ -374,6 +375,7 @@ module Xml =
         { guid: string
           link: string
           title: string
+          author: string option
           description: string
           pubDate: string }
 
@@ -395,11 +397,16 @@ module Xml =
             match meta.frontMatter with
             | Some fm -> Parser.getTextTitle fm
             | None -> meta.leaf
+          author =
+            match meta.frontMatter with
+            | Some fm -> fm.author
+            | None -> None
           description = meta.content |> Parser.parseReactStaticMarkup |> simpleEscape
           pubDate = pubDate }
 
     type RssChannel =
         { title: string
+          author: string option
           description: string
           link: string
           xml: string
@@ -414,6 +421,10 @@ module Xml =
                     node "guid" [] [ text item.guid ]
                     node "link" [] [ text item.link ]
                     node "title" [] [ text item.title ]
+                    match item.author, channel.author with
+                    | Some author, _
+                    | None, Some author -> node "dc:creator" [] [ text author ]
+                    | None, None -> ()
                     node "description" [] [ text item.description ]
                     node "pubDate" [] [ text item.pubDate ]
                 ])
@@ -421,6 +432,7 @@ module Xml =
 
         node "rss" [
             attr.value ("version", "2.0")
+            attr.value ("xmlns:dc", "http://purl.org/dc/elements/1.1/")
             attr.value ("xmlns:atom", "http://www.w3.org/2005/Atom")
         ] [
             node "channel" []
@@ -538,6 +550,7 @@ module Component =
           navItems: ReactElement list
           name: string
           title: string
+          author: string option
           description: string
           url: string
           copyright: string
@@ -578,6 +591,9 @@ module Component =
             [ Html.head (
                   [ Html.title [ prop.text conf.title ]
                     Html.meta [ prop.charset "utf-8" ]
+                    match conf.author with
+                    | Some author -> Html.meta [ prop.name "author"; prop.content author ]
+                    | None -> ()
                     Html.meta [ prop.name "description"; prop.content conf.description ]
                     Html.meta [ prop.name "viewport"; prop.content "width=device-width, initial-scale=1" ]
                     Html.meta [ prop.custom ("property", "og:site_name"); prop.content conf.name ]
