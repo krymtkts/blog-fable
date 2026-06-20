@@ -538,6 +538,7 @@ module Component =
           navItems: ReactElement list
           name: string
           title: string
+          author: string
           description: string
           url: string
           copyright: string
@@ -578,6 +579,7 @@ module Component =
             [ Html.head (
                   [ Html.title [ prop.text conf.title ]
                     Html.meta [ prop.charset "utf-8" ]
+                    Html.meta [ prop.name "author"; prop.content conf.author ]
                     Html.meta [ prop.name "description"; prop.content conf.description ]
                     Html.meta [ prop.name "viewport"; prop.content "width=device-width, initial-scale=1" ]
                     Html.meta [ prop.custom ("property", "og:site_name"); prop.content conf.name ]

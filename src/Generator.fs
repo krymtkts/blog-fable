@@ -678,6 +678,7 @@ type sitemap =
 type RenderOptions =
     { stage: Mode
       siteName: string
+      author: string
       description: string
       siteUrl: string
       pathRoot: string
@@ -856,6 +857,7 @@ let render (opts: RenderOptions) =
               navItems = navItems
               name = opts.siteName
               title = opts.siteName
+              author = opts.author
               description = opts.description
               url = opts.siteUrl
               copyright = opts.copyright
