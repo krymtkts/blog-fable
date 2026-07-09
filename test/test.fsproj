@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Expecto" Version="11.0.0-alpha9" />
+    <PackageReference Include="Expecto" Version="11.1.0" />
     <PackageReference Include="Fake.DotNet.Cli" Version="6.1.4" />
     <PackageReference Include="Fake.JavaScript.Npm" Version="6.1.4" />
     <PackageReference Include="Microsoft.Playwright" Version="1.60.0" />
