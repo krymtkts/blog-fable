@@ -28,9 +28,9 @@
     <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.16.0" />
     <!-- NOTE: Use Update to avoid a duplicate references FSharp.Core 10.0.101. -->
     <!-- NOTE: Pin the FSharp.Core version to satisfy Suave's requirements. -->
-    <PackageReference Update="FSharp.Core" Version="10.1.301" />
+    <PackageReference Update="FSharp.Core" Version="10.1.302" />
     <!-- NOTE: Add explicit dependency overrides to address vulnerabilities related to Fake.DotNet.Cli. -->
-    <PackageReference Include="System.Drawing.Common" Version="10.0.9" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.10" />
     <PackageReference Include="NuGet.Packaging" Version="7.6.0" />
     <PackageReference Include="NuGet.Protocol" Version="7.6.0" />
   </ItemGroup>
