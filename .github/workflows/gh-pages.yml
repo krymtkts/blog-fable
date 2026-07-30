@@ -27,14 +27,14 @@ jobs:
           snyk_token: ${{ secrets.SNYK_TOKEN }}
           snyk_continue_on_error: "true"
       - name: Upload Node.js results
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v4.37.3
         with:
           sarif_file: snyk-node.sarif
           category: Snyk Vulnerabilities(Node.js)
       # TODO: Currently, Snyk's .NET action does not work with test project.
       # TODO: Revisit when Snyk provides a supported replacement.
       # - name: Upload .NET results
-      #   uses: github/codeql-action/upload-sarif@v4
+      #   uses: github/codeql-action/upload-sarif@v4.37.3
       #   with:
       #     sarif_file: snyk-dotnet.sarif
       #     category: Snyk Vulnerabilities(.NET)
