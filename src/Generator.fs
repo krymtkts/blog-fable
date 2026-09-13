@@ -704,22 +704,34 @@ module Rendering =
                     |> function
                         | None -> None
                         | Some book ->
-                            generateBooklogSummaryContent
-                                conf
-                                {
-                                    priority = priority
-                                    basePath = basePath
-                                    links = links
-                                    book = book
-                                }
-                                logs
-                            |> Some)
+                            let content, location, id =
+                                generateBooklogSummaryContent
+                                    conf
+                                    {
+                                        priority = priority
+                                        basePath = basePath
+                                        links = links
+                                        book = book
+                                    }
+                                    logs
+
+                            Some(content, location, id, book, logs))
 
             do!
                 bookContents
-                |> List.map (fun (content, _, id) ->
+                |> List.map (fun (content, _, id, _, _) ->
                     let dest = $"{destDir}/%s{id}.html"
                     printfn $"Writing booklog to %s{dest}..."
+                    IO.writeFile dest content)
+                |> Promise.all
+                |> Promise.map ignore
+
+            do!
+                bookContents
+                |> List.map (fun (_, _, id, book, logs) ->
+                    let dest = $"%s{destDir}/%s{id}.html.md"
+                    let content = generateBooklogSummaryMarkdown book logs
+                    printfn $"Writing Markdown %s{dest}..."
                     IO.writeFile dest content)
                 |> Promise.all
                 |> Promise.map ignore
@@ -731,7 +743,7 @@ module Rendering =
             return
                 [
                     booklogContents |> List.unzip3 |> sndOfTriple
-                    bookContents |> List.unzip3 |> sndOfTriple
+                    bookContents |> List.map (fun (_, location, _, _, _) -> location)
                 ]
                 |> List.concat
         }

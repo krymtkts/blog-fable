@@ -233,6 +233,34 @@ let tests =
             client.Dispose()
         }
 
+        testTask "Booklog Markdown exports preserve reading records" {
+            use server = new DevServer()
+            let client = new HttpClient()
+            let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+            let path = "/booklogs/a-book.html.md"
+
+            let! response: HttpResponseMessage = client.GetAsync(baseUrl + path)
+            let! content: string = response.Content.ReadAsStringAsync()
+
+            if response.IsSuccessStatusCode |> not then
+                failtestf "Failed to load booklog Markdown export %s: %O" path response.StatusCode
+
+            for expected in
+                [ "# Booklog - A book"
+                  "Author: Jane Doe"
+                  "## 2023-01-01"
+                  "- Read count: n+1"
+                  "- Pages: 1 ~ 9 (pages read: 9)"
+                  "start day of Jan." ] do
+                if content.Contains expected |> not then
+                    failtestf "Booklog Markdown export does not contain %s: %s" expected content
+
+            if content.StartsWith "<!DOCTYPE html>" then
+                failtest "Booklog Markdown export should not be an HTML document"
+
+            client.Dispose()
+        }
+
         testTask "Pagefind filters classify archive and booklog results" {
             use server = new DevServer()
             let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
