@@ -261,6 +261,63 @@ let tests =
             client.Dispose()
         }
 
+        testTask "llms.txt lists published Markdown exports without auto-generated descriptions" {
+            use server = new DevServer()
+            let client = new HttpClient()
+            let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+
+            let! response: HttpResponseMessage = client.GetAsync(baseUrl + "/llms.txt")
+            let! content: string = response.Content.ReadAsStringAsync()
+
+            if response.IsSuccessStatusCode |> not then
+                failtestf "Failed to load llms.txt: %O" response.StatusCode
+
+            for expected in [ "# Blog Fable"; "## Posts"; "## Pages"; "## Booklogs" ] do
+                if content.Contains expected |> not then
+                    failtestf "llms.txt does not contain %s: %s" expected content
+
+            let hasGeneratedDescription (line: string) =
+                line.StartsWith "- ["
+                && (line.Contains "/posts/" || line.Contains "/pages/")
+                && line.Contains "): "
+
+            if content.Split('\n') |> Array.exists hasGeneratedDescription then
+                failtest "llms.txt should not generate descriptions for posts or pages"
+
+            if content.Contains "): Jane Doe" |> not then
+                failtest "llms.txt should preserve explicit booklog descriptions"
+
+            let outputRoot =
+                System.IO.Path.Combine(__SOURCE_DIRECTORY__, "..", "docs", "blog-fable")
+                |> System.IO.Path.GetFullPath
+
+            let urls =
+                [ "posts"; "pages"; "booklogs" ]
+                |> List.collect (fun root ->
+                    System.IO.Directory.GetFiles(System.IO.Path.Combine(outputRoot, root), "*.html.md")
+                    |> Array.map (fun path ->
+                        let relative =
+                            System.IO.Path.GetRelativePath(outputRoot, path).Replace("\\", "/")
+
+                        $"https://krymtkts.github.io/blog-fable/%s{relative}")
+                    |> Array.toList)
+
+            if urls.IsEmpty then
+                failtest "No Markdown exports were found"
+
+            for url in urls do
+                if content.Contains url |> not then
+                    failtestf "llms.txt does not link to %s: %s" url content
+
+            if content.Contains "2077-01-01-future-post.html.md" then
+                failtest "llms.txt should not link to the future post"
+
+            if content.Contains "## Archives" then
+                failtest "llms.txt should not contain an Archives section"
+
+            client.Dispose()
+        }
+
         testTask "Pagefind filters classify archive and booklog results" {
             use server = new DevServer()
             let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"

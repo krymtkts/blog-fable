@@ -9,6 +9,12 @@ open Booklog
 module Generation =
     let private generatorName = "blog-fable"
 
+    type LlmPage =
+        { section: string
+          title: string
+          description: string option
+          url: string }
+
     let private generatePostArchives (meta: Meta seq) root =
         promise {
             let archives =
@@ -393,6 +399,31 @@ module Rendering =
         | None, Some author -> Some author
         | None, None -> None
 
+    let private markdownRoot (site: PathConfiguration) (meta: Meta) =
+        match meta.layout with
+        | Post _ -> site.postRoot
+        | Page -> site.pageRoot
+
+    let private markdownUrl
+        (conf: FrameConfiguration)
+        (site: PathConfiguration)
+        (meta: Meta)
+        =
+        sourceToSitemap $"%s{site.siteRoot}%s{markdownRoot site meta}" meta.source
+        + ".md"
+        |> fun path -> $"%s{conf.url}%s{path}"
+
+    let llmPageFromMeta
+        (conf: FrameConfiguration)
+        (site: PathConfiguration)
+        (section: string)
+        (meta: Meta)
+        =
+        { section = section
+          title = markdownTitle meta
+          description = None
+          url = markdownUrl conf site meta }
+
     let private writeMarkdownContent
         (conf: FrameConfiguration)
         (site: PathConfiguration)
@@ -400,15 +431,7 @@ module Rendering =
         (dest: string)
         =
         promise {
-            let root =
-                match meta.layout with
-                | Post _ -> site.postRoot
-                | Page -> site.pageRoot
-
-            let url =
-                sourceToSitemap $"%s{site.siteRoot}%s{root}" meta.source
-                + ".md"
-                |> fun path -> $"%s{conf.url}%s{path}"
+            let url = markdownUrl conf site meta
 
             let metadata =
                 [ Some $"- URL: %s{url}"
@@ -431,6 +454,39 @@ module Rendering =
                 |> fun content -> content + "\n"
 
             printfn $"Writing Markdown %s{dest}..."
+            do! IO.writeFile dest content
+        }
+
+    let private llmsLink (page: LlmPage) =
+        match page.description with
+        | Some description when description <> "" ->
+            $"- [%s{page.title}](%s{page.url}): %s{description}"
+        | _ -> $"- [%s{page.title}](%s{page.url})"
+
+    let renderLlms
+        (conf: FrameConfiguration)
+        (pages: LlmPage list)
+        (dest: string)
+        =
+        promise {
+            let section name =
+                [ $"## %s{name}"
+                  pages
+                  |> List.filter (fun page -> page.section = name)
+                  |> List.sortBy _.url
+                  |> List.map llmsLink
+                  |> String.concat "\n"
+                  "" ]
+
+            let sections = [ section "Posts"; section "Pages"; section "Booklogs" ] |> List.concat
+
+            let content =
+                [ $"# %s{conf.name}"; ""; $"> %s{conf.description}"; "" ]
+                @ sections
+                |> String.concat "\n"
+                |> fun content -> content + "\n"
+
+            printfn $"Writing llms.txt %s{dest}..."
             do! IO.writeFile dest content
         }
 
@@ -740,12 +796,22 @@ module Rendering =
                 printfn $"Writing index of booklog to %s{booklogsDest}..."
                 booklogIndex |> fun (content, _, _) -> IO.writeFile booklogsDest content
 
-            return
+            let locations =
                 [
                     booklogContents |> List.unzip3 |> sndOfTriple
                     bookContents |> List.map (fun (_, location, _, _, _) -> location)
                 ]
                 |> List.concat
+
+            let pages =
+                bookContents
+                |> List.map (fun (_, _, id, book, _) ->
+                    { section = "Booklogs"
+                      title = book.bookTitle
+                      description = Some book.bookAuthor
+                      url = $"%s{conf.url}%s{basePath}/%s{id}.html.md" |> normalizeUrlPath })
+
+            return locations, pages
         }
 
 
@@ -862,6 +928,7 @@ module RenderOptions =
     let tagsPath opts = $"%s{opts.tags.root}.html"
     let booksPath opts = $"%s{opts.books.root}.html"
     let booklogsPath opts = $"%s{opts.booklogs.root}.html"
+    let llmsPath = "/llms.txt"
     let stylePath opts = $"%s{opts.pathRoot}/css/style.css"
 
     let highlightStylePath opts =
@@ -915,6 +982,8 @@ module RenderOptions =
 
     let booklogsDestinationPath opts =
         $"%s{destinationRoot opts}%s{booklogsPath opts}"
+
+    let llmsDestinationPath opts = $"%s{destinationRoot opts}%s{llmsPath}"
 
     let ``404DestinationPath`` opts = $"%s{destinationRoot opts}/404.html"
 
@@ -1092,12 +1161,20 @@ let render (opts: RenderOptions) =
 
         let! tagLocs = renderTags conf site tagDef <| RenderOptions.tagsDestinationPath opts
 
-        let! booklogLocs =
+        let! booklogLocs, booklogPages =
             renderBooklogs confWithAuthor site (opts.sitemap.booklogs |> string)
             <| RenderOptions.booklogsSourceRoot opts
             <| RenderOptions.booklogsDestinationPath opts
             <| RenderOptions.booksSourceRoot opts
             <| RenderOptions.booksDestinationPath opts
+
+        let llmPages =
+            [ metaPosts |> Array.map (llmPageFromMeta confWithAuthor site "Posts") |> Array.toList
+              metaPages |> Array.map (llmPageFromMeta confWithAuthor site "Pages") |> Array.toList
+              booklogPages ]
+            |> List.concat
+
+        do! renderLlms confWithAuthor llmPages <| RenderOptions.llmsDestinationPath opts
 
         do! render404 conf site <| RenderOptions.``404DestinationPath`` opts
 
