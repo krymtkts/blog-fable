@@ -10,6 +10,7 @@ open DevServer
 open Suave
 open System.Threading
 open System.Threading.Tasks
+open System.Net.Http
 
 (*
 NOTE: This tests requires the Playwright CLI to be installed.
@@ -188,6 +189,48 @@ let tests =
             if failures.Count > 0 then
                 failtestf "Snapshot test failed for the following URLs:\n%s" (String.concat "\n" failures)
 
+        }
+
+        testTask "Markdown exports preserve published content" {
+            use server = new DevServer()
+            let client = new HttpClient()
+            let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+
+            let pages =
+                [ ( "/posts/2023-03-01-sample-post.html.md",
+                    "# Sample post - subtitle",
+                    "Posts have front matter." )
+                  ( "/pages/sampla-page-without-front-matter.html.md",
+                    "# sampla-page-without-front-matter",
+                    "The page can omit front matter" ) ]
+
+            for path, expectedTitle, expectedBody in pages do
+                let! response: HttpResponseMessage = client.GetAsync(baseUrl + path)
+                let! content: string = response.Content.ReadAsStringAsync()
+
+                if response.IsSuccessStatusCode |> not then
+                    failtestf "Failed to load Markdown export %s: %O" path response.StatusCode
+
+                if content.StartsWith expectedTitle |> not then
+                    failtestf "Markdown export has unexpected title for %s: %s" path content
+
+                if content.Contains expectedBody |> not then
+                    failtestf "Markdown export does not contain source content for %s: %s" path content
+
+                if content.StartsWith "<!DOCTYPE html>" then
+                    failtestf "Markdown export should not be an HTML document: %s" path
+
+                if content.StartsWith "---" then
+                    failtestf "Markdown export should not start with front matter: %s" path
+
+            let! futureResponse: HttpResponseMessage =
+                client.GetAsync(baseUrl + "/posts/2077-01-01-future-post.html.md")
+            let! futureContent: string = futureResponse.Content.ReadAsStringAsync()
+
+            if futureContent.Contains "future-post" then
+                failtest "Future post Markdown export should not be published"
+
+            client.Dispose()
         }
 
         testTask "Pagefind filters classify archive and booklog results" {

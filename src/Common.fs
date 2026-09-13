@@ -215,16 +215,21 @@ module Parser =
 
     let parseYaml str : 'a = Yaml.parse str
 
-    let parseMarkdownAsReactEl content =
-        let frontMatter, content = extractFrontMatter content
+    let parseMarkdownSource content =
+        let frontMatter, markdown = extractFrontMatter content
 
-        let content =
+        let reactElement =
             Html.div [
                 prop.className "section"
-                prop.dangerouslySetInnerHTML (parseMarkdown content)
+                prop.dangerouslySetInnerHTML (parseMarkdown markdown)
             ]
 
-        frontMatter, content
+        frontMatter, markdown, reactElement
+
+    let parseMarkdownAsReactEl content =
+        let frontMatter, _, reactElement = parseMarkdownSource content
+
+        frontMatter, reactElement
 
     /// Parses a React element invoking ReactDOMServer.renderToString
     let parseReact el = ReactDOMServer.renderToString el
@@ -266,6 +271,7 @@ module Misc =
     type Meta =
         {
             frontMatter: Parser.FrontMatter option
+            markdown: string
             content: ReactElement
             description: string
             layout: Layout
@@ -279,6 +285,9 @@ module Misc =
 
     let getDestinationPath (source: string) (dir: string) =
         Directory.leaf source |> Util.mdToHtml |> Directory.join2 dir |> IO.resolve
+
+    let getMarkdownDestinationPath (source: string) (dir: string) =
+        getDestinationPath source dir + ".md"
 
     let isMarkdown (path: string) = path.EndsWith ".md"
 

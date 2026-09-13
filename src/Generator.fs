@@ -284,7 +284,7 @@ module Rendering =
                 | Post d -> Some d
                 | Page -> None
 
-            let fm, content = md |> Parser.parseMarkdownAsReactEl |> (fun (fm, c) -> fm, c)
+            let fm, markdown, content = Parser.parseMarkdownSource md
 
             let today = DateTime.toRFC3339Date now
 
@@ -306,6 +306,7 @@ module Rendering =
             return
                 {
                     frontMatter = fm
+                    markdown = markdown
                     content = content
                     description = content |> Parser.parseReact |> summarizeHtml 120
                     layout = layout
@@ -380,6 +381,59 @@ module Rendering =
             do! IO.writeFile dest page
         }
 
+    let private markdownTitle (meta: Meta) =
+        match meta.frontMatter with
+        | Some fm -> Parser.getTextTitle fm
+        | None -> meta.leaf.Replace(".html", "")
+
+    let private markdownAuthor (conf: FrameConfiguration) (meta: Meta) =
+        match meta.frontMatter, conf.author with
+        | Some fm, Some author -> fm.author |> Option.defaultValue author |> Some
+        | Some fm, None -> fm.author
+        | None, Some author -> Some author
+        | None, None -> None
+
+    let private writeMarkdownContent
+        (conf: FrameConfiguration)
+        (site: PathConfiguration)
+        (meta: Meta)
+        (dest: string)
+        =
+        promise {
+            let root =
+                match meta.layout with
+                | Post _ -> site.postRoot
+                | Page -> site.pageRoot
+
+            let url =
+                sourceToSitemap $"%s{site.siteRoot}%s{root}" meta.source
+                + ".md"
+                |> fun path -> $"%s{conf.url}%s{path}"
+
+            let metadata =
+                [ Some $"- URL: %s{url}"
+                  Some $"- Date: %s{meta.date}"
+                  markdownAuthor conf meta |> Option.map (fun author -> $"- Author: %s{author}")
+                  meta.frontMatter
+                  |> Option.bind _.tags
+                  |> Option.map (fun tags ->
+                      let tags = String.concat ", " tags
+                      $"- Tags: %s{tags}") ]
+                |> List.choose id
+
+            let content =
+                [ $"# %s{markdownTitle meta}"
+                  ""
+                  metadata |> String.concat "\n"
+                  ""
+                  meta.markdown.Trim() ]
+                |> String.concat "\n"
+                |> fun content -> content + "\n"
+
+            printfn $"Writing Markdown %s{dest}..."
+            do! IO.writeFile dest content
+        }
+
     let private checkFilenamePattern (files: string list) =
         files
         |> List.choose (fun filename ->
@@ -443,6 +497,8 @@ module Rendering =
 
                         let dest = getDestinationPath meta.source destDir
                         do! writeContent conf site meta dest prev next
+                        let markdownDest = getMarkdownDestinationPath meta.source destDir
+                        do! writeMarkdownContent conf site meta markdownDest
                         return meta
                     })
                 |> Promise.all
