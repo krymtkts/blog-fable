@@ -125,7 +125,7 @@ module DateTime =
     open System.Text.RegularExpressions
 
     let options (timeZone: string) =
-        jsOptions<Intl.DateTimeFormatOptions> (fun o ->
+        jsOptions<Intl.DateTimeFormatOptions>(fun o ->
             o.weekday <- "short"
             o.year <- "numeric"
             o.month <- "short"

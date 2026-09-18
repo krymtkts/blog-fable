@@ -17,14 +17,18 @@ type Book =
     abstract previouslyRead: bool option
 
 type Streak =
-    { startDate: DateTime
-      endDate: DateTime
-      count: int }
+    {
+        startDate: DateTime
+        endDate: DateTime
+        count: int
+    }
 
 type StreakSummary =
-    { longest: Streak option
-      current: Streak option
-      maxPagesRead: int }
+    {
+        longest: Streak option
+        current: Streak option
+        maxPagesRead: int
+    }
 
 [<RequireQualifiedAccess>]
 module Parser =
@@ -234,12 +238,15 @@ module Misc =
                         | Some current when dt = current.endDate.AddDays(1) ->
                             { current with
                                 endDate = dt
-                                count = current.count + 1 }
+                                count = current.count + 1
+                            }
                         | Some _
                         | None ->
-                            { startDate = dt
-                              endDate = dt
-                              count = 1 }
+                            {
+                                startDate = dt
+                                endDate = dt
+                                count = 1
+                            }
 
                     let longest =
                         match longest with
@@ -251,14 +258,18 @@ module Misc =
 
         let maxPagesRead = getMaxPagesRead booklogs
 
-        { longest = longest
-          current = current
-          maxPagesRead = maxPagesRead }
+        {
+            longest = longest
+            current = current
+            maxPagesRead = maxPagesRead
+        }
 
     let generateBooklogStats (booklogs: Booklog list) =
-        let { longest = longest
-              current = current
-              maxPagesRead = maxPagesRead } =
+        let {
+                longest = longest
+                current = current
+                maxPagesRead = maxPagesRead
+            } =
             booklogs |> getStreakSummary
 
         let current, longest =
@@ -342,15 +353,17 @@ module Misc =
             | i -> $", pages read: {i}"
 
     type BooklogDef =
-        { priority: string
-          basePath: string
-          links: Fable.React.ReactElement list
-          books: Map<string, Book>
-          year: int
-          prevYear: int option
-          nextYear: int option
-          stats: Fable.React.ReactElement
-          index: bool }
+        {
+            priority: string
+            basePath: string
+            links: Fable.React.ReactElement list
+            books: Map<string, Book>
+            year: int
+            prevYear: int option
+            nextYear: int option
+            stats: Fable.React.ReactElement
+            index: bool
+        }
 
     let private generateBooklogList (def: BooklogDef) (logs: Booklog list) =
         let header =
@@ -419,12 +432,14 @@ module Misc =
         let booksOfYearLinks =
             booksOfYear |> generateBookLinks def.basePath booklogsByTitleInYear
 
-        [ header
-          def.stats
-          booklogCalendar
-          Html.div booklogRows
-          Html.h2 $"Books of %d{def.year} (%d{booksOfYear |> List.length})"
-          booksOfYearLinks ]
+        [
+            header
+            def.stats
+            booklogCalendar
+            Html.div booklogRows
+            Html.h2 $"Books of %d{def.year} (%d{booksOfYear |> List.length})"
+            booksOfYearLinks
+        ]
         @ def.links
 
     let private generateBooklogSummary (links: Fable.React.ReactElement list) (book: Book) (logs: Booklog list) =
@@ -440,34 +455,38 @@ module Misc =
         let booklogRows =
             logs
             |> List.map (fun log ->
-                [ log.notes |> generateBooklogNotes
-                  Html.p [
-                      prop.className "content is-small booklog-info"
-                      prop.children [
-                          Html.text log.date
-                          Html.text ", read count: "
-                          Html.text (
-                              let rc =
-                                  log.readCount
-                                  |> function
-                                      | Some rc -> rc
-                                      | None -> 1
+                [
+                    log.notes |> generateBooklogNotes
+                    Html.p [
+                        prop.className "content is-small booklog-info"
+                        prop.children [
+                            Html.text log.date
+                            Html.text ", read count: "
+                            Html.text (
+                                let rc =
+                                    log.readCount
+                                    |> function
+                                        | Some rc -> rc
+                                        | None -> 1
 
-                              book.previouslyRead
-                              |> function
-                                  | Some pr when pr -> $"n+{rc}"
-                                  | _ -> $"{rc}"
-                          )
-                          Html.text ", page: "
-                          Html.text log.pages
-                          log.pages |> countReadPages |> Html.text
-                      ]
-                  ] ])
+                                book.previouslyRead
+                                |> function
+                                    | Some pr when pr -> $"n+{rc}"
+                                    | _ -> $"{rc}"
+                            )
+                            Html.text ", page: "
+                            Html.text log.pages
+                            log.pages |> countReadPages |> Html.text
+                        ]
+                    ]
+                ])
 
 
-        [ header
-          bookAuthor
-          Html.div [ prop.className "section"; prop.children (booklogRows |> List.concat) ] ]
+        [
+            header
+            bookAuthor
+            Html.div [ prop.className "section"; prop.children (booklogRows |> List.concat) ]
+        ]
         @ links
 
     let groupBooklogsByYear (booklogs: Booklog list) =
@@ -500,21 +519,25 @@ module Misc =
                 { conf with
                     title = $"%s{conf.title} - %s{id}"
                     pagefindSection = Some "booklog"
-                    url = $"%s{conf.url}%s{def.basePath}.html" }
+                    url = $"%s{conf.url}%s{def.basePath}.html"
+                }
             else
                 { conf with
                     title = $"%s{conf.title} - %s{id}"
                     pagefindSection = Some "booklog"
-                    url = $"%s{conf.url}%s{def.basePath}/%s{id}.html" }
+                    url = $"%s{conf.url}%s{def.basePath}/%s{id}.html"
+                }
 
         let content = booklogs |> generate def |> frame conf |> Parser.parseReactStaticHtml
 
         let lastmod = booklogs |> List.maxBy _.date |> _.date
 
         let loc: Xml.SiteLocation =
-            { loc = sourceToSitemap def.basePath id
-              lastmod = lastmod
-              priority = def.priority }
+            {
+                loc = sourceToSitemap def.basePath id
+                lastmod = lastmod
+                priority = def.priority
+            }
 
         content, loc, id
 
@@ -528,10 +551,12 @@ module Misc =
             booklogs
 
     type BookDef =
-        { priority: string
-          basePath: string
-          links: Fable.React.ReactElement list
-          book: Book }
+        {
+            priority: string
+            basePath: string
+            links: Fable.React.ReactElement list
+            book: Book
+        }
 
     let generateBooklogSummaryContent (conf: FrameConfiguration) (def: BookDef) (booklogs: Booklog list) =
         parseBooklog

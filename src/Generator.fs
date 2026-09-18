@@ -34,10 +34,12 @@ module Generation =
         }
 
     type ArchiveDef =
-        { title: string
-          metas: Meta seq
-          root: string
-          priority: string }
+        {
+            title: string
+            metas: Meta seq
+            root: string
+            priority: string
+        }
 
     type Archive =
         | Posts of ArchiveDef
@@ -56,9 +58,11 @@ module Generation =
                     let refs: Xml.SiteLocation seq =
                         def.metas
                         |> Seq.map (fun meta ->
-                            { loc = sourceToSitemap $"%s{pathRoot}%s{def.root}" meta.source
-                              lastmod = meta.date
-                              priority = def.priority })
+                            {
+                                loc = sourceToSitemap $"%s{pathRoot}%s{def.root}" meta.source
+                                lastmod = meta.date
+                                priority = def.priority
+                            })
 
                     generate def.metas $"%s{pathRoot}%s{def.root}"
                     |> Promise.map (fun content -> [ Html.h2 def.title; content ], refs))
@@ -71,12 +75,14 @@ module Generation =
         }
 
     type TagDef =
-        { title: string
-          metas: Meta seq
-          tagRoot: string
-          postRoot: string
-          pageRoot: string
-          priority: string }
+        {
+            title: string
+            metas: Meta seq
+            tagRoot: string
+            postRoot: string
+            pageRoot: string
+            priority: string
+        }
 
     let generateTagsContent def =
         let tagAndPage =
@@ -124,9 +130,11 @@ module Generation =
             tagAndPage
             |> Map.toList
             |> Seq.map (fun (tag, _) ->
-                { loc = sourceToSitemap def.tagRoot $"%s{tag}.html"
-                  lastmod = now |> DateTime.toRFC3339Date
-                  priority = def.priority })
+                {
+                    loc = sourceToSitemap def.tagRoot $"%s{tag}.html"
+                    lastmod = now |> DateTime.toRFC3339Date
+                    priority = def.priority
+                })
 
         tagsContent, tagPageContents, locs
 
@@ -135,9 +143,11 @@ module Generation =
         | No
 
     type NavItem =
-        { text: string
-          path: string
-          sitemap: UseSitemap }
+        {
+            text: string
+            path: string
+            sitemap: UseSitemap
+        }
 
     type Nav =
         | Title of NavItem
@@ -152,9 +162,11 @@ module Generation =
                 match navi.sitemap with
                 | Yes n ->
                     Some
-                        { Xml.SiteLocation.loc = $"%s{pathRoot}%s{navi.path}"
-                          Xml.SiteLocation.lastmod = now |> DateTime.toRFC3339Date
-                          Xml.SiteLocation.priority = n }
+                        {
+                            Xml.SiteLocation.loc = $"%s{pathRoot}%s{navi.path}"
+                            Xml.SiteLocation.lastmod = now |> DateTime.toRFC3339Date
+                            Xml.SiteLocation.priority = n
+                        }
                 | No -> None
             | Search -> None
 
@@ -211,20 +223,24 @@ module Generation =
         |> List.map (fun meta -> Html.meta [ prop.name meta.name; prop.content meta.content ])
 
     let generate404 =
-        [ Html.h1 [ prop.text "404 Page not found" ]
-          Html.p [ prop.text "Sorry! The page you're looking for does not exist." ] ]
+        [
+            Html.h1 [ prop.text "404 Page not found" ]
+            Html.p [ prop.text "Sorry! The page you're looking for does not exist." ]
+        ]
 
     let generateSitemap = Xml.createSitemap
 
     type FeedConf =
-        { title: string
-          author: string option
-          description: string
-          link: string
-          feed: string
-          postRoot: string
-          posts: Meta seq
-          timeZone: string }
+        {
+            title: string
+            author: string option
+            description: string
+            link: string
+            feed: string
+            postRoot: string
+            posts: Meta seq
+            timeZone: string
+        }
 
     let generateFeed (conf: FeedConf) =
         let items =
@@ -233,13 +249,15 @@ module Generation =
             |> Seq.map (Xml.metaToRssItem conf.timeZone $"{conf.link}{conf.postRoot}")
 
         Xml.createRss
-            { title = conf.title
-              author = conf.author
-              description = conf.description
-              link = conf.link
-              xml = conf.feed
-              lastBuildDate = now |> DateTime.toRFC822DateTimeString conf.timeZone
-              generator = generatorName }
+            {
+                title = conf.title
+                author = conf.author
+                description = conf.description
+                link = conf.link
+                xml = conf.feed
+                lastBuildDate = now |> DateTime.toRFC822DateTimeString conf.timeZone
+                generator = generatorName
+            }
             items
 
 [<AutoOpen>]
@@ -247,11 +265,13 @@ module Rendering =
     let argv = Misc.argv
 
     type PathConfiguration =
-        { siteRoot: string
-          postRoot: string
-          pageRoot: string
-          tagRoot: string
-          destRoot: string }
+        {
+            siteRoot: string
+            postRoot: string
+            pageRoot: string
+            tagRoot: string
+            destRoot: string
+        }
 
     let private readSource source =
         promise {
@@ -284,16 +304,18 @@ module Rendering =
             let date = chooseDate fm pubDate
 
             return
-                { frontMatter = fm
-                  content = content
-                  description = content |> Parser.parseReact |> summarizeHtml 120
-                  layout = layout
-                  source = source
-                  leaf = leafHtml source
-                  date = date
-                  pubDate = pubDate
-                  publish = date <= today
-                  index = false }
+                {
+                    frontMatter = fm
+                    content = content
+                    description = content |> Parser.parseReact |> summarizeHtml 120
+                    layout = layout
+                    source = source
+                    leaf = leafHtml source
+                    date = date
+                    pubDate = pubDate
+                    publish = date <= today
+                    index = false
+                }
         }
 
     let private parseBooksSource source (parser: string -> 'T list) =
@@ -349,7 +371,8 @@ module Rendering =
                         author = author
                         description = meta.description
                         pagefindSection = Some "archive"
-                        url = $"%s{conf.url}%s{root.siteRoot}/%s{path}" }
+                        url = $"%s{conf.url}%s{root.siteRoot}/%s{path}"
+                    }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing %s{dest}..."
@@ -454,7 +477,8 @@ module Rendering =
                 |> frame
                     { conf with
                         title = $"%s{conf.title} - Archives"
-                        url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}" }
+                        url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}"
+                    }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing archives %s{dest}..."
@@ -475,7 +499,8 @@ module Rendering =
                 |> frame
                     { conf with
                         title = title
-                        url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}" }
+                        url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}"
+                    }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing tags %s{dest}..."
@@ -494,7 +519,8 @@ module Rendering =
                         |> frame
                             { conf with
                                 title = $"%s{title} - %s{tag}"
-                                url = $"%s{conf.url}%s{site.siteRoot}/%s{parent}/%s{IO.leaf dest}" }
+                                url = $"%s{conf.url}%s{site.siteRoot}/%s{parent}/%s{IO.leaf dest}"
+                            }
                         |> Parser.parseReactStaticHtml
 
                     IO.writeFile dest content |> Promise.map ignore)
@@ -553,10 +579,12 @@ module Rendering =
                 |> generateBookLinks basePath booklogPerTitle
 
             let links =
-                [ Html.h2 $"Years (%d{years |> List.length})"
-                  yearLinks
-                  Html.h2 $"Books (%d{bookMap |> Map.count})"
-                  bookLinks ]
+                [
+                    Html.h2 $"Years (%d{years |> List.length})"
+                    yearLinks
+                    Html.h2 $"Books (%d{bookMap |> Map.count})"
+                    bookLinks
+                ]
 
             let getPrevYear year =
                 if year > minYear then Some(year - 1) else None
@@ -571,15 +599,17 @@ module Rendering =
                     booklogs
                     |> generateYearlyBooklogContent
                         { conf with title = title }
-                        { priority = priority
-                          basePath = basePath
-                          links = links
-                          books = bookMap
-                          year = year
-                          prevYear = getPrevYear year
-                          nextYear = None
-                          stats = stats
-                          index = true }
+                        {
+                            priority = priority
+                            basePath = basePath
+                            links = links
+                            books = bookMap
+                            year = year
+                            prevYear = getPrevYear year
+                            nextYear = None
+                            stats = stats
+                            index = true
+                        }
 
 
             let booklogContents =
@@ -588,15 +618,17 @@ module Rendering =
                     booklogs
                     |> generateYearlyBooklogContent
                         { conf with title = title }
-                        { priority = priority
-                          basePath = basePath
-                          links = links
-                          books = bookMap
-                          year = year
-                          prevYear = getPrevYear year
-                          nextYear = getNextYear year
-                          stats = stats
-                          index = false })
+                        {
+                            priority = priority
+                            basePath = basePath
+                            links = links
+                            books = bookMap
+                            year = year
+                            prevYear = getPrevYear year
+                            nextYear = getNextYear year
+                            stats = stats
+                            index = false
+                        })
 
             do!
                 booklogContents
@@ -618,10 +650,12 @@ module Rendering =
                         | Some book ->
                             generateBooklogSummaryContent
                                 conf
-                                { priority = priority
-                                  basePath = basePath
-                                  links = links
-                                  book = book }
+                                {
+                                    priority = priority
+                                    basePath = basePath
+                                    links = links
+                                    book = book
+                                }
                                 logs
                             |> Some)
 
@@ -639,8 +673,10 @@ module Rendering =
                 booklogIndex |> fun (content, _, _) -> IO.writeFile booklogsDest content
 
             return
-                [ booklogContents |> List.unzip3 |> sndOfTriple
-                  bookContents |> List.unzip3 |> sndOfTriple ]
+                [
+                    booklogContents |> List.unzip3 |> sndOfTriple
+                    bookContents |> List.unzip3 |> sndOfTriple
+                ]
                 |> List.concat
         }
 
@@ -654,7 +690,8 @@ module Rendering =
                 |> frame
                     { conf with
                         title = $"%s{conf.title} - 404"
-                        url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}" }
+                        url = $"%s{conf.url}%s{site.siteRoot}/%s{IO.leaf dest}"
+                    }
                 |> Parser.parseReactStaticHtml
 
             printfn $"Writing 404 {dest}..."
@@ -704,47 +741,51 @@ type Content = { root: string; title: string }
 type AdditionalNav = { text: string; path: string }
 
 type sitemap =
-    { index: float
-      archives: float
-      tags: float
-      posts: float
-      pages: float
-      booklogs: float }
+    {
+        index: float
+        archives: float
+        tags: float
+        posts: float
+        pages: float
+        booklogs: float
+    }
 
 type RenderOptions =
-    { stage: Mode
-      siteName: string
-      author: string option
-      description: string
-      siteUrl: string
-      pathRoot: string
-      lang: string
-      copyright: string
-      favicon: string
+    {
+        stage: Mode
+        siteName: string
+        author: string option
+        description: string
+        siteUrl: string
+        pathRoot: string
+        lang: string
+        copyright: string
+        favicon: string
 
-      src: string
-      dst: string
+        src: string
+        dst: string
 
-      posts: Content
-      pages: Content
-      tags: Content
-      archives: Content
-      books: Content
-      booklogs: Content
-      images: string
+        posts: Content
+        pages: Content
+        tags: Content
+        archives: Content
+        books: Content
+        booklogs: Content
+        images: string
 
-      additionalNavs: AdditionalNav list
-      additionalMetaContents: MetaContent list
+        additionalNavs: AdditionalNav list
+        additionalMetaContents: MetaContent list
 
-      feedName: string
+        feedName: string
 
-      timeZone: string
+        timeZone: string
 
-      sitemap: sitemap
+        sitemap: sitemap
 
-      highlightStyle: string
+        highlightStyle: string
 
-      future: bool }
+        future: bool
+    }
 
 module RenderOptions =
     let indexPath = "/index.html"
@@ -830,45 +871,65 @@ let private buildNavList opts =
 
     feed,
     List.concat [
-        [ Title
-              { text = opts.siteName
-                path = RenderOptions.indexPath
-                sitemap = Yes <| string opts.sitemap.index }
-          Link
-              { text = opts.archives.title
-                path = RenderOptions.archivesPath opts
-                sitemap = Yes <| string opts.sitemap.archives }
-          Link
-              { text = opts.tags.title
-                path = RenderOptions.tagsPath opts
-                sitemap = Yes <| string opts.sitemap.tags }
-          Link
-              { text = opts.booklogs.title
-                path = RenderOptions.booklogsPath opts
-                sitemap = Yes <| string opts.sitemap.booklogs } ]
+        [
+            Title
+                {
+                    text = opts.siteName
+                    path = RenderOptions.indexPath
+                    sitemap = Yes <| string opts.sitemap.index
+                }
+            Link
+                {
+                    text = opts.archives.title
+                    path = RenderOptions.archivesPath opts
+                    sitemap = Yes <| string opts.sitemap.archives
+                }
+            Link
+                {
+                    text = opts.tags.title
+                    path = RenderOptions.tagsPath opts
+                    sitemap = Yes <| string opts.sitemap.tags
+                }
+            Link
+                {
+                    text = opts.booklogs.title
+                    path = RenderOptions.booklogsPath opts
+                    sitemap = Yes <| string opts.sitemap.booklogs
+                }
+        ]
         List.map
             (fun n ->
                 Link
-                    { text = n.text
-                      path = n.path
-                      sitemap = No })
+                    {
+                        text = n.text
+                        path = n.path
+                        sitemap = No
+                    })
             opts.additionalNavs
-        [ Link
-              { text = "RSS"
-                path = feed
-                sitemap = No }
-          Search ]
+        [
+            Link
+                {
+                    text = "RSS"
+                    path = feed
+                    sitemap = No
+                }
+            Search
+        ]
     ]
 
 let private buildBundledScripts opts =
     match opts.stage with
     | Development ->
         [ RenderOptions.devScriptPath opts; RenderOptions.handlerScriptPath opts ],
-        [ RenderOptions.devScriptSourcePath, RenderOptions.devScriptDestinationPath opts
-          RenderOptions.handlerScriptSourcePath, RenderOptions.handlerScriptDestinationPath opts ]
+        [
+            RenderOptions.devScriptSourcePath, RenderOptions.devScriptDestinationPath opts
+            RenderOptions.handlerScriptSourcePath, RenderOptions.handlerScriptDestinationPath opts
+        ]
     | Production ->
         [ RenderOptions.handlerScriptPath opts ],
-        [ RenderOptions.handlerScriptSourcePath, RenderOptions.handlerScriptDestinationPath opts ]
+        [
+            RenderOptions.handlerScriptSourcePath, RenderOptions.handlerScriptDestinationPath opts
+        ]
 
 let private buildHighlightStyle opts =
     RenderOptions.highlightStylePath opts, [ (opts.highlightStyle, RenderOptions.highlightStyleDestinationPath opts) ]
@@ -882,30 +943,34 @@ let render (opts: RenderOptions) =
         let additionalMetaContents = generateMetaContents opts.additionalMetaContents
 
         let site: PathConfiguration =
-            { siteRoot = opts.pathRoot
-              postRoot = opts.posts.root
-              pageRoot = opts.pages.root
-              tagRoot = opts.tags.root
-              destRoot = RenderOptions.destinationRoot opts }
+            {
+                siteRoot = opts.pathRoot
+                postRoot = opts.posts.root
+                pageRoot = opts.pages.root
+                tagRoot = opts.tags.root
+                destRoot = RenderOptions.destinationRoot opts
+            }
 
         let conf: FrameConfiguration =
-            { lang = opts.lang
-              navItems = navItems
-              name = opts.siteName
-              title = opts.siteName
-              author = None
-              description = opts.description
-              url = opts.siteUrl
-              copyright = opts.copyright
-              favicon = RenderOptions.faviconPath opts
-              style = RenderOptions.stylePath opts
-              highlightStyle = highlightInjection
-              pagefindStyle = RenderOptions.pagefindStylePath opts
-              pagefindScript = RenderOptions.pagefindScriptPath opts
-              scriptInjection = jsInjection
-              additionalMetaContents = additionalMetaContents
-              pagefindSection = None
-              future = opts.future }
+            {
+                lang = opts.lang
+                navItems = navItems
+                name = opts.siteName
+                title = opts.siteName
+                author = None
+                description = opts.description
+                url = opts.siteUrl
+                copyright = opts.copyright
+                favicon = RenderOptions.faviconPath opts
+                style = RenderOptions.stylePath opts
+                highlightStyle = highlightInjection
+                pagefindStyle = RenderOptions.pagefindStylePath opts
+                pagefindScript = RenderOptions.pagefindScriptPath opts
+                scriptInjection = jsInjection
+                additionalMetaContents = additionalMetaContents
+                pagefindSection = None
+                future = opts.future
+            }
 
         let confWithAuthor = { conf with author = opts.author }
 
@@ -926,28 +991,36 @@ let render (opts: RenderOptions) =
             <| RenderOptions.indexDestinationPath opts
 
         let archiveDefs =
-            [ Posts
-                  { title = opts.posts.title
-                    metas = metaPosts
-                    root = opts.posts.root
-                    priority = string opts.sitemap.posts }
-              Pages
-                  { title = opts.pages.title
-                    metas = metaPages
-                    root = opts.pages.root
-                    priority = string opts.sitemap.pages } ]
+            [
+                Posts
+                    {
+                        title = opts.posts.title
+                        metas = metaPosts
+                        root = opts.posts.root
+                        priority = string opts.sitemap.posts
+                    }
+                Pages
+                    {
+                        title = opts.pages.title
+                        metas = metaPages
+                        root = opts.pages.root
+                        priority = string opts.sitemap.pages
+                    }
+            ]
 
         let! archiveLocs =
             renderArchives conf site archiveDefs
             <| RenderOptions.archivesDestinationPath opts
 
         let tagDef =
-            { title = opts.tags.title
-              tagRoot = RenderOptions.tagsRootPath opts
-              postRoot = RenderOptions.postsRootPath opts
-              pageRoot = RenderOptions.pagesRootPath opts
-              metas = Seq.concat [ metaPosts; metaPages ]
-              priority = string opts.sitemap.tags }
+            {
+                title = opts.tags.title
+                tagRoot = RenderOptions.tagsRootPath opts
+                postRoot = RenderOptions.postsRootPath opts
+                pageRoot = RenderOptions.pagesRootPath opts
+                metas = Seq.concat [ metaPosts; metaPages ]
+                priority = string opts.sitemap.tags
+            }
 
         let! tagLocs = renderTags conf site tagDef <| RenderOptions.tagsDestinationPath opts
 
@@ -967,14 +1040,16 @@ let render (opts: RenderOptions) =
 
         do!
             renderFeed
-                { title = opts.siteName
-                  author = opts.author
-                  description = opts.description
-                  link = RenderOptions.siteUrl opts
-                  feed = feed
-                  postRoot = opts.posts.root
-                  posts = metaPosts
-                  timeZone = opts.timeZone }
+                {
+                    title = opts.siteName
+                    author = opts.author
+                    description = opts.description
+                    link = RenderOptions.siteUrl opts
+                    feed = feed
+                    postRoot = opts.posts.root
+                    posts = metaPosts
+                    timeZone = opts.timeZone
+                }
             <| RenderOptions.feedDestinationPath opts
 
         let! paths =
