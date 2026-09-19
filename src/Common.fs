@@ -286,8 +286,7 @@ module Misc =
     let getDestinationPath (source: string) (dir: string) =
         Directory.leaf source |> Util.mdToHtml |> Directory.join2 dir |> IO.resolve
 
-    let getMarkdownDestinationPath (source: string) (dir: string) =
-        getDestinationPath source dir + ".md"
+    let getMarkdownDestinationPath (source: string) (dir: string) = getDestinationPath source dir + ".md"
 
     let isMarkdown (path: string) = path.EndsWith ".md"
 

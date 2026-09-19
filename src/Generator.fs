@@ -404,32 +404,18 @@ module Rendering =
         | Post _ -> site.postRoot
         | Page -> site.pageRoot
 
-    let private markdownUrl
-        (conf: FrameConfiguration)
-        (site: PathConfiguration)
-        (meta: Meta)
-        =
+    let private markdownUrl (conf: FrameConfiguration) (site: PathConfiguration) (meta: Meta) =
         sourceToSitemap $"%s{site.siteRoot}%s{markdownRoot site meta}" meta.source
         + ".md"
         |> fun path -> $"%s{conf.url}%s{path}"
 
-    let llmPageFromMeta
-        (conf: FrameConfiguration)
-        (site: PathConfiguration)
-        (section: string)
-        (meta: Meta)
-        =
+    let llmPageFromMeta (conf: FrameConfiguration) (site: PathConfiguration) (section: string) (meta: Meta) =
         { section = section
           title = markdownTitle meta
           description = None
           url = markdownUrl conf site meta }
 
-    let private writeMarkdownContent
-        (conf: FrameConfiguration)
-        (site: PathConfiguration)
-        (meta: Meta)
-        (dest: string)
-        =
+    let private writeMarkdownContent (conf: FrameConfiguration) (site: PathConfiguration) (meta: Meta) (dest: string) =
         promise {
             let url = markdownUrl conf site meta
 
@@ -459,15 +445,10 @@ module Rendering =
 
     let private llmsLink (page: LlmPage) =
         match page.description with
-        | Some description when description <> "" ->
-            $"- [%s{page.title}](%s{page.url}): %s{description}"
+        | Some description when description <> "" -> $"- [%s{page.title}](%s{page.url}): %s{description}"
         | _ -> $"- [%s{page.title}](%s{page.url})"
 
-    let renderLlms
-        (conf: FrameConfiguration)
-        (pages: LlmPage list)
-        (dest: string)
-        =
+    let renderLlms (conf: FrameConfiguration) (pages: LlmPage list) (dest: string) =
         promise {
             let section name =
                 [ $"## %s{name}"
@@ -478,11 +459,11 @@ module Rendering =
                   |> String.concat "\n"
                   "" ]
 
-            let sections = [ section "Posts"; section "Pages"; section "Booklogs" ] |> List.concat
+            let sections =
+                [ section "Posts"; section "Pages"; section "Booklogs" ] |> List.concat
 
             let content =
-                [ $"# %s{conf.name}"; ""; $"> %s{conf.description}"; "" ]
-                @ sections
+                [ $"# %s{conf.name}"; ""; $"> %s{conf.description}"; "" ] @ sections
                 |> String.concat "\n"
                 |> fun content -> content + "\n"
 
@@ -1169,8 +1150,12 @@ let render (opts: RenderOptions) =
             <| RenderOptions.booksDestinationPath opts
 
         let llmPages =
-            [ metaPosts |> Array.map (llmPageFromMeta confWithAuthor site "Posts") |> Array.toList
-              metaPages |> Array.map (llmPageFromMeta confWithAuthor site "Pages") |> Array.toList
+            [ metaPosts
+              |> Array.map (llmPageFromMeta confWithAuthor site "Posts")
+              |> Array.toList
+              metaPages
+              |> Array.map (llmPageFromMeta confWithAuthor site "Pages")
+              |> Array.toList
               booklogPages ]
             |> List.concat
 
