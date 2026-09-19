@@ -133,14 +133,16 @@ module private Util =
                 $"""<img src="%s{item.href}" title="%s{title}" alt="%s{item.text}" loading="lazy" />"""
 
             let mops =
-                !!{| heading = heading
-                     link = link
-                     listitem = listitem
-                     checkbox = checkbox
-                     image = image |}
+                !!{|
+                    heading = heading
+                    link = link
+                    listitem = listitem
+                    checkbox = checkbox
+                    image = image
+                |}
 
 
-            jsOptions<Marked.MarkedExtension> (fun o ->
+            jsOptions<Marked.MarkedExtension>(fun o ->
                 o.useNewRenderer <- Some true
                 o.renderer <- Some <| U2.Case1 mops
                 o.gfm <- Some true)
@@ -262,16 +264,18 @@ module Misc =
         Regex.IsMatch(s, @"^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9-.\s]+\.md$") |> not
 
     type Meta =
-        { frontMatter: Parser.FrontMatter option
-          content: ReactElement
-          description: string
-          layout: Layout
-          source: string
-          leaf: string
-          date: string
-          pubDate: string option
-          publish: bool
-          index: bool }
+        {
+            frontMatter: Parser.FrontMatter option
+            content: ReactElement
+            description: string
+            layout: Layout
+            source: string
+            leaf: string
+            date: string
+            pubDate: string option
+            publish: bool
+            index: bool
+        }
 
     let getDestinationPath (source: string) (dir: string) =
         Directory.leaf source |> Util.mdToHtml |> Directory.join2 dir |> IO.resolve
@@ -346,9 +350,11 @@ module Xml =
     open Fable.SimpleXml.Generator
 
     type SiteLocation =
-        { loc: string
-          lastmod: string
-          priority: string }
+        {
+            loc: string
+            lastmod: string
+            priority: string
+        }
 
     let createSitemap (root: string) (locs: SiteLocation seq) =
         let urls =
@@ -365,19 +371,23 @@ module Xml =
         let urlSet =
             node
                 "urlset"
-                [ attr.value ("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9")
-                  attr.value ("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance") ]
+                [
+                    attr.value ("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9")
+                    attr.value ("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+                ]
                 urls
 
         urlSet |> serializeXml |> (+) @"<?xml version=""1.0"" encoding=""UTF-8""?>"
 
     type RssItem =
-        { guid: string
-          link: string
-          title: string
-          author: string option
-          description: string
-          pubDate: string }
+        {
+            guid: string
+            link: string
+            title: string
+            author: string option
+            description: string
+            pubDate: string
+        }
 
     let metaToRssItem (timeZone: string) (pathRoot: string) (meta: Meta) =
         let link = $"{pathRoot}/{meta.leaf}"
@@ -391,27 +401,31 @@ module Xml =
             | None -> meta.date
             |> DateTime.parseToRFC822DateTimeString timeZone
 
-        { guid = link
-          link = link
-          title =
-            match meta.frontMatter with
-            | Some fm -> Parser.getTextTitle fm
-            | None -> meta.leaf
-          author =
-            match meta.frontMatter with
-            | Some fm -> fm.author
-            | None -> None
-          description = meta.content |> Parser.parseReactStaticMarkup |> simpleEscape
-          pubDate = pubDate }
+        {
+            guid = link
+            link = link
+            title =
+                match meta.frontMatter with
+                | Some fm -> Parser.getTextTitle fm
+                | None -> meta.leaf
+            author =
+                match meta.frontMatter with
+                | Some fm -> fm.author
+                | None -> None
+            description = meta.content |> Parser.parseReactStaticMarkup |> simpleEscape
+            pubDate = pubDate
+        }
 
     type RssChannel =
-        { title: string
-          author: string option
-          description: string
-          link: string
-          xml: string
-          lastBuildDate: string
-          generator: string }
+        {
+            title: string
+            author: string option
+            description: string
+            link: string
+            xml: string
+            lastBuildDate: string
+            generator: string
+        }
 
     let createRss (channel: RssChannel) (items: RssItem seq) =
         let itemNodes =
@@ -436,17 +450,19 @@ module Xml =
             attr.value ("xmlns:atom", "http://www.w3.org/2005/Atom")
         ] [
             node "channel" []
-            <| [ node "atom:link" [
-                     attr.value ("href", $"{channel.link}{channel.xml}")
-                     attr.value ("rel", "self")
-                     attr.value ("type", "application/rss+xml")
-                 ] []
-                 node "title" [] [ text channel.title ]
+            <| [
+                node "atom:link" [
+                    attr.value ("href", $"{channel.link}{channel.xml}")
+                    attr.value ("rel", "self")
+                    attr.value ("type", "application/rss+xml")
+                ] []
+                node "title" [] [ text channel.title ]
 
-                 node "description" [] [ text channel.description ]
-                 node "link" [] [ text channel.link ]
-                 node "lastBuildDate" [] [ text channel.lastBuildDate ]
-                 node "generator" [] [ text channel.generator ] ]
+                node "description" [] [ text channel.description ]
+                node "link" [] [ text channel.link ]
+                node "lastBuildDate" [] [ text channel.lastBuildDate ]
+                node "generator" [] [ text channel.generator ]
+               ]
                @ itemNodes
         ]
         |> serializeXml
@@ -513,79 +529,85 @@ module Component =
         let header =
             match fm with
             | Some fm ->
-                [ date pubDate fm.date
-                  Html.h1 [
-                      prop.className [ "title" ]
-                      prop.dangerouslySetInnerHTML (fm.title |> Util.parseMarkdownInline)
-                  ]
-                  match fm.subtitle with
-                  | Some subtitle ->
-                      Html.p [
-                          prop.className [ "subtitle"; "is-4" ]
-                          prop.dangerouslySetInnerHTML (subtitle |> Util.parseMarkdownInline)
-                      ]
-                  | None -> Html.none
-                  Html.div [
-                      prop.className [ "tags" ]
-                      prop.custom ("data-pagefind-ignore", "index")
-                      prop.children (
-                          match fm.tags with
-                          | Some tags -> tags
-                          | None -> [||]
-                          |> Seq.map (fun tag ->
-                              Html.a [
-                                  prop.href $"%s{tagRoot}%s{tag}.html"
-                                  prop.title tag
-                                  prop.className "tag is-medium"
-                                  prop.custom ("data-pagefind-filter", "tag")
-                                  prop.text tag
-                              ])
-                      )
-                  ] ]
+                [
+                    date pubDate fm.date
+                    Html.h1 [
+                        prop.className [ "title" ]
+                        prop.dangerouslySetInnerHTML (fm.title |> Util.parseMarkdownInline)
+                    ]
+                    match fm.subtitle with
+                    | Some subtitle ->
+                        Html.p [
+                            prop.className [ "subtitle"; "is-4" ]
+                            prop.dangerouslySetInnerHTML (subtitle |> Util.parseMarkdownInline)
+                        ]
+                    | None -> Html.none
+                    Html.div [
+                        prop.className [ "tags" ]
+                        prop.custom ("data-pagefind-ignore", "index")
+                        prop.children (
+                            match fm.tags with
+                            | Some tags -> tags
+                            | None -> [||]
+                            |> Seq.map (fun tag ->
+                                Html.a [
+                                    prop.href $"%s{tagRoot}%s{tag}.html"
+                                    prop.title tag
+                                    prop.className "tag is-medium"
+                                    prop.custom ("data-pagefind-filter", "tag")
+                                    prop.text tag
+                                ])
+                        )
+                    ]
+                ]
             | None -> []
 
         header
 
     type FrameConfiguration =
-        { lang: string
-          navItems: ReactElement list
-          name: string
-          title: string
-          author: string option
-          description: string
-          url: string
-          copyright: string
-          favicon: string
-          style: string
-          highlightStyle: string
-          pagefindStyle: string
-          pagefindScript: string
-          scriptInjection: string list
-          additionalMetaContents: ReactElement list
-          pagefindSection: string option
-          future: bool }
+        {
+            lang: string
+            navItems: ReactElement list
+            name: string
+            title: string
+            author: string option
+            description: string
+            url: string
+            copyright: string
+            favicon: string
+            style: string
+            highlightStyle: string
+            pagefindStyle: string
+            pagefindScript: string
+            scriptInjection: string list
+            additionalMetaContents: ReactElement list
+            pagefindSection: string option
+            future: bool
+        }
 
     let frame (conf: FrameConfiguration) (content: Fable.React.ReactElement list) =
         let themeSelector =
-            [ Html.li [
-                  prop.children [
-                      Html.button [
-                          prop.className "theme-toggle theme-toggle-light"
-                          prop.custom ("data-theme", "light")
-                          prop.title "Light theme"
-                      ]
-                      Html.button [
-                          prop.className "theme-toggle theme-toggle-dark"
-                          prop.custom ("data-theme", "dark")
-                          prop.title "Dark theme"
-                      ]
-                      Html.button [
-                          prop.className "theme-toggle theme-toggle-system"
-                          prop.custom ("data-theme", "system")
-                          prop.title "System Default"
-                      ]
-                  ]
-              ] ]
+            [
+                Html.li [
+                    prop.children [
+                        Html.button [
+                            prop.className "theme-toggle theme-toggle-light"
+                            prop.custom ("data-theme", "light")
+                            prop.title "Light theme"
+                        ]
+                        Html.button [
+                            prop.className "theme-toggle theme-toggle-dark"
+                            prop.custom ("data-theme", "dark")
+                            prop.title "Dark theme"
+                        ]
+                        Html.button [
+                            prop.className "theme-toggle theme-toggle-system"
+                            prop.custom ("data-theme", "system")
+                            prop.title "System Default"
+                        ]
+                    ]
+                ]
+            ]
 
         let navbar = Html.ul [ prop.children (conf.navItems @ themeSelector) ]
 
@@ -595,41 +617,45 @@ module Component =
             |> Option.toList
 
         let main =
-            [ Html.head (
-                  [ Html.title [ prop.text conf.title ]
-                    Html.meta [ prop.charset "utf-8" ]
-                    match conf.author with
-                    | Some author -> Html.meta [ prop.name "author"; prop.content author ]
-                    | None -> ()
-                    Html.meta [ prop.name "description"; prop.content conf.description ]
-                    Html.meta [ prop.name "viewport"; prop.content "width=device-width, initial-scale=1" ]
-                    Html.meta [ prop.custom ("property", "og:site_name"); prop.content conf.name ]
-                    Html.meta [ prop.custom ("property", "og:title"); prop.content conf.title ]
-                    Html.meta [ prop.custom ("property", "og:description"); prop.content conf.description ]
-                    Html.meta [ prop.custom ("property", "og:url"); prop.content conf.url ]
-                    Html.link [ prop.rel "canonical"; prop.href conf.url ]
-                    Html.link [ prop.rel "icon"; prop.href conf.favicon ]
-                    Html.link [ prop.rel "stylesheet"; prop.href conf.pagefindStyle ]
-                    Html.script [ prop.src conf.pagefindScript; prop.type' "module" ]
-                    Html.link [ prop.rel "stylesheet"; prop.type' "text/css"; prop.href conf.style ]
-                    Html.link [ prop.rel "stylesheet"; prop.type' "text/css"; prop.href conf.highlightStyle ] ]
-                  @ conf.additionalMetaContents
-              )
-              Html.body [
-                  Html.nav [ prop.className "tabs"; prop.children [ navbar ] ]
-                  Html.main [
-                      prop.className "container"
-                      prop.children [
-                          Html.div [ prop.className "content"; prop.children (pagefindSection @ content) ]
-                      ]
-                  ]
-              ]
-              Html.footer [
-                  prop.className "footer"
-                  prop.children [
-                      Html.div [ prop.className "container"; prop.text ($"Copyright © %s{conf.copyright}") ]
-                  ]
-              ] ]
+            [
+                Html.head (
+                    [
+                        Html.title [ prop.text conf.title ]
+                        Html.meta [ prop.charset "utf-8" ]
+                        match conf.author with
+                        | Some author -> Html.meta [ prop.name "author"; prop.content author ]
+                        | None -> ()
+                        Html.meta [ prop.name "description"; prop.content conf.description ]
+                        Html.meta [ prop.name "viewport"; prop.content "width=device-width, initial-scale=1" ]
+                        Html.meta [ prop.custom ("property", "og:site_name"); prop.content conf.name ]
+                        Html.meta [ prop.custom ("property", "og:title"); prop.content conf.title ]
+                        Html.meta [ prop.custom ("property", "og:description"); prop.content conf.description ]
+                        Html.meta [ prop.custom ("property", "og:url"); prop.content conf.url ]
+                        Html.link [ prop.rel "canonical"; prop.href conf.url ]
+                        Html.link [ prop.rel "icon"; prop.href conf.favicon ]
+                        Html.link [ prop.rel "stylesheet"; prop.href conf.pagefindStyle ]
+                        Html.script [ prop.src conf.pagefindScript; prop.type' "module" ]
+                        Html.link [ prop.rel "stylesheet"; prop.type' "text/css"; prop.href conf.style ]
+                        Html.link [ prop.rel "stylesheet"; prop.type' "text/css"; prop.href conf.highlightStyle ]
+                    ]
+                    @ conf.additionalMetaContents
+                )
+                Html.body [
+                    Html.nav [ prop.className "tabs"; prop.children [ navbar ] ]
+                    Html.main [
+                        prop.className "container"
+                        prop.children [
+                            Html.div [ prop.className "content"; prop.children (pagefindSection @ content) ]
+                        ]
+                    ]
+                ]
+                Html.footer [
+                    prop.className "footer"
+                    prop.children [
+                        Html.div [ prop.className "container"; prop.text ($"Copyright © %s{conf.copyright}") ]
+                    ]
+                ]
+            ]
 
         let scripts =
             conf.scriptInjection
@@ -670,8 +696,10 @@ module Component =
         let prev = button Prev prev
         let next = button Next next
 
-        [ Html.div [
-              prop.className "buttons"
-              prop.custom ("data-pagefind-ignore", "all")
-              prop.children [ prev; next ]
-          ] ]
+        [
+            Html.div [
+                prop.className "buttons"
+                prop.custom ("data-pagefind-ignore", "all")
+                prop.children [ prev; next ]
+            ]
+        ]
