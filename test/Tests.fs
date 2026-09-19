@@ -199,12 +199,14 @@ let tests =
             let pages =
                 [ ( "/posts/2023-03-01-sample-post.html.md",
                     "# Sample post - subtitle",
-                    "Posts have front matter." )
+                    "Posts have front matter.",
+                    "- URL: <https://krymtkts.github.io/blog-fable/posts/2023-03-01-sample-post.html.md>" )
                   ( "/pages/sampla-page-without-front-matter.html.md",
                     "# sampla-page-without-front-matter",
-                    "The page can omit front matter" ) ]
+                    "The page can omit front matter",
+                    "- URL: <https://krymtkts.github.io/blog-fable/pages/sampla-page-without-front-matter.html.md>" ) ]
 
-            for path, expectedTitle, expectedBody in pages do
+            for path, expectedTitle, expectedBody, expectedUrl in pages do
                 let! response: HttpResponseMessage = client.GetAsync(baseUrl + path)
                 let! content: string = response.Content.ReadAsStringAsync()
 
@@ -216,6 +218,9 @@ let tests =
 
                 if content.Contains expectedBody |> not then
                     failtestf "Markdown export does not contain source content for %s: %s" path content
+
+                if content.Contains expectedUrl |> not then
+                    failtestf "Markdown export does not contain an autolink URL for %s: %s" path content
 
                 if content.StartsWith "<!DOCTYPE html>" then
                     failtestf "Markdown export should not be an HTML document: %s" path

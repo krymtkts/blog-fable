@@ -420,7 +420,7 @@ module Rendering =
             let url = markdownUrl conf site meta
 
             let metadata =
-                [ Some $"- URL: %s{url}"
+                [ Some $"- URL: <%s{url}>"
                   Some $"- Date: %s{meta.date}"
                   markdownAuthor conf meta |> Option.map (fun author -> $"- Author: %s{author}")
                   meta.frontMatter
