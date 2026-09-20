@@ -481,6 +481,7 @@ module Rendering =
         promise {
             let section name =
                 [ $"## %s{name}"
+                  ""
                   pages
                   |> List.filter (fun page -> page.section = name)
                   |> List.sortBy _.url

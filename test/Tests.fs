@@ -324,6 +324,10 @@ let tests =
                 if content.Contains expected |> not then
                     failtestf "llms.txt does not contain %s: %s" expected content
 
+            for section in [ "Posts"; "Pages"; "Booklogs" ] do
+                if content.Contains ($"## %s{section}\n\n-") |> not then
+                    failtestf "llms.txt should separate the %s heading from its links: %s" section content
+
             let hasGeneratedDescription (line: string) =
                 line.StartsWith "- ["
                 && (line.Contains "/posts/" || line.Contains "/pages/")
