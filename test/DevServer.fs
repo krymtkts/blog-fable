@@ -167,8 +167,9 @@ let suaveConfig (home: string) (ct: CancellationToken) =
         home |> Some
 
     let extendedMimeTypesMap (ext: string) =
-        // NOTE: Add custom mime types for pagefind to prevent 404 error.
+        // NOTE: Add custom MIME types for Pagefind and Markdown exports.
         match ext with
+        | ".md" -> Writers.createMimeType "text/markdown" false
         | ".pagefind"
         | ".pf_fragment"
         | ".pf_index"

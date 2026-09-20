@@ -12,6 +12,7 @@ module IO =
     let resolve (path: string) = File.absolutePath path
     let writeFile = File.write
     let readFile = File.read
+    let removeFile = File.remove
     let copy = File.copy
     let getFiles = Directory.getFiles true
     let leaf = Directory.leaf
@@ -215,16 +216,21 @@ module Parser =
 
     let parseYaml str : 'a = Yaml.parse str
 
-    let parseMarkdownAsReactEl content =
-        let frontMatter, content = extractFrontMatter content
+    let parseMarkdownSource content =
+        let frontMatter, markdown = extractFrontMatter content
 
-        let content =
+        let reactElement =
             Html.div [
                 prop.className "section"
-                prop.dangerouslySetInnerHTML (parseMarkdown content)
+                prop.dangerouslySetInnerHTML (parseMarkdown markdown)
             ]
 
-        frontMatter, content
+        frontMatter, markdown, reactElement
+
+    let parseMarkdownAsReactEl content =
+        let frontMatter, _, reactElement = parseMarkdownSource content
+
+        frontMatter, reactElement
 
     /// Parses a React element invoking ReactDOMServer.renderToString
     let parseReact el = ReactDOMServer.renderToString el
@@ -266,6 +272,7 @@ module Misc =
     type Meta =
         {
             frontMatter: Parser.FrontMatter option
+            markdown: string
             content: ReactElement
             description: string
             layout: Layout
@@ -279,6 +286,8 @@ module Misc =
 
     let getDestinationPath (source: string) (dir: string) =
         Directory.leaf source |> Util.mdToHtml |> Directory.join2 dir |> IO.resolve
+
+    let getMarkdownDestinationPath (source: string) (dir: string) = getDestinationPath source dir + ".md"
 
     let isMarkdown (path: string) = path.EndsWith ".md"
 
@@ -564,6 +573,12 @@ module Component =
 
         header
 
+    type LlmLinks =
+        {
+            markdown: string
+            describedBy: string
+        }
+
     type FrameConfiguration =
         {
             lang: string
@@ -582,6 +597,8 @@ module Component =
             scriptInjection: string list
             additionalMetaContents: ReactElement list
             pagefindSection: string option
+            llms: bool
+            llmLinks: LlmLinks option
             future: bool
         }
 
@@ -616,6 +633,15 @@ module Component =
             |> Option.map (fun section -> Html.span [ prop.custom ("data-pagefind-filter", $"section:%s{section}") ])
             |> Option.toList
 
+        let llmLinks =
+            conf.llmLinks
+            |> Option.map (fun links ->
+                [
+                    Html.link [ prop.rel "alternate"; prop.type' "text/markdown"; prop.href links.markdown ]
+                    Html.link [ prop.rel "describedby"; prop.href links.describedBy ]
+                ])
+            |> Option.defaultValue []
+
         let main =
             [
                 Html.head (
@@ -638,6 +664,7 @@ module Component =
                         Html.link [ prop.rel "stylesheet"; prop.type' "text/css"; prop.href conf.style ]
                         Html.link [ prop.rel "stylesheet"; prop.type' "text/css"; prop.href conf.highlightStyle ]
                     ]
+                    @ llmLinks
                     @ conf.additionalMetaContents
                 )
                 Html.body [

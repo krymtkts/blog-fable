@@ -40,6 +40,7 @@ module Fs =
         abstract readdir: path: string * ?callback: (Error option -> ResizeArray<string> -> unit) -> unit
         abstract readFile: filename: string * options: obj * callback: (Error option -> Buffer -> unit) -> unit
         abstract writeFile: filename: string * data: obj * ?callback: (Error option -> unit) -> unit
+        abstract unlink: filename: string * callback: (Error option -> unit) -> unit
         abstract statSync: path: string -> Stats
 
 [<Import("*", "fs")>]

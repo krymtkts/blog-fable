@@ -10,6 +10,8 @@ open DevServer
 open Suave
 open System.Threading
 open System.Threading.Tasks
+open System.Net.Http
+open System.Diagnostics
 
 (*
 NOTE: This tests requires the Playwright CLI to be installed.
@@ -106,6 +108,40 @@ let overwriteSnapshotsEnabled () =
     |> String.IsNullOrEmpty
     |> not
 
+let repositoryRoot = IO.Path.GetFullPath(IO.Path.Combine(__SOURCE_DIRECTORY__, ".."))
+
+let runProcess (fileName: string) (arguments: string list) =
+    task {
+        let startInfo = ProcessStartInfo(fileName)
+        startInfo.WorkingDirectory <- repositoryRoot
+        startInfo.UseShellExecute <- false
+        startInfo.RedirectStandardOutput <- true
+        startInfo.RedirectStandardError <- true
+
+        for argument in arguments do
+            startInfo.ArgumentList.Add argument
+
+        use child = new Process()
+        child.StartInfo <- startInfo
+
+        if child.Start() |> not then
+            failtestf "Failed to start %s" fileName
+
+        let outputTask = child.StandardOutput.ReadToEndAsync()
+        let errorTask = child.StandardError.ReadToEndAsync()
+        do! child.WaitForExitAsync()
+        let! output = outputTask
+        let! error = errorTask
+
+        if child.ExitCode <> 0 then
+            failtestf
+                "%s exited with code %d.\nstdout:\n%s\nstderr:\n%s"
+                fileName
+                child.ExitCode
+                output
+                error
+    }
+
 [<Tests>]
 let tests =
     testSequenced <| testList "snapshot testing" [
@@ -188,6 +224,185 @@ let tests =
             if failures.Count > 0 then
                 failtestf "Snapshot test failed for the following URLs:\n%s" (String.concat "\n" failures)
 
+        }
+
+        testTask "Markdown exports serve published content only" {
+            use server = new DevServer()
+            let client = new HttpClient()
+            let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+
+            let pages =
+                [ ( "/posts/2023-03-01-sample-post.html.md",
+                    "# Sample post - subtitle",
+                    "Posts have front matter.",
+                    "- URL: <https://krymtkts.github.io/blog-fable/posts/2023-03-01-sample-post.html.md>" )
+                  ( "/pages/sampla-page-without-front-matter.html.md",
+                    "# sampla-page-without-front-matter",
+                    "The page can omit front matter",
+                    "- URL: <https://krymtkts.github.io/blog-fable/pages/sampla-page-without-front-matter.html.md>" ) ]
+
+            for path, expectedTitle, expectedBody, expectedUrl in pages do
+                let! response: HttpResponseMessage = client.GetAsync(baseUrl + path)
+                let! content: string = response.Content.ReadAsStringAsync()
+
+                if response.IsSuccessStatusCode |> not then
+                    failtestf "Failed to load Markdown export %s: %O" path response.StatusCode
+
+                if content.StartsWith expectedTitle |> not then
+                    failtestf "Markdown export has unexpected title for %s: %s" path content
+
+                if content.Contains expectedBody |> not then
+                    failtestf "Markdown export does not contain source content for %s: %s" path content
+
+                if content.Contains expectedUrl |> not then
+                    failtestf "Markdown export does not contain an autolink URL for %s: %s" path content
+
+                if content.StartsWith "<!DOCTYPE html>" then
+                    failtestf "Markdown export should not be an HTML document: %s" path
+
+                if content.StartsWith "---" then
+                    failtestf "Markdown export should not start with front matter: %s" path
+
+            let! futureResponse: HttpResponseMessage =
+                client.GetAsync(baseUrl + "/posts/2077-01-01-future-post.html.md")
+            let! futureContent: string = futureResponse.Content.ReadAsStringAsync()
+
+            if futureContent.Contains "future-post" then
+                failtest "Future post Markdown export should not be published"
+
+            if futureContent.StartsWith "<!DOCTYPE html>" |> not then
+                failtest "Future post Markdown export should fall back to the 404 page"
+
+            client.Dispose()
+        }
+
+        testTask "Booklog Markdown exports preserve reading records" {
+            use server = new DevServer()
+            let client = new HttpClient()
+            let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+            let path = "/booklogs/a-book.html.md"
+
+            let! response: HttpResponseMessage = client.GetAsync(baseUrl + path)
+            let! content: string = response.Content.ReadAsStringAsync()
+
+            if response.IsSuccessStatusCode |> not then
+                failtestf "Failed to load booklog Markdown export %s: %O" path response.StatusCode
+
+            for expected in
+                [ "# Booklog - A book"
+                  "Author: Jane Doe"
+                  "## 2023-01-01"
+                  "- Read count: n+1"
+                  "- Pages: 1 ~ 9 (pages read: 9)"
+                  "start day of Jan." ] do
+                if content.Contains expected |> not then
+                    failtestf "Booklog Markdown export does not contain %s: %s" expected content
+
+            if content.StartsWith "<!DOCTYPE html>" then
+                failtest "Booklog Markdown export should not be an HTML document"
+
+            client.Dispose()
+        }
+
+        testTask "HTML detail pages advertise LLM resources" {
+            use server = new DevServer()
+            let client = new HttpClient()
+            let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+            let siteUrl = "https://krymtkts.github.io/blog-fable"
+
+            let detailPaths =
+                [ "/posts/2023-03-01-sample-post.html"
+                  "/pages/sampla-page.html"
+                  "/booklogs/a-book.html" ]
+
+            for path in detailPaths do
+                let! response: HttpResponseMessage = client.GetAsync(baseUrl + path)
+                let! content: string = response.Content.ReadAsStringAsync()
+
+                if response.IsSuccessStatusCode |> not then
+                    failtestf "Failed to load HTML detail page %s: %O" path response.StatusCode
+
+                if content.Contains "rel=\"alternate\"" |> not
+                   || content.Contains "type=\"text/markdown\"" |> not
+                   || content.Contains ($"href=\"%s{siteUrl}%s{path}.md\"") |> not then
+                    failtestf "HTML detail page does not advertise its Markdown export: %s" path
+
+                if content.Contains "rel=\"describedby\"" |> not
+                   || content.Contains ($"href=\"%s{siteUrl}/llms.txt\"") |> not then
+                    failtestf "HTML detail page does not advertise llms.txt: %s" path
+
+            for path in [ "/index.html"; "/archives.html"; "/booklogs.html"; "/404.html" ] do
+                let! response: HttpResponseMessage = client.GetAsync(baseUrl + path)
+                let! content: string = response.Content.ReadAsStringAsync()
+
+                if response.IsSuccessStatusCode |> not then
+                    failtestf "Failed to load non-detail page %s: %O" path response.StatusCode
+
+                if content.Contains "rel=\"alternate\"" || content.Contains "rel=\"describedby\"" then
+                    failtestf "Non-detail page should not advertise page-specific LLM resources: %s" path
+
+            client.Dispose()
+        }
+
+        testTask "llms.txt lists published Markdown exports without auto-generated descriptions" {
+            use server = new DevServer()
+            let client = new HttpClient()
+            let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+
+            let! response: HttpResponseMessage = client.GetAsync(baseUrl + "/llms.txt")
+            let! content: string = response.Content.ReadAsStringAsync()
+
+            if response.IsSuccessStatusCode |> not then
+                failtestf "Failed to load llms.txt: %O" response.StatusCode
+
+            for expected in [ "# Blog Fable"; "## Posts"; "## Pages"; "## Booklogs" ] do
+                if content.Contains expected |> not then
+                    failtestf "llms.txt does not contain %s: %s" expected content
+
+            for section in [ "Posts"; "Pages"; "Booklogs" ] do
+                if content.Contains ($"## %s{section}\n\n-") |> not then
+                    failtestf "llms.txt should separate the %s heading from its links: %s" section content
+
+            let hasGeneratedDescription (line: string) =
+                line.StartsWith "- ["
+                && (line.Contains "/posts/" || line.Contains "/pages/")
+                && line.Contains "): "
+
+            if content.Split('\n') |> Array.exists hasGeneratedDescription then
+                failtest "llms.txt should not generate descriptions for posts or pages"
+
+            if content.Contains "): Jane Doe" |> not then
+                failtest "llms.txt should preserve explicit booklog descriptions"
+
+            let outputRoot =
+                System.IO.Path.Combine(__SOURCE_DIRECTORY__, "..", "docs", "blog-fable")
+                |> System.IO.Path.GetFullPath
+
+            let urls =
+                [ "posts"; "pages"; "booklogs" ]
+                |> List.collect (fun root ->
+                    System.IO.Directory.GetFiles(System.IO.Path.Combine(outputRoot, root), "*.html.md")
+                    |> Array.map (fun path ->
+                        let relative =
+                            System.IO.Path.GetRelativePath(outputRoot, path).Replace("\\", "/")
+
+                        $"https://krymtkts.github.io/blog-fable/%s{relative}")
+                    |> Array.toList)
+
+            if urls.IsEmpty then
+                failtest "No Markdown exports were found"
+
+            for url in urls do
+                if content.Contains url |> not then
+                    failtestf "llms.txt does not link to %s: %s" url content
+
+            if content.Contains "2077-01-01-future-post.html.md" then
+                failtest "llms.txt should not link to the future post"
+
+            if content.Contains "## Archives" then
+                failtest "llms.txt should not contain an Archives section"
+
+            client.Dispose()
         }
 
         testTask "Pagefind filters classify archive and booklog results" {
@@ -402,6 +617,56 @@ let tests =
                 failtestf
                     "Tag AND filter returned unexpected URLs: %s"
                     (String.concat ", " tagUrls)
+        }
+
+        testTask "Disabled LLM output removes Markdown exports and discovery links" {
+            let outputRoot = IO.Path.Combine(repositoryRoot, "docs", "blog-fable")
+            let markdownRoot = IO.Path.Combine(outputRoot, "posts")
+            let pagesRoot = IO.Path.Combine(outputRoot, "pages")
+            let booklogsRoot = IO.Path.Combine(outputRoot, "booklogs")
+            let llmsPath = IO.Path.Combine(outputRoot, "llms.txt")
+            let mutable failure = None
+
+            try
+                do! runProcess "node" [ "src/App.fs.js"; "--no-llms" ]
+
+                if IO.File.Exists llmsPath then
+                    failtest "llms.txt should not be generated when LLM output is disabled"
+
+                let markdownFiles =
+                    [ markdownRoot; pagesRoot; booklogsRoot ]
+                    |> List.collect (fun root ->
+                        if IO.Directory.Exists root then
+                            IO.Directory.GetFiles(root, "*.html.md", IO.SearchOption.AllDirectories)
+                            |> Array.toList
+                        else
+                            [])
+
+                if markdownFiles.IsEmpty |> not then
+                    failtestf
+                        "Markdown exports should not be generated when LLM output is disabled: %s"
+                        (String.concat ", " markdownFiles)
+
+                for relativePath in
+                    [ "posts/2023-03-01-sample-post.html"
+                      "pages/sampla-page.html"
+                      "booklogs/a-book.html" ] do
+                    let path = IO.Path.Combine(outputRoot, relativePath)
+                    let content = IO.File.ReadAllText path
+
+                    if content.Contains "rel=\"alternate\"" || content.Contains "rel=\"describedby\"" then
+                        failtestf "LLM discovery links should be omitted from %s" relativePath
+            with ex ->
+                failure <- Some ex
+
+            do! runProcess "node" [ "src/App.fs.js" ]
+
+            if IO.File.Exists llmsPath |> not then
+                failtest "llms.txt was not restored after the disabled-output test"
+
+            match failure with
+            | Some ex -> return raise ex
+            | None -> return ()
         }
 
     ]

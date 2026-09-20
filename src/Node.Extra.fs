@@ -99,6 +99,19 @@ module File =
                     ))
         }
 
+    let remove (path: string) =
+        if fs.existsSync path then
+            Promise.create (fun resolve reject ->
+                fs.unlink (
+                    path,
+                    fun err ->
+                        match err with
+                        | Some err -> reject (err :?> System.Exception)
+                        | None -> resolve ()
+                ))
+        else
+            promise { return () }
+
     let copy (source: string) (destination: string) =
         promise {
             do! destination |> Directory.dirname |> Directory.ensure

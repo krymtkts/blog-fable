@@ -566,3 +566,46 @@ module Misc =
             (fun def -> generateBooklogSummary def.links def.book)
             (fun _ -> false)
             booklogs
+
+    let private markdownReadCount (book: Book) (log: Booklog) =
+        let readCount = log.readCount |> Option.defaultValue 1
+
+        match book.previouslyRead with
+        | Some true -> $"n+%d{readCount}"
+        | _ -> string readCount
+
+    let private markdownPageInfo (log: Booklog) =
+        let pagesRead = readPages log.pages
+
+        if pagesRead > 0 then
+            $"%s{log.pages} (pages read: %d{pagesRead})"
+        else
+            log.pages
+
+    let generateBooklogSummaryMarkdown (book: Book) (booklogs: Booklog list) =
+        let entries =
+            booklogs
+            |> List.map (fun log ->
+                let notes =
+                    match log.notes with
+                    | Some notes when notes.Trim() <> "" -> [ ""; notes.Trim() ]
+                    | _ -> []
+
+                [
+                    $"## %s{log.date}"
+                    ""
+                    $"- Read count: %s{markdownReadCount book log}"
+                    $"- Pages: %s{markdownPageInfo log}"
+                ]
+                @ notes
+                |> String.concat "\n")
+
+        [
+            $"# Booklog - %s{book.bookTitle}"
+            ""
+            $"Author: %s{book.bookAuthor}"
+            ""
+            entries |> String.concat "\n\n"
+        ]
+        |> String.concat "\n"
+        |> fun content -> content + "\n"
