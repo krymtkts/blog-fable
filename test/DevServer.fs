@@ -69,6 +69,9 @@ type BuildResult =
 let (handleWatcherEvents: FileChange seq -> unit), sseHandler =
     let refreshEvent = new Event<unit>()
 
+    let repositoryRoot =
+        IO.Path.GetFullPath(IO.Path.Combine(__SOURCE_DIRECTORY__, ".."))
+
     let buildFable () =
         let cmd = "fable src"
         let args = "--runScript dev" // NOTE: run script with development mode.
@@ -82,10 +85,16 @@ let (handleWatcherEvents: FileChange seq -> unit), sseHandler =
 
     let buildMd () =
         try
-            Npm.run "build-md" id
+            CreateProcess.fromRawCommand "node" [ "src/App.fs.js"; "dev" ]
+            |> CreateProcess.withWorkingDirectory repositoryRoot
+            |> CreateProcess.setEnvironmentVariable "NODE_ENV" "production"
+            |> CreateProcess.ensureExitCodeWithMessage "`node src/App.fs.js dev` failed"
+            |> Proc.run
+            |> ignore
+
             BuildResult.Ok
         with ex ->
-            printfn $"`[error] npm run build-md` failed: %s{ex.Message}"
+            printfn $"[error] `node src/App.fs.js dev` failed: %s{ex.Message}"
             BuildResult.Error ex.Message
 
     let buildStyle () =
@@ -183,7 +192,8 @@ let suaveConfig (home: string) (ct: CancellationToken) =
         bindings = [ HttpBinding.create HTTP IPAddress.Loopback port ]
         listenTimeout = TimeSpan.FromMilliseconds 3000.
         mimeTypesMap = extendedMimeTypesMap
-        cancellationToken = ct }
+        cancellationToken = ct
+    }
 
 let webpart (root: string) : WebPart =
     let root = root.Trim '/'
