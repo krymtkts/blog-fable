@@ -15,6 +15,7 @@ module Generation =
             title: string
             description: string option
             url: string
+            sortDate: string option
         }
 
     let private generatePostArchives (meta: Meta seq) root =
@@ -441,6 +442,10 @@ module Rendering =
             title = markdownTitle meta
             description = None
             url = markdownUrl conf site meta
+            sortDate =
+                match meta.layout with
+                | Post date -> Some date
+                | Page -> None
         }
 
     let private writeMarkdownContent (conf: FrameConfiguration) (site: PathConfiguration) (meta: Meta) (dest: string) =
@@ -488,16 +493,17 @@ module Rendering =
     let renderLlms (conf: FrameConfiguration) (pages: LlmPage list) (dest: string) =
         promise {
             let section name =
-                [
-                    $"## %s{name}"
-                    ""
+                let sortedPages =
                     pages
                     |> List.filter (fun page -> page.section = name)
-                    |> List.sortBy _.url
+                    |> match name with
+                       | "Posts"
+                       | "Booklogs" -> List.sortByDescending (fun page -> page.sortDate, page.url)
+                       | _ -> List.sortBy _.url
                     |> List.map llmsLink
                     |> String.concat "\n"
-                    ""
-                ]
+
+                [ $"## %s{name}"; ""; sortedPages; "" ]
 
             let sections =
                 [ section "Posts"; section "Pages"; section "Booklogs" ] |> List.concat
@@ -852,12 +858,13 @@ module Rendering =
 
             let pages =
                 bookContents
-                |> List.map (fun (_, _, id, book, _) ->
+                |> List.map (fun (_, _, id, book, logs) ->
                     {
                         section = "Booklogs"
                         title = book.bookTitle
                         description = Some book.bookAuthor
                         url = $"%s{conf.url}%s{basePath}/%s{id}.html.md" |> normalizeUrlPath
+                        sortDate = logs |> List.minBy (fun log -> System.DateTime.Parse log.date) |> _.date |> Some
                     })
 
             return locations, pages

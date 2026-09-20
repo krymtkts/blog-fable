@@ -374,6 +374,38 @@ let tests =
             if content.Contains "): Jane Doe" |> not then
                 failtest "llms.txt should preserve explicit booklog descriptions"
 
+            let assertLinksInOrder (section: string) (urls: string list) =
+                let positions = urls |> List.map (fun url -> content.IndexOf url)
+
+                if positions |> List.exists (fun position -> position < 0) then
+                    failtestf "llms.txt does not contain all expected %s links: %s" section (String.concat ", " urls)
+
+                if
+                    positions
+                    |> List.pairwise
+                    |> List.exists (fun (previous, current) -> previous >= current)
+                then
+                    failtestf
+                        "llms.txt does not list %s links in the expected order: %s"
+                        section
+                        (String.concat ", " urls)
+
+            assertLinksInOrder "Posts" [
+                "2023-09-10-blog-fable.html.md"
+                "2023-04-01-default-color-scheme.html.md"
+                "2023-03-01-sample-post.html.md"
+                "2023-02-01-about-markdown-parser.html.md"
+                "2023-01-01-sample-post-without-front-matter.html.md"
+                "2022-12-31-flatten-posts-in-nested-directory.html.md"
+            ]
+
+            assertLinksInOrder "Booklogs" [
+                "c-book.html.md"
+                "b-book.html.md"
+                "a-book.html.md"
+                "d-book.html.md"
+            ]
+
             let outputRoot =
                 System.IO.Path.Combine(__SOURCE_DIRECTORY__, "..", "docs", "blog-fable")
                 |> System.IO.Path.GetFullPath
