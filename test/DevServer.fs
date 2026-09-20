@@ -69,6 +69,9 @@ type BuildResult =
 let (handleWatcherEvents: FileChange seq -> unit), sseHandler =
     let refreshEvent = new Event<unit>()
 
+    let repositoryRoot =
+        IO.Path.GetFullPath(IO.Path.Combine(__SOURCE_DIRECTORY__, ".."))
+
     let buildFable () =
         let cmd = "fable src"
         let args = "--runScript dev" // NOTE: run script with development mode.
@@ -80,21 +83,25 @@ let (handleWatcherEvents: FileChange seq -> unit), sseHandler =
             printfn $"`dotnet %s{cmd} %s{args}` failed"
             result.Messages |> String.concat "\n" |> BuildResult.Error
 
-    let buildMd () =
+    let tryBuild command build =
         try
-            Npm.run "build-md" id
+            build ()
             BuildResult.Ok
         with ex ->
-            printfn $"`[error] npm run build-md` failed: %s{ex.Message}"
+            printfn $"[error] %s{command} failed: %s{ex.Message}"
             BuildResult.Error ex.Message
 
+    let buildMd () =
+        tryBuild "`node src/App.fs.js dev`" (fun () ->
+            CreateProcess.fromRawCommand "node" [ "src/App.fs.js"; "dev" ]
+            |> CreateProcess.withWorkingDirectory repositoryRoot
+            |> CreateProcess.setEnvironmentVariable "NODE_ENV" "production"
+            |> CreateProcess.ensureExitCodeWithMessage "`node src/App.fs.js dev` failed"
+            |> Proc.run
+            |> ignore)
+
     let buildStyle () =
-        try
-            Npm.run "build-css" id
-            BuildResult.Ok
-        with ex ->
-            printfn $"`[error] npm run build-css` failed: %s{ex.Message}"
-            BuildResult.Error ex.Message
+        tryBuild "`npm run build-css`" (fun () -> Npm.run "build-css" id)
 
     let handleWatcherEvents (events: FileChange seq) =
         let es =
@@ -183,7 +190,8 @@ let suaveConfig (home: string) (ct: CancellationToken) =
         bindings = [ HttpBinding.create HTTP IPAddress.Loopback port ]
         listenTimeout = TimeSpan.FromMilliseconds 3000.
         mimeTypesMap = extendedMimeTypesMap
-        cancellationToken = ct }
+        cancellationToken = ct
+    }
 
 let webpart (root: string) : WebPart =
     let root = root.Trim '/'
