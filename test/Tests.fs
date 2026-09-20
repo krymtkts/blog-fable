@@ -399,6 +399,13 @@ let tests =
                 "2022-12-31-flatten-posts-in-nested-directory.html.md"
             ]
 
+            assertLinksInOrder "Booklogs" [
+                "c-book.html.md"
+                "b-book.html.md"
+                "a-book.html.md"
+                "d-book.html.md"
+            ]
+
             let outputRoot =
                 System.IO.Path.Combine(__SOURCE_DIRECTORY__, "..", "docs", "blog-fable")
                 |> System.IO.Path.GetFullPath

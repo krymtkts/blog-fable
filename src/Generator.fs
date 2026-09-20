@@ -497,7 +497,8 @@ module Rendering =
                     pages
                     |> List.filter (fun page -> page.section = name)
                     |> match name with
-                       | "Posts" -> List.sortByDescending (fun page -> page.sortDate, page.url)
+                       | "Posts"
+                       | "Booklogs" -> List.sortByDescending (fun page -> page.sortDate, page.url)
                        | _ -> List.sortBy _.url
                     |> List.map llmsLink
                     |> String.concat "\n"
@@ -857,13 +858,13 @@ module Rendering =
 
             let pages =
                 bookContents
-                |> List.map (fun (_, _, id, book, _) ->
+                |> List.map (fun (_, _, id, book, logs) ->
                     {
                         section = "Booklogs"
                         title = book.bookTitle
                         description = Some book.bookAuthor
                         url = $"%s{conf.url}%s{basePath}/%s{id}.html.md" |> normalizeUrlPath
-                        sortDate = None
+                        sortDate = logs |> List.minBy (fun log -> System.DateTime.Parse log.date) |> _.date |> Some
                     })
 
             return locations, pages
