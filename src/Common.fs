@@ -12,6 +12,7 @@ module IO =
     let resolve (path: string) = File.absolutePath path
     let writeFile = File.write
     let readFile = File.read
+    let removeFile = File.remove
     let copy = File.copy
     let getFiles = Directory.getFiles true
     let leaf = Directory.leaf

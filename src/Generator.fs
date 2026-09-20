@@ -279,6 +279,14 @@ module Rendering =
             destRoot: string
         }
 
+    type LlmOutput =
+        {
+            removeMarkdown: string -> Fable.Core.JS.Promise<unit>
+            writeMarkdown: FrameConfiguration -> PathConfiguration -> Meta -> string -> Fable.Core.JS.Promise<unit>
+            writeBooklogMarkdown: string -> Book -> Booklog list -> Fable.Core.JS.Promise<unit>
+            writeIndex: FrameConfiguration -> LlmPage list -> string -> Fable.Core.JS.Promise<unit>
+        }
+
     let private readSource source =
         promise {
             printfn $"Rendering %s{source}..."
@@ -443,6 +451,11 @@ module Rendering =
             do! IO.writeFile dest content
         }
 
+    let private writeBooklogMarkdown (dest: string) (book: Book) (logs: Booklog list) =
+        let content = generateBooklogSummaryMarkdown book logs
+        printfn $"Writing Markdown %s{dest}..."
+        IO.writeFile dest content
+
     let private llmsLink (page: LlmPage) =
         match page.description with
         | Some description when description <> "" -> $"- [%s{page.title}](%s{page.url}): %s{description}"
@@ -470,6 +483,22 @@ module Rendering =
             printfn $"Writing llms.txt %s{dest}..."
             do! IO.writeFile dest content
         }
+
+    let createLlmOutput (enabled: bool) : LlmOutput =
+        if enabled then
+            {
+                removeMarkdown = fun _ -> promise { return () }
+                writeMarkdown = writeMarkdownContent
+                writeBooklogMarkdown = writeBooklogMarkdown
+                writeIndex = renderLlms
+            }
+        else
+            {
+                removeMarkdown = IO.removeFile
+                writeMarkdown = fun _ _ _ _ -> promise { return () }
+                writeBooklogMarkdown = fun dest _ _ -> IO.removeFile dest
+                writeIndex = fun _ _ dest -> IO.removeFile dest
+            }
 
     let private checkFilenamePattern (files: string list) =
         files
@@ -502,12 +531,18 @@ module Rendering =
             | [] -> ()
             | x -> x |> String.concat " " |> failwithf "Invalid posts filename patterns: %s"
 
-    let renderMarkdowns (conf: FrameConfiguration) (site: PathConfiguration) sourceDir destDir =
+    let renderMarkdowns (llmOutput: LlmOutput) (conf: FrameConfiguration) (site: PathConfiguration) sourceDir destDir =
         promise {
             let! files = getMarkdownFiles sourceDir
 
             files |> checkFilenamePattern
             files |> checkPostsFilenamePattern site.postRoot
+
+            do!
+                files
+                |> List.map (fun source -> getMarkdownDestinationPath source destDir |> llmOutput.removeMarkdown)
+                |> Promise.all
+                |> Promise.map ignore
 
             let! metas = files |> List.map readSource |> Promise.all
 
@@ -535,7 +570,7 @@ module Rendering =
                         let dest = getDestinationPath meta.source destDir
                         do! writeContent conf site meta dest prev next
                         let markdownDest = getMarkdownDestinationPath meta.source destDir
-                        do! writeMarkdownContent conf site meta markdownDest
+                        do! llmOutput.writeMarkdown conf site meta markdownDest
                         return meta
                     })
                 |> Promise.all
@@ -624,6 +659,7 @@ module Rendering =
         }
 
     let renderBooklogs
+        (llmOutput: LlmOutput)
         (conf: FrameConfiguration)
         (site: PathConfiguration)
         (priority: string)
@@ -767,9 +803,7 @@ module Rendering =
                 bookContents
                 |> List.map (fun (_, _, id, book, logs) ->
                     let dest = $"%s{destDir}/%s{id}.html.md"
-                    let content = generateBooklogSummaryMarkdown book logs
-                    printfn $"Writing Markdown %s{dest}..."
-                    IO.writeFile dest content)
+                    llmOutput.writeBooklogMarkdown dest book logs)
                 |> Promise.all
                 |> Promise.map ignore
 
@@ -898,6 +932,8 @@ type RenderOptions =
         sitemap: sitemap
 
         highlightStyle: string
+
+        llms: bool
 
         future: bool
     }
@@ -1059,6 +1095,7 @@ let render (opts: RenderOptions) =
         let jsInjection, scripts = buildBundledScripts opts
         let highlightInjection, highlightStyle = buildHighlightStyle opts
         let additionalMetaContents = generateMetaContents opts.additionalMetaContents
+        let llmOutput = createLlmOutput opts.llms
 
         let site: PathConfiguration =
             {
@@ -1092,7 +1129,7 @@ let render (opts: RenderOptions) =
 
         let confWithAuthor = { conf with author = opts.author }
 
-        let renderPostAndPages = renderMarkdowns confWithAuthor site
+        let renderPostAndPages = renderMarkdowns llmOutput confWithAuthor site
 
         let! metaPosts =
             renderPostAndPages
@@ -1143,7 +1180,7 @@ let render (opts: RenderOptions) =
         let! tagLocs = renderTags conf site tagDef <| RenderOptions.tagsDestinationPath opts
 
         let! booklogLocs, booklogPages =
-            renderBooklogs confWithAuthor site (opts.sitemap.booklogs |> string)
+            renderBooklogs llmOutput confWithAuthor site (opts.sitemap.booklogs |> string)
             <| RenderOptions.booklogsSourceRoot opts
             <| RenderOptions.booklogsDestinationPath opts
             <| RenderOptions.booksSourceRoot opts
@@ -1159,7 +1196,7 @@ let render (opts: RenderOptions) =
               booklogPages ]
             |> List.concat
 
-        do! renderLlms confWithAuthor llmPages <| RenderOptions.llmsDestinationPath opts
+        do! llmOutput.writeIndex confWithAuthor llmPages <| RenderOptions.llmsDestinationPath opts
 
         do! render404 conf site <| RenderOptions.``404DestinationPath`` opts
 
