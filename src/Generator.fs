@@ -346,6 +346,26 @@ module Rendering =
     let private readBooksSource source =
         parseBooksSource source Parser.parseBooks
 
+    let private markdownRoot (site: PathConfiguration) (meta: Meta) =
+        match meta.layout with
+        | Post _ -> site.postRoot
+        | Page -> site.pageRoot
+
+    let private markdownUrl (conf: FrameConfiguration) (site: PathConfiguration) (meta: Meta) =
+        sourceToSitemap $"%s{site.siteRoot}%s{markdownRoot site meta}" meta.source
+        + ".md"
+        |> fun path -> $"%s{conf.url}%s{path}"
+
+    let private createLlmLinks (conf: FrameConfiguration) (site: PathConfiguration) markdown =
+        if conf.llms then
+            Some
+                {
+                    markdown = markdown
+                    describedBy = $"%s{conf.url}%s{site.siteRoot}/llms.txt"
+                }
+        else
+            None
+
     let private writeContent
         (conf: FrameConfiguration)
         (root: PathConfiguration)
@@ -377,6 +397,12 @@ module Rendering =
                 | Post _ -> Component.footer $"%s{root.siteRoot}%s{root.postRoot}/" prev next
                 | _ -> []
 
+            let llmLinks =
+                if meta.index then
+                    None
+                else
+                    markdownUrl conf root meta |> createLlmLinks conf root
+
             let page =
                 List.concat [ header; [ meta.content ]; footer ]
                 |> frame
@@ -385,6 +411,7 @@ module Rendering =
                         author = author
                         description = meta.description
                         pagefindSection = Some "archive"
+                        llmLinks = llmLinks
                         url = $"%s{conf.url}%s{root.siteRoot}/%s{path}"
                     }
                 |> Parser.parseReactStaticHtml
@@ -405,16 +432,6 @@ module Rendering =
         | Some fm, None -> fm.author
         | None, Some author -> Some author
         | None, None -> None
-
-    let private markdownRoot (site: PathConfiguration) (meta: Meta) =
-        match meta.layout with
-        | Post _ -> site.postRoot
-        | Page -> site.pageRoot
-
-    let private markdownUrl (conf: FrameConfiguration) (site: PathConfiguration) (meta: Meta) =
-        sourceToSitemap $"%s{site.siteRoot}%s{markdownRoot site meta}" meta.source
-        + ".md"
-        |> fun path -> $"%s{conf.url}%s{path}"
 
     let llmPageFromMeta (conf: FrameConfiguration) (site: PathConfiguration) (section: string) (meta: Meta) =
         { section = section
@@ -774,9 +791,18 @@ module Rendering =
                     |> function
                         | None -> None
                         | Some book ->
-                            let content, location, id =
+                            let id = book.id
+                            let bookConf =
+                                { conf with
+                                    llmLinks =
+                                        createLlmLinks
+                                            conf
+                                            site
+                                            $"%s{conf.url}%s{basePath}/%s{id}.html.md" }
+
+                            let content, location, generatedId =
                                 generateBooklogSummaryContent
-                                    conf
+                                    bookConf
                                     {
                                         priority = priority
                                         basePath = basePath
@@ -785,7 +811,7 @@ module Rendering =
                                     }
                                     logs
 
-                            Some(content, location, id, book, logs))
+                            Some(content, location, generatedId, book, logs))
 
             do!
                 bookContents
@@ -1121,6 +1147,8 @@ let render (opts: RenderOptions) =
                 scriptInjection = jsInjection
                 additionalMetaContents = additionalMetaContents
                 pagefindSection = None
+                llms = opts.llms
+                llmLinks = None
                 future = opts.future
             }
 

@@ -269,6 +269,46 @@ let tests =
             client.Dispose()
         }
 
+        testTask "HTML detail pages advertise LLM resources" {
+            use server = new DevServer()
+            let client = new HttpClient()
+            let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+            let siteUrl = "https://krymtkts.github.io/blog-fable"
+
+            let detailPaths =
+                [ "/posts/2023-03-01-sample-post.html"
+                  "/pages/sampla-page.html"
+                  "/booklogs/a-book.html" ]
+
+            for path in detailPaths do
+                let! response: HttpResponseMessage = client.GetAsync(baseUrl + path)
+                let! content: string = response.Content.ReadAsStringAsync()
+
+                if response.IsSuccessStatusCode |> not then
+                    failtestf "Failed to load HTML detail page %s: %O" path response.StatusCode
+
+                if content.Contains "rel=\"alternate\"" |> not
+                   || content.Contains "type=\"text/markdown\"" |> not
+                   || content.Contains ($"href=\"%s{siteUrl}%s{path}.md\"") |> not then
+                    failtestf "HTML detail page does not advertise its Markdown export: %s" path
+
+                if content.Contains "rel=\"describedby\"" |> not
+                   || content.Contains ($"href=\"%s{siteUrl}/llms.txt\"") |> not then
+                    failtestf "HTML detail page does not advertise llms.txt: %s" path
+
+            for path in [ "/index.html"; "/archives.html"; "/booklogs.html"; "/404.html" ] do
+                let! response: HttpResponseMessage = client.GetAsync(baseUrl + path)
+                let! content: string = response.Content.ReadAsStringAsync()
+
+                if response.IsSuccessStatusCode |> not then
+                    failtestf "Failed to load non-detail page %s: %O" path response.StatusCode
+
+                if content.Contains "rel=\"alternate\"" || content.Contains "rel=\"describedby\"" then
+                    failtestf "Non-detail page should not advertise page-specific LLM resources: %s" path
+
+            client.Dispose()
+        }
+
         testTask "llms.txt lists published Markdown exports without auto-generated descriptions" {
             use server = new DevServer()
             let client = new HttpClient()
