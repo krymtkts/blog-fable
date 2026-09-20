@@ -281,7 +281,6 @@ module Rendering =
 
     type LlmOutput =
         {
-            removeMarkdown: string -> Fable.Core.JS.Promise<unit>
             writeMarkdown: FrameConfiguration -> PathConfiguration -> Meta -> string -> Fable.Core.JS.Promise<unit>
             writeBooklogMarkdown: string -> Book -> Booklog list -> Fable.Core.JS.Promise<unit>
             writeIndex: FrameConfiguration -> LlmPage list -> string -> Fable.Core.JS.Promise<unit>
@@ -487,14 +486,12 @@ module Rendering =
     let createLlmOutput (enabled: bool) : LlmOutput =
         if enabled then
             {
-                removeMarkdown = fun _ -> promise { return () }
                 writeMarkdown = writeMarkdownContent
                 writeBooklogMarkdown = writeBooklogMarkdown
                 writeIndex = renderLlms
             }
         else
             {
-                removeMarkdown = IO.removeFile
                 writeMarkdown = fun _ _ _ _ -> promise { return () }
                 writeBooklogMarkdown = fun dest _ _ -> IO.removeFile dest
                 writeIndex = fun _ _ dest -> IO.removeFile dest
@@ -540,7 +537,7 @@ module Rendering =
 
             do!
                 files
-                |> List.map (fun source -> getMarkdownDestinationPath source destDir |> llmOutput.removeMarkdown)
+                |> List.map (fun source -> getMarkdownDestinationPath source destDir |> IO.removeFile)
                 |> Promise.all
                 |> Promise.map ignore
 

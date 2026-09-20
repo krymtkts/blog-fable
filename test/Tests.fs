@@ -191,7 +191,7 @@ let tests =
 
         }
 
-        testTask "Markdown exports preserve published content" {
+        testTask "Markdown exports serve published content only" {
             use server = new DevServer()
             let client = new HttpClient()
             let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
@@ -234,6 +234,9 @@ let tests =
 
             if futureContent.Contains "future-post" then
                 failtest "Future post Markdown export should not be published"
+
+            if futureContent.StartsWith "<!DOCTYPE html>" |> not then
+                failtest "Future post Markdown export should fall back to the 404 page"
 
             client.Dispose()
         }
