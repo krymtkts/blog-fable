@@ -108,7 +108,8 @@ let overwriteSnapshotsEnabled () =
     |> String.IsNullOrEmpty
     |> not
 
-let repositoryRoot = IO.Path.GetFullPath(IO.Path.Combine(__SOURCE_DIRECTORY__, ".."))
+let repositoryRoot =
+    IO.Path.GetFullPath(IO.Path.Combine(__SOURCE_DIRECTORY__, ".."))
 
 let runProcess (fileName: string) (arguments: string list) =
     task {
@@ -134,56 +135,50 @@ let runProcess (fileName: string) (arguments: string list) =
         let! error = errorTask
 
         if child.ExitCode <> 0 then
-            failtestf
-                "%s exited with code %d.\nstdout:\n%s\nstderr:\n%s"
-                fileName
-                child.ExitCode
-                output
-                error
+            failtestf "%s exited with code %d.\nstdout:\n%s\nstderr:\n%s" fileName child.ExitCode output error
     }
 
 [<Tests>]
 let tests =
-    testSequenced <| testList "snapshot testing" [
+    testSequenced
+    <| testList "snapshot testing" [
 
         testTask "comparison" {
 
             let paths =
                 [
-
-                  ""
-                  "/index.html"
-                  "/archives.html"
-                  "/pages/about.html"
-                  "/pages/sampla-page-without-front-matter.html"
-                  "/pages/sampla-page.html"
-                  "/posts/2022-12-31-flatten-posts-in-nested-directory.html"
-                  "/posts/2023-01-01-sample-post-without-front-matter.html"
-                  "/posts/2023-02-01-about-markdown-parser.html"
-                  "/posts/2023-03-01-sample-post.html"
-                  "/posts/2023-04-01-default-color-scheme.html"
-                  "/posts/2023-09-10-blog-fable.html"
-                  "/tags.html"
-                  "/tags/fsharp.html"
-                  "/tags/image.html"
-                  "/tags/markdown.html"
-                  "/tags/sample.html"
-                  "/tags/t.html"
-                  "/tags/tag.html"
-                  "/tags/this-is-extreme-long-tag-name.html"
-                  "/tags/yaml.html"
-                  "/booklogs.html"
-                  "/booklogs/2022.html"
-                  "/booklogs/2023.html"
-                  "/booklogs/2024.html"
-                  "/booklogs/a-book.html"
-                  "/booklogs/b-book.html"
-                  "/booklogs/c-book.html"
-                  "/booklogs/d-book.html"
-                  "/404.html"
-                  "/xxx.html" // Test for 404 page
-
-                  ]
+                    ""
+                    "/index.html"
+                    "/archives.html"
+                    "/pages/about.html"
+                    "/pages/sampla-page-without-front-matter.html"
+                    "/pages/sampla-page.html"
+                    "/posts/2022-12-31-flatten-posts-in-nested-directory.html"
+                    "/posts/2023-01-01-sample-post-without-front-matter.html"
+                    "/posts/2023-02-01-about-markdown-parser.html"
+                    "/posts/2023-03-01-sample-post.html"
+                    "/posts/2023-04-01-default-color-scheme.html"
+                    "/posts/2023-09-10-blog-fable.html"
+                    "/tags.html"
+                    "/tags/fsharp.html"
+                    "/tags/image.html"
+                    "/tags/markdown.html"
+                    "/tags/sample.html"
+                    "/tags/t.html"
+                    "/tags/tag.html"
+                    "/tags/this-is-extreme-long-tag-name.html"
+                    "/tags/yaml.html"
+                    "/booklogs.html"
+                    "/booklogs/2022.html"
+                    "/booklogs/2023.html"
+                    "/booklogs/2024.html"
+                    "/booklogs/a-book.html"
+                    "/booklogs/b-book.html"
+                    "/booklogs/c-book.html"
+                    "/booklogs/d-book.html"
+                    "/404.html"
+                    "/xxx.html" // Test for 404 page
+                ]
 
             use server = new DevServer()
             let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
@@ -232,14 +227,16 @@ let tests =
             let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
 
             let pages =
-                [ ( "/posts/2023-03-01-sample-post.html.md",
-                    "# Sample post - subtitle",
-                    "Posts have front matter.",
-                    "- URL: <https://krymtkts.github.io/blog-fable/posts/2023-03-01-sample-post.html.md>" )
-                  ( "/pages/sampla-page-without-front-matter.html.md",
-                    "# sampla-page-without-front-matter",
-                    "The page can omit front matter",
-                    "- URL: <https://krymtkts.github.io/blog-fable/pages/sampla-page-without-front-matter.html.md>" ) ]
+                [
+                    ("/posts/2023-03-01-sample-post.html.md",
+                     "# Sample post - subtitle",
+                     "Posts have front matter.",
+                     "- URL: <https://krymtkts.github.io/blog-fable/posts/2023-03-01-sample-post.html.md>")
+                    ("/pages/sampla-page-without-front-matter.html.md",
+                     "# sampla-page-without-front-matter",
+                     "The page can omit front matter",
+                     "- URL: <https://krymtkts.github.io/blog-fable/pages/sampla-page-without-front-matter.html.md>")
+                ]
 
             for path, expectedTitle, expectedBody, expectedUrl in pages do
                 let! response: HttpResponseMessage = client.GetAsync(baseUrl + path)
@@ -265,6 +262,7 @@ let tests =
 
             let! futureResponse: HttpResponseMessage =
                 client.GetAsync(baseUrl + "/posts/2077-01-01-future-post.html.md")
+
             let! futureContent: string = futureResponse.Content.ReadAsStringAsync()
 
             if futureContent.Contains "future-post" then
@@ -289,12 +287,14 @@ let tests =
                 failtestf "Failed to load booklog Markdown export %s: %O" path response.StatusCode
 
             for expected in
-                [ "# Booklog - A book"
-                  "Author: Jane Doe"
-                  "## 2023-01-01"
-                  "- Read count: n+1"
-                  "- Pages: 1 ~ 9 (pages read: 9)"
-                  "start day of Jan." ] do
+                [
+                    "# Booklog - A book"
+                    "Author: Jane Doe"
+                    "## 2023-01-01"
+                    "- Read count: n+1"
+                    "- Pages: 1 ~ 9 (pages read: 9)"
+                    "start day of Jan."
+                ] do
                 if content.Contains expected |> not then
                     failtestf "Booklog Markdown export does not contain %s: %s" expected content
 
@@ -311,9 +311,11 @@ let tests =
             let siteUrl = "https://krymtkts.github.io/blog-fable"
 
             let detailPaths =
-                [ "/posts/2023-03-01-sample-post.html"
-                  "/pages/sampla-page.html"
-                  "/booklogs/a-book.html" ]
+                [
+                    "/posts/2023-03-01-sample-post.html"
+                    "/pages/sampla-page.html"
+                    "/booklogs/a-book.html"
+                ]
 
             for path in detailPaths do
                 let! response: HttpResponseMessage = client.GetAsync(baseUrl + path)
@@ -322,13 +324,17 @@ let tests =
                 if response.IsSuccessStatusCode |> not then
                     failtestf "Failed to load HTML detail page %s: %O" path response.StatusCode
 
-                if content.Contains "rel=\"alternate\"" |> not
-                   || content.Contains "type=\"text/markdown\"" |> not
-                   || content.Contains ($"href=\"%s{siteUrl}%s{path}.md\"") |> not then
+                if
+                    content.Contains "rel=\"alternate\"" |> not
+                    || content.Contains "type=\"text/markdown\"" |> not
+                    || content.Contains($"href=\"%s{siteUrl}%s{path}.md\"") |> not
+                then
                     failtestf "HTML detail page does not advertise its Markdown export: %s" path
 
-                if content.Contains "rel=\"describedby\"" |> not
-                   || content.Contains ($"href=\"%s{siteUrl}/llms.txt\"") |> not then
+                if
+                    content.Contains "rel=\"describedby\"" |> not
+                    || content.Contains($"href=\"%s{siteUrl}/llms.txt\"") |> not
+                then
                     failtestf "HTML detail page does not advertise llms.txt: %s" path
 
             for path in [ "/index.html"; "/archives.html"; "/booklogs.html"; "/404.html" ] do
@@ -360,7 +366,7 @@ let tests =
                     failtestf "llms.txt does not contain %s: %s" expected content
 
             for section in [ "Posts"; "Pages"; "Booklogs" ] do
-                if content.Contains ($"## %s{section}\n\n-") |> not then
+                if content.Contains($"## %s{section}\n\n-") |> not then
                     failtestf "llms.txt should separate the %s heading from its links: %s" section content
 
             let hasGeneratedDescription (line: string) =
@@ -399,12 +405,7 @@ let tests =
                 "2022-12-31-flatten-posts-in-nested-directory.html.md"
             ]
 
-            assertLinksInOrder "Booklogs" [
-                "c-book.html.md"
-                "b-book.html.md"
-                "a-book.html.md"
-                "d-book.html.md"
-            ]
+            assertLinksInOrder "Booklogs" [ "c-book.html.md"; "b-book.html.md"; "a-book.html.md"; "d-book.html.md" ]
 
             let outputRoot =
                 System.IO.Path.Combine(__SOURCE_DIRECTORY__, "..", "docs", "blog-fable")
@@ -415,8 +416,7 @@ let tests =
                 |> List.collect (fun root ->
                     System.IO.Directory.GetFiles(System.IO.Path.Combine(outputRoot, root), "*.html.md")
                     |> Array.map (fun path ->
-                        let relative =
-                            System.IO.Path.GetRelativePath(outputRoot, path).Replace("\\", "/")
+                        let relative = System.IO.Path.GetRelativePath(outputRoot, path).Replace("\\", "/")
 
                         $"https://krymtkts.github.io/blog-fable/%s{relative}")
                     |> Array.toList)
@@ -452,7 +452,8 @@ let tests =
             | _ -> ()
 
             let filtersTask: Task<string> =
-                page.EvaluateAsync<string> """
+                page.EvaluateAsync<string>
+                    """
                     async () => {
                         const pagefind = await import("/blog-fable/pagefind/pagefind.js");
                         return JSON.stringify(await pagefind.filters());
@@ -461,18 +462,13 @@ let tests =
 
             let! filters = filtersTask
 
-            for expected: string in [
-                "\"section\""
-                "\"archive\""
-                "\"booklog\""
-                "\"tag\""
-                "\"sample\""
-            ] do
+            for expected: string in [ "\"section\""; "\"archive\""; "\"booklog\""; "\"tag\""; "\"sample\"" ] do
                 if (filters: string).Contains expected |> not then
                     failtestf "Pagefind filters did not contain %s: %s" expected filters
 
             let booklogUrlsTask: Task<string array> =
-                page.EvaluateAsync<string array> """
+                page.EvaluateAsync<string array>
+                    """
                     async () => {
                         const pagefind = await import("/blog-fable/pagefind/pagefind.js");
                         const search = await pagefind.search(null, {
@@ -485,12 +481,16 @@ let tests =
 
             let! booklogUrls = booklogUrlsTask
 
-            if (booklogUrls: string array).Length = 0
-               || booklogUrls |> Array.exists (fun (url: string) -> url.Contains("/booklogs/") |> not) then
+            if
+                (booklogUrls: string array).Length = 0
+                || booklogUrls
+                   |> Array.exists (fun (url: string) -> url.Contains("/booklogs/") |> not)
+            then
                 failtestf "Booklog filter returned unexpected URLs: %s" (String.concat ", " booklogUrls)
 
             let taggedArchiveUrlsTask: Task<string array> =
-                page.EvaluateAsync<string array> """
+                page.EvaluateAsync<string array>
+                    """
                     async () => {
                         const pagefind = await import("/blog-fable/pagefind/pagefind.js");
                         const search = await pagefind.search(null, {
@@ -503,8 +503,11 @@ let tests =
 
             let! taggedArchiveUrls = taggedArchiveUrlsTask
 
-            if (taggedArchiveUrls: string array).Length = 0
-               || taggedArchiveUrls |> Array.exists (fun (url: string) -> url.Contains("/booklogs/")) then
+            if
+                (taggedArchiveUrls: string array).Length = 0
+                || taggedArchiveUrls
+                   |> Array.exists (fun (url: string) -> url.Contains("/booklogs/"))
+            then
                 failtestf "Tagged archive filter returned unexpected URLs: %s" (String.concat ", " taggedArchiveUrls)
 
             let! dropdownCount = page.Locator("pagefind-filter-dropdown").CountAsync()
@@ -517,7 +520,9 @@ let tests =
             do! modalTrigger.ClickAsync()
 
             let! modalScrollbarColor =
-                page.Locator(".pf-modal-body").EvaluateAsync<string>("element => getComputedStyle(element).scrollbarColor")
+                page
+                    .Locator(".pf-modal-body")
+                    .EvaluateAsync<string>("element => getComputedStyle(element).scrollbarColor")
 
             if modalScrollbarColor = "auto" then
                 failtest "Pagefind modal scrollbar did not use the site theme"
@@ -531,13 +536,17 @@ let tests =
             do! sectionTrigger.ClickAsync()
 
             let! dropdownScrollbarColor =
-                sectionDropdown.Locator(".pf-dropdown-options").EvaluateAsync<string>("element => getComputedStyle(element).scrollbarColor")
+                sectionDropdown
+                    .Locator(".pf-dropdown-options")
+                    .EvaluateAsync<string>("element => getComputedStyle(element).scrollbarColor")
 
             if dropdownScrollbarColor = "auto" then
                 failtest "Pagefind filter scrollbar did not use the site theme"
 
             let! dropdownOverflow =
-                sectionDropdown.Locator(".pf-dropdown-menu").EvaluateAsync<string>("element => getComputedStyle(element).overflowY")
+                sectionDropdown
+                    .Locator(".pf-dropdown-menu")
+                    .EvaluateAsync<string>("element => getComputedStyle(element).overflowY")
 
             if dropdownOverflow <> "visible" then
                 failtestf "Pagefind filter menu should not be a second scroll container: %s" dropdownOverflow
@@ -603,7 +612,8 @@ let tests =
             do! yamlOption.ClickAsync()
 
             let! selectedValues =
-                page.EvaluateAsync<string array> """
+                page.EvaluateAsync<string array>
+                    """
                     () => Array.from(document.querySelectorAll(
                         "pagefind-filter-dropdown[filter='tag'] [role='option'][aria-selected='true']"
                     ))
@@ -614,9 +624,7 @@ let tests =
             let expectedSelectedValues = [| "sample"; "yaml" |]
 
             if selectedValues <> expectedSelectedValues then
-                failtestf
-                    "Tag filter did not keep both selections: %s"
-                    (String.concat ", " selectedValues)
+                failtestf "Tag filter did not keep both selections: %s" (String.concat ", " selectedValues)
 
             let! tagTriggerLabel = tagTrigger.GetAttributeAsync("aria-label")
 
@@ -626,7 +634,8 @@ let tests =
             | None -> failtest "The selected tag label was null"
 
             let tagUrlsTask: Task<string array> =
-                page.EvaluateAsync<string array> """
+                page.EvaluateAsync<string array>
+                    """
                     async () => {
                         const pagefind = await import("/blog-fable/pagefind/pagefind.js");
                         const search = await pagefind.search(null, {
@@ -642,13 +651,13 @@ let tests =
             let! tagUrls = tagUrlsTask
 
             let expectedTagUrls =
-                [| "/blog-fable/pages/sampla-page.html"
-                   "/blog-fable/posts/2023-03-01-sample-post.html" |]
+                [|
+                    "/blog-fable/pages/sampla-page.html"
+                    "/blog-fable/posts/2023-03-01-sample-post.html"
+                |]
 
             if tagUrls <> expectedTagUrls then
-                failtestf
-                    "Tag AND filter returned unexpected URLs: %s"
-                    (String.concat ", " tagUrls)
+                failtestf "Tag AND filter returned unexpected URLs: %s" (String.concat ", " tagUrls)
         }
 
         testTask "Disabled LLM output removes Markdown exports and discovery links" {
@@ -680,9 +689,11 @@ let tests =
                         (String.concat ", " markdownFiles)
 
                 for relativePath in
-                    [ "posts/2023-03-01-sample-post.html"
-                      "pages/sampla-page.html"
-                      "booklogs/a-book.html" ] do
+                    [
+                        "posts/2023-03-01-sample-post.html"
+                        "pages/sampla-page.html"
+                        "booklogs/a-book.html"
+                    ] do
                     let path = IO.Path.Combine(outputRoot, relativePath)
                     let content = IO.File.ReadAllText path
 
