@@ -591,17 +591,21 @@ module Misc =
                     | Some notes when notes.Trim() <> "" -> [ ""; notes.Trim() ]
                     | _ -> []
 
-                [ $"## %s{log.date}"
-                  ""
-                  $"- Read count: %s{markdownReadCount book log}"
-                  $"- Pages: %s{markdownPageInfo log}" ]
+                [
+                    $"## %s{log.date}"
+                    ""
+                    $"- Read count: %s{markdownReadCount book log}"
+                    $"- Pages: %s{markdownPageInfo log}"
+                ]
                 @ notes
                 |> String.concat "\n")
 
-        [ $"# Booklog - %s{book.bookTitle}"
-          ""
-          $"Author: %s{book.bookAuthor}"
-          ""
-          entries |> String.concat "\n\n" ]
+        [
+            $"# Booklog - %s{book.bookTitle}"
+            ""
+            $"Author: %s{book.bookAuthor}"
+            ""
+            entries |> String.concat "\n\n"
+        ]
         |> String.concat "\n"
         |> fun content -> content + "\n"

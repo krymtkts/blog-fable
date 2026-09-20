@@ -636,8 +636,10 @@ module Component =
         let llmLinks =
             conf.llmLinks
             |> Option.map (fun links ->
-                [ Html.link [ prop.rel "alternate"; prop.type' "text/markdown"; prop.href links.markdown ]
-                  Html.link [ prop.rel "describedby"; prop.href links.describedBy ] ])
+                [
+                    Html.link [ prop.rel "alternate"; prop.type' "text/markdown"; prop.href links.markdown ]
+                    Html.link [ prop.rel "describedby"; prop.href links.describedBy ]
+                ])
             |> Option.defaultValue []
 
         let main =

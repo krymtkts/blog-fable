@@ -10,10 +10,12 @@ module Generation =
     let private generatorName = "blog-fable"
 
     type LlmPage =
-        { section: string
-          title: string
-          description: string option
-          url: string }
+        {
+            section: string
+            title: string
+            description: string option
+            url: string
+        }
 
     let private generatePostArchives (meta: Meta seq) root =
         promise {
@@ -434,32 +436,38 @@ module Rendering =
         | None, None -> None
 
     let llmPageFromMeta (conf: FrameConfiguration) (site: PathConfiguration) (section: string) (meta: Meta) =
-        { section = section
-          title = markdownTitle meta
-          description = None
-          url = markdownUrl conf site meta }
+        {
+            section = section
+            title = markdownTitle meta
+            description = None
+            url = markdownUrl conf site meta
+        }
 
     let private writeMarkdownContent (conf: FrameConfiguration) (site: PathConfiguration) (meta: Meta) (dest: string) =
         promise {
             let url = markdownUrl conf site meta
 
             let metadata =
-                [ Some $"- URL: <%s{url}>"
-                  Some $"- Date: %s{meta.date}"
-                  markdownAuthor conf meta |> Option.map (fun author -> $"- Author: %s{author}")
-                  meta.frontMatter
-                  |> Option.bind _.tags
-                  |> Option.map (fun tags ->
-                      let tags = String.concat ", " tags
-                      $"- Tags: %s{tags}") ]
+                [
+                    Some $"- URL: <%s{url}>"
+                    Some $"- Date: %s{meta.date}"
+                    markdownAuthor conf meta |> Option.map (fun author -> $"- Author: %s{author}")
+                    meta.frontMatter
+                    |> Option.bind _.tags
+                    |> Option.map (fun tags ->
+                        let tags = String.concat ", " tags
+                        $"- Tags: %s{tags}")
+                ]
                 |> List.choose id
 
             let content =
-                [ $"# %s{markdownTitle meta}"
-                  ""
-                  metadata |> String.concat "\n"
-                  ""
-                  meta.markdown.Trim() ]
+                [
+                    $"# %s{markdownTitle meta}"
+                    ""
+                    metadata |> String.concat "\n"
+                    ""
+                    meta.markdown.Trim()
+                ]
                 |> String.concat "\n"
                 |> fun content -> content + "\n"
 
@@ -480,14 +488,16 @@ module Rendering =
     let renderLlms (conf: FrameConfiguration) (pages: LlmPage list) (dest: string) =
         promise {
             let section name =
-                [ $"## %s{name}"
-                  ""
-                  pages
-                  |> List.filter (fun page -> page.section = name)
-                  |> List.sortBy _.url
-                  |> List.map llmsLink
-                  |> String.concat "\n"
-                  "" ]
+                [
+                    $"## %s{name}"
+                    ""
+                    pages
+                    |> List.filter (fun page -> page.section = name)
+                    |> List.sortBy _.url
+                    |> List.map llmsLink
+                    |> String.concat "\n"
+                    ""
+                ]
 
             let sections =
                 [ section "Posts"; section "Pages"; section "Booklogs" ] |> List.concat
@@ -793,13 +803,11 @@ module Rendering =
                         | None -> None
                         | Some book ->
                             let id = book.id
+
                             let bookConf =
                                 { conf with
-                                    llmLinks =
-                                        createLlmLinks
-                                            conf
-                                            site
-                                            $"%s{conf.url}%s{basePath}/%s{id}.html.md" }
+                                    llmLinks = createLlmLinks conf site $"%s{conf.url}%s{basePath}/%s{id}.html.md"
+                                }
 
                             let content, location, generatedId =
                                 generateBooklogSummaryContent
@@ -845,10 +853,12 @@ module Rendering =
             let pages =
                 bookContents
                 |> List.map (fun (_, _, id, book, _) ->
-                    { section = "Booklogs"
-                      title = book.bookTitle
-                      description = Some book.bookAuthor
-                      url = $"%s{conf.url}%s{basePath}/%s{id}.html.md" |> normalizeUrlPath })
+                    {
+                        section = "Booklogs"
+                        title = book.bookTitle
+                        description = Some book.bookAuthor
+                        url = $"%s{conf.url}%s{basePath}/%s{id}.html.md" |> normalizeUrlPath
+                    })
 
             return locations, pages
         }
@@ -1213,16 +1223,20 @@ let render (opts: RenderOptions) =
             <| RenderOptions.booksDestinationPath opts
 
         let llmPages =
-            [ metaPosts
-              |> Array.map (llmPageFromMeta confWithAuthor site "Posts")
-              |> Array.toList
-              metaPages
-              |> Array.map (llmPageFromMeta confWithAuthor site "Pages")
-              |> Array.toList
-              booklogPages ]
+            [
+                metaPosts
+                |> Array.map (llmPageFromMeta confWithAuthor site "Posts")
+                |> Array.toList
+                metaPages
+                |> Array.map (llmPageFromMeta confWithAuthor site "Pages")
+                |> Array.toList
+                booklogPages
+            ]
             |> List.concat
 
-        do! llmOutput.writeIndex confWithAuthor llmPages <| RenderOptions.llmsDestinationPath opts
+        do!
+            llmOutput.writeIndex confWithAuthor llmPages
+            <| RenderOptions.llmsDestinationPath opts
 
         do! render404 conf site <| RenderOptions.``404DestinationPath`` opts
 
