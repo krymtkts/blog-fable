@@ -1256,7 +1256,18 @@ let render (opts: RenderOptions) =
     }
     |> ignore
 
-let stage, future =
+let commandArgs =
+    // NOTE: Drop Node.js's executable and generated script paths; the remaining arguments belong to this app.
     match List.ofSeq argv with
-    | [ _; _; mode ] when mode = "dev" -> Development, true
-    | _ -> Production, false
+    | _ :: _ :: args -> args
+    | _ -> []
+
+let stage =
+    if commandArgs |> List.contains "dev" then
+        Development
+    else
+        Production
+
+let future = stage = Development
+
+let llms = commandArgs |> List.contains "--no-llms" |> not

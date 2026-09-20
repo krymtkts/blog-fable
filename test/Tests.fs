@@ -11,6 +11,7 @@ open Suave
 open System.Threading
 open System.Threading.Tasks
 open System.Net.Http
+open System.Diagnostics
 
 (*
 NOTE: This tests requires the Playwright CLI to be installed.
@@ -106,6 +107,40 @@ let overwriteSnapshotsEnabled () =
     Environment.GetEnvironmentVariable "BLOG_FABLE_UPDATE_SNAPSHOTS"
     |> String.IsNullOrEmpty
     |> not
+
+let repositoryRoot = IO.Path.GetFullPath(IO.Path.Combine(__SOURCE_DIRECTORY__, ".."))
+
+let runProcess (fileName: string) (arguments: string list) =
+    task {
+        let startInfo = ProcessStartInfo(fileName)
+        startInfo.WorkingDirectory <- repositoryRoot
+        startInfo.UseShellExecute <- false
+        startInfo.RedirectStandardOutput <- true
+        startInfo.RedirectStandardError <- true
+
+        for argument in arguments do
+            startInfo.ArgumentList.Add argument
+
+        use child = new Process()
+        child.StartInfo <- startInfo
+
+        if child.Start() |> not then
+            failtestf "Failed to start %s" fileName
+
+        let outputTask = child.StandardOutput.ReadToEndAsync()
+        let errorTask = child.StandardError.ReadToEndAsync()
+        do! child.WaitForExitAsync()
+        let! output = outputTask
+        let! error = errorTask
+
+        if child.ExitCode <> 0 then
+            failtestf
+                "%s exited with code %d.\nstdout:\n%s\nstderr:\n%s"
+                fileName
+                child.ExitCode
+                output
+                error
+    }
 
 [<Tests>]
 let tests =
@@ -582,6 +617,56 @@ let tests =
                 failtestf
                     "Tag AND filter returned unexpected URLs: %s"
                     (String.concat ", " tagUrls)
+        }
+
+        testTask "Disabled LLM output removes Markdown exports and discovery links" {
+            let outputRoot = IO.Path.Combine(repositoryRoot, "docs", "blog-fable")
+            let markdownRoot = IO.Path.Combine(outputRoot, "posts")
+            let pagesRoot = IO.Path.Combine(outputRoot, "pages")
+            let booklogsRoot = IO.Path.Combine(outputRoot, "booklogs")
+            let llmsPath = IO.Path.Combine(outputRoot, "llms.txt")
+            let mutable failure = None
+
+            try
+                do! runProcess "node" [ "src/App.fs.js"; "--no-llms" ]
+
+                if IO.File.Exists llmsPath then
+                    failtest "llms.txt should not be generated when LLM output is disabled"
+
+                let markdownFiles =
+                    [ markdownRoot; pagesRoot; booklogsRoot ]
+                    |> List.collect (fun root ->
+                        if IO.Directory.Exists root then
+                            IO.Directory.GetFiles(root, "*.html.md", IO.SearchOption.AllDirectories)
+                            |> Array.toList
+                        else
+                            [])
+
+                if markdownFiles.IsEmpty |> not then
+                    failtestf
+                        "Markdown exports should not be generated when LLM output is disabled: %s"
+                        (String.concat ", " markdownFiles)
+
+                for relativePath in
+                    [ "posts/2023-03-01-sample-post.html"
+                      "pages/sampla-page.html"
+                      "booklogs/a-book.html" ] do
+                    let path = IO.Path.Combine(outputRoot, relativePath)
+                    let content = IO.File.ReadAllText path
+
+                    if content.Contains "rel=\"alternate\"" || content.Contains "rel=\"describedby\"" then
+                        failtestf "LLM discovery links should be omitted from %s" relativePath
+            with ex ->
+                failure <- Some ex
+
+            do! runProcess "node" [ "src/App.fs.js" ]
+
+            if IO.File.Exists llmsPath |> not then
+                failtest "llms.txt was not restored after the disabled-output test"
+
+            match failure with
+            | Some ex -> return raise ex
+            | None -> return ()
         }
 
     ]
