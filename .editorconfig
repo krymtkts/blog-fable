@@ -2,7 +2,9 @@
 indent_size = 4
 end_of_line = lf
 fsharp_experimental_elmish = true
+fsharp_multiline_bracket_style = aligned
 
 [*.fsx]
 indent_size = 4
 end_of_line = lf
+fsharp_multiline_bracket_style = aligned
