@@ -605,7 +605,7 @@ module Rendering =
                 |> Promise.all
         }
 
-    let renderIndex conf site metaPosts dest =
+    let renderIndex conf site dest metaPosts =
         let index (m: Meta) = { m with index = true }
 
         let meta, metaPrev =
@@ -1183,8 +1183,9 @@ let render (opts: RenderOptions) =
             <| RenderOptions.pagesDestinationRoot opts
 
         do!
-            renderIndex confWithAuthor site metaPosts
+            renderIndex confWithAuthor site
             <| RenderOptions.indexDestinationPath opts
+            <| metaPosts
 
         let archiveDefs =
             [
