@@ -375,6 +375,17 @@ module Rendering =
             next: Meta option
         }
 
+    type BooklogRenderOptions =
+        {
+            llmOutput: LlmOutput
+            conf: FrameConfiguration
+            site: PathConfiguration
+            priority: string
+            booklogsSourceDir: string
+            booklogsDest: string
+            booksSourceDir: string
+        }
+
     let private writeContent (conf: FrameConfiguration) (root: PathConfiguration) (options: PageRenderOptions) =
         promise {
             let path =
@@ -700,29 +711,20 @@ module Rendering =
             return locs
         }
 
-    let renderBooklogs
-        (llmOutput: LlmOutput)
-        (conf: FrameConfiguration)
-        (site: PathConfiguration)
-        (priority: string)
-        (booklogsSourceDir: string)
-        (booklogsDest: string)
-        (booksSourceDir: string)
-        (booksDest: string) // TODO: unused booksDest.
-        =
-        let title = $"%s{conf.title} - Booklogs"
+    let renderBooklogs (options: BooklogRenderOptions) =
+        let title = $"%s{options.conf.title} - Booklogs"
 
         promise {
-            printfn "Getting booklogs from %s" booklogsSourceDir
-            let! files = getYamlFiles booklogsSourceDir
+            printfn "Getting booklogs from %s" options.booklogsSourceDir
+            let! files = getYamlFiles options.booklogsSourceDir
             printfn "Getting %d booklogs..." (List.length files)
             let! booklogs = files |> List.map readBooklogsSource |> Promise.all
-            printfn "Getting books from %s" booklogsSourceDir
-            let! files = getYamlFiles booksSourceDir
+            printfn "Getting books from %s" options.booklogsSourceDir
+            let! files = getYamlFiles options.booksSourceDir
             printfn "Getting %d books..." (List.length files)
             let! books = files |> List.map readBooksSource |> Promise.all
             let booklogs = booklogs |> List.ofArray |> List.concat
-            let destDir = booklogsDest.Replace(".html", "")
+            let destDir = options.booklogsDest.Replace(".html", "")
             let minYear, booklogPerYear = booklogs |> groupBooklogsByYear
             let booklogPerTitle = booklogs |> groupBooklogsByTitle
             let bookMap = books |> List.concat |> getBookMap
@@ -739,7 +741,7 @@ module Rendering =
 
             let years = booklogContents |> List.map fst
             let maxYear = years |> List.max
-            let basePath = $"%s{site.siteRoot}/%s{IO.leaf destDir}"
+            let basePath = $"%s{options.site.siteRoot}/%s{IO.leaf destDir}"
             let stats = generateBooklogStats booklogs
             let yearLinks = generateBooklogLinks basePath years
 
@@ -769,9 +771,9 @@ module Rendering =
                 |> fun (year, booklogs) ->
                     booklogs
                     |> generateYearlyBooklogContent
-                        { conf with title = title }
+                        { options.conf with title = title }
                         {
-                            priority = priority
+                            priority = options.priority
                             basePath = basePath
                             links = links
                             books = bookMap
@@ -788,9 +790,9 @@ module Rendering =
                 |> List.map (fun (year, booklogs) ->
                     booklogs
                     |> generateYearlyBooklogContent
-                        { conf with title = title }
+                        { options.conf with title = title }
                         {
-                            priority = priority
+                            priority = options.priority
                             basePath = basePath
                             links = links
                             books = bookMap
@@ -822,15 +824,19 @@ module Rendering =
                             let id = book.id
 
                             let bookConf =
-                                { conf with
-                                    llmLinks = createLlmLinks conf site $"%s{conf.url}%s{basePath}/%s{id}.html.md"
+                                { options.conf with
+                                    llmLinks =
+                                        createLlmLinks
+                                            options.conf
+                                            options.site
+                                            $"%s{options.conf.url}%s{basePath}/%s{id}.html.md"
                                 }
 
                             let content, location, generatedId =
                                 generateBooklogSummaryContent
                                     bookConf
                                     {
-                                        priority = priority
+                                        priority = options.priority
                                         basePath = basePath
                                         links = links
                                         book = book
@@ -852,13 +858,13 @@ module Rendering =
                 bookContents
                 |> List.map (fun (_, _, id, book, logs) ->
                     let dest = $"%s{destDir}/%s{id}.html.md"
-                    llmOutput.writeBooklogMarkdown dest book logs)
+                    options.llmOutput.writeBooklogMarkdown dest book logs)
                 |> Promise.all
                 |> Promise.map ignore
 
             do!
-                printfn $"Writing index of booklog to %s{booklogsDest}..."
-                booklogIndex |> fun (content, _, _) -> IO.writeFile booklogsDest content
+                printfn $"Writing index of booklog to %s{options.booklogsDest}..."
+                booklogIndex |> fun (content, _, _) -> IO.writeFile options.booklogsDest content
 
             let locations =
                 [
@@ -874,7 +880,7 @@ module Rendering =
                         section = "Booklogs"
                         title = book.bookTitle
                         description = Some book.bookAuthor
-                        url = $"%s{conf.url}%s{basePath}/%s{id}.html.md" |> normalizeUrlPath
+                        url = $"%s{options.conf.url}%s{basePath}/%s{id}.html.md" |> normalizeUrlPath
                         sortDate = logs |> List.minBy (fun log -> System.DateTime.Parse log.date) |> _.date |> Some
                     })
 
@@ -995,7 +1001,6 @@ module RenderOptions =
     let feedPath opts = $"/%s{opts.feedName}.xml"
     let archivesPath opts = $"%s{opts.archives.root}.html"
     let tagsPath opts = $"%s{opts.tags.root}.html"
-    let booksPath opts = $"%s{opts.books.root}.html"
     let booklogsPath opts = $"%s{opts.booklogs.root}.html"
     let llmsPath = "/llms.txt"
     let stylePath opts = $"%s{opts.pathRoot}/css/style.css"
@@ -1045,9 +1050,6 @@ module RenderOptions =
 
     let tagsDestinationPath opts =
         $"%s{destinationRoot opts}%s{tagsPath opts}"
-
-    let booksDestinationPath opts =
-        $"%s{destinationRoot opts}%s{booksPath opts}"
 
     let booklogsDestinationPath opts =
         $"%s{destinationRoot opts}%s{booklogsPath opts}"
@@ -1237,11 +1239,16 @@ let render (opts: RenderOptions) =
             renderTags conf site <| RenderOptions.tagsDestinationPath opts <| tagDef
 
         let! booklogLocs, booklogPages =
-            renderBooklogs llmOutput confWithAuthor site (opts.sitemap.booklogs |> string)
-            <| RenderOptions.booklogsSourceRoot opts
-            <| RenderOptions.booklogsDestinationPath opts
-            <| RenderOptions.booksSourceRoot opts
-            <| RenderOptions.booksDestinationPath opts
+            renderBooklogs
+                {
+                    llmOutput = llmOutput
+                    conf = confWithAuthor
+                    site = site
+                    priority = string opts.sitemap.booklogs
+                    booklogsSourceDir = RenderOptions.booklogsSourceRoot opts
+                    booklogsDest = RenderOptions.booklogsDestinationPath opts
+                    booksSourceDir = RenderOptions.booksSourceRoot opts
+                }
 
         let llmPages =
             [
