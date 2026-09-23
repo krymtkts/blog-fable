@@ -367,59 +367,61 @@ module Rendering =
         else
             None
 
-    let private writeContent
-        (conf: FrameConfiguration)
-        (root: PathConfiguration)
-        (meta: Meta)
-        (dest: string)
-        prev
-        next
-        =
+    type private PageRenderOptions =
+        {
+            meta: Meta
+            dest: string
+            prev: Meta option
+            next: Meta option
+        }
+
+    let private writeContent (conf: FrameConfiguration) (root: PathConfiguration) (options: PageRenderOptions) =
         promise {
-            let path = dest |> normalizeUrlPath |> _.Split($"%s{root.destRoot}/") |> Seq.last
+            let path =
+                options.dest |> normalizeUrlPath |> _.Split($"%s{root.destRoot}/") |> Seq.last
 
             let title =
-                match meta.index, meta.frontMatter with
+                match options.meta.index, options.meta.frontMatter with
                 | false, Some fm -> $"%s{conf.title} - %s{Parser.getTextTitle fm}"
                 | _ -> conf.title
 
             let author =
-                match meta.frontMatter, conf.author with
+                match options.meta.frontMatter, conf.author with
                 | Some fm, Some author -> fm.author |> Option.defaultValue author |> Some
                 | Some fm, None -> fm.author
                 | None, Some author -> Some author
                 | None, None -> None
 
             let header =
-                Component.header $"%s{root.siteRoot}%s{root.tagRoot}/" meta.pubDate meta.frontMatter
+                Component.header $"%s{root.siteRoot}%s{root.tagRoot}/" options.meta.pubDate options.meta.frontMatter
 
             let footer =
-                match meta.layout with
-                | Post _ -> Component.footer $"%s{root.siteRoot}%s{root.postRoot}/" prev next
+                match options.meta.layout with
+                | Post _ -> Component.footer $"%s{root.siteRoot}%s{root.postRoot}/" options.prev options.next
                 | _ -> []
 
             let llmLinks =
-                if meta.index then
+                if options.meta.index then
                     None
                 else
-                    markdownUrl conf root meta |> createLlmLinks conf root
+                    markdownUrl conf root options.meta |> createLlmLinks conf root
 
             let page =
-                List.concat [ header; [ meta.content ]; footer ]
+                List.concat [ header; [ options.meta.content ]; footer ]
                 |> frame
                     { conf with
                         title = title
                         author = author
-                        description = meta.description
+                        description = options.meta.description
                         pagefindSection = Some "archive"
                         llmLinks = llmLinks
                         url = $"%s{conf.url}%s{root.siteRoot}/%s{path}"
                     }
                 |> Parser.parseReactStaticHtml
 
-            printfn $"Writing %s{dest}..."
+            printfn $"Writing %s{options.dest}..."
 
-            do! IO.writeFile dest page
+            do! IO.writeFile options.dest page
         }
 
     let private markdownTitle (meta: Meta) =
@@ -586,18 +588,24 @@ module Rendering =
                 | true -> None
                 | _ -> Some(metas.[i])
 
+            let createPageRenderOptions i meta =
+                let prev = if i = 0 then None else Some(metas.[i - 1])
+                let next = getMeta (i + 1)
+
+                {
+                    meta = meta
+                    dest = meta.source |> getDestinationPath destDir
+                    prev = prev
+                    next = next
+                }
+
             return!
                 metas
                 |> Seq.mapi (fun i meta ->
                     promise {
-                        let prev, next =
-                            match i with
-                            | 0 -> None, getMeta <| i + 1
-                            | i when i = Seq.length metas - 1 -> Some(metas.[i - 1]), None
-                            | i -> Some(metas.[i - 1]), getMeta <| i + 1
+                        let pageOptions = createPageRenderOptions i meta
 
-                        let dest = meta.source |> getDestinationPath destDir
-                        do! writeContent conf site meta dest prev next
+                        do! writeContent conf site pageOptions
                         let markdownDest = meta.source |> getMarkdownDestinationPath destDir
                         do! llmOutput.writeMarkdown conf site markdownDest meta
                         return meta
@@ -605,9 +613,7 @@ module Rendering =
                 |> Promise.all
         }
 
-    let renderIndex conf site dest metaPosts =
-        let index (m: Meta) = { m with index = true }
-
+    let private createIndexPageRenderOptions dest metaPosts =
         let meta, metaPrev =
             match
                 metaPosts
@@ -619,10 +625,17 @@ module Rendering =
             | [ post; prev ] -> post, Some prev
             | _ -> failwith "requires at last one post."
 
-        promise {
-            let dest = IO.resolve dest
-            do! writeContent conf site (index meta) dest metaPrev None
+        {
+            meta = { meta with index = true }
+            dest = IO.resolve dest
+            prev = metaPrev
+            next = None
         }
+
+    let renderIndex conf site dest metaPosts =
+        let pageOptions = createIndexPageRenderOptions dest metaPosts
+
+        promise { do! writeContent conf site pageOptions }
 
     let renderArchives conf site dest archives =
         promise {
