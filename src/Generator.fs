@@ -644,7 +644,7 @@ module Rendering =
             return locs
         }
 
-    let renderTags (conf: FrameConfiguration) (site: PathConfiguration) def dest =
+    let renderTags (conf: FrameConfiguration) (site: PathConfiguration) dest def =
         let tagsContent, tagPageContents, locs = generateTagsContent def
 
         promise {
@@ -1220,7 +1220,8 @@ let render (opts: RenderOptions) =
                 priority = string opts.sitemap.tags
             }
 
-        let! tagLocs = renderTags conf site tagDef <| RenderOptions.tagsDestinationPath opts
+        let! tagLocs =
+            renderTags conf site <| RenderOptions.tagsDestinationPath opts <| tagDef
 
         let! booklogLocs, booklogPages =
             renderBooklogs llmOutput confWithAuthor site (opts.sitemap.booklogs |> string)
