@@ -227,11 +227,6 @@ module Parser =
 
         frontMatter, markdown, reactElement
 
-    let parseMarkdownAsReactEl content =
-        let frontMatter, _, reactElement = parseMarkdownSource content
-
-        frontMatter, reactElement
-
     /// Parses a React element invoking ReactDOMServer.renderToString
     let parseReact el = ReactDOMServer.renderToString el
 
@@ -493,12 +488,6 @@ module Component =
             | Element(s, el) -> [ prop.title s; prop.children [ el ] ]
 
         Html.li [ Html.a <| prop.href ref :: children title ]
-
-    let liSpanA (span: string) ref title =
-        Html.li [
-            Html.span [ prop.text span ]
-            Html.a [ prop.href ref; prop.title title; prop.text title ]
-        ]
 
     let tagToLi root tag count =
         let leaf = Directory.leaf $"{tag}.html"
