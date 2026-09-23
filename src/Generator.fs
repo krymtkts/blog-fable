@@ -18,7 +18,7 @@ module Generation =
             sortDate: string option
         }
 
-    let private generatePostArchives (meta: Meta seq) root =
+    let private generatePostArchives root (meta: Meta seq) =
         promise {
             let archives =
                 meta
@@ -34,7 +34,7 @@ module Generation =
             return Html.ul [ prop.children (List.concat archives) ]
         }
 
-    let private generatePageArchives (meta: Meta seq) root =
+    let private generatePageArchives root (meta: Meta seq) =
         promise {
             let archives =
                 meta |> Seq.sortBy (fun meta -> IO.leaf meta.source) |> Seq.map (metaToLi root)
@@ -73,7 +73,7 @@ module Generation =
                                 priority = def.priority
                             })
 
-                    generate def.metas $"%s{pathRoot}%s{def.root}"
+                    generate $"%s{pathRoot}%s{def.root}" def.metas
                     |> Promise.map (fun content -> [ Html.h2 def.title; content ], refs))
                 |> Promise.all
 
