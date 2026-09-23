@@ -571,7 +571,7 @@ module Rendering =
 
             do!
                 files
-                |> List.map (fun source -> getMarkdownDestinationPath source destDir |> IO.removeFile)
+                |> List.map (getMarkdownDestinationPath destDir >> IO.removeFile)
                 |> Promise.all
                 |> Promise.map ignore
 
@@ -598,9 +598,9 @@ module Rendering =
                             | i when i = Seq.length metas - 1 -> Some(metas.[i - 1]), None
                             | i -> Some(metas.[i - 1]), getMeta <| i + 1
 
-                        let dest = getDestinationPath meta.source destDir
+                        let dest = meta.source |> getDestinationPath destDir
                         do! writeContent conf site meta dest prev next
-                        let markdownDest = getMarkdownDestinationPath meta.source destDir
+                        let markdownDest = meta.source |> getMarkdownDestinationPath destDir
                         do! llmOutput.writeMarkdown conf site meta markdownDest
                         return meta
                     })
