@@ -284,7 +284,7 @@ module Rendering =
 
     type LlmOutput =
         {
-            writeMarkdown: FrameConfiguration -> PathConfiguration -> Meta -> string -> Fable.Core.JS.Promise<unit>
+            writeMarkdown: FrameConfiguration -> PathConfiguration -> string -> Meta -> Fable.Core.JS.Promise<unit>
             writeBooklogMarkdown: string -> Book -> Booklog list -> Fable.Core.JS.Promise<unit>
             writeIndex: FrameConfiguration -> string -> LlmPage list -> Fable.Core.JS.Promise<unit>
         }
@@ -446,7 +446,7 @@ module Rendering =
                 | Page -> None
         }
 
-    let private writeMarkdownContent (conf: FrameConfiguration) (site: PathConfiguration) (meta: Meta) (dest: string) =
+    let private writeMarkdownContent (conf: FrameConfiguration) (site: PathConfiguration) (dest: string) (meta: Meta) =
         promise {
             let url = markdownUrl conf site meta
 
@@ -599,7 +599,7 @@ module Rendering =
                         let dest = meta.source |> getDestinationPath destDir
                         do! writeContent conf site meta dest prev next
                         let markdownDest = meta.source |> getMarkdownDestinationPath destDir
-                        do! llmOutput.writeMarkdown conf site meta markdownDest
+                        do! llmOutput.writeMarkdown conf site markdownDest meta
                         return meta
                     })
                 |> Promise.all
