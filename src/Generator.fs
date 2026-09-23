@@ -18,7 +18,7 @@ module Generation =
             sortDate: string option
         }
 
-    let private generatePostArchives (meta: Meta seq) root =
+    let private generatePostArchives root (meta: Meta seq) =
         promise {
             let archives =
                 meta
@@ -34,7 +34,7 @@ module Generation =
             return Html.ul [ prop.children (List.concat archives) ]
         }
 
-    let private generatePageArchives (meta: Meta seq) root =
+    let private generatePageArchives root (meta: Meta seq) =
         promise {
             let archives =
                 meta |> Seq.sortBy (fun meta -> IO.leaf meta.source) |> Seq.map (metaToLi root)
@@ -73,7 +73,7 @@ module Generation =
                                 priority = def.priority
                             })
 
-                    generate def.metas $"%s{pathRoot}%s{def.root}"
+                    generate $"%s{pathRoot}%s{def.root}" def.metas
                     |> Promise.map (fun content -> [ Html.h2 def.title; content ], refs))
                 |> Promise.all
 
@@ -284,9 +284,9 @@ module Rendering =
 
     type LlmOutput =
         {
-            writeMarkdown: FrameConfiguration -> PathConfiguration -> Meta -> string -> Fable.Core.JS.Promise<unit>
+            writeMarkdown: FrameConfiguration -> PathConfiguration -> string -> Meta -> Fable.Core.JS.Promise<unit>
             writeBooklogMarkdown: string -> Book -> Booklog list -> Fable.Core.JS.Promise<unit>
-            writeIndex: FrameConfiguration -> LlmPage list -> string -> Fable.Core.JS.Promise<unit>
+            writeIndex: FrameConfiguration -> string -> LlmPage list -> Fable.Core.JS.Promise<unit>
         }
 
     let private readSource source =
@@ -335,7 +335,7 @@ module Rendering =
                 }
         }
 
-    let private parseBooksSource source (parser: string -> 'T list) =
+    let private parseBooksSource (parser: string -> 'T list) source =
         promise {
             printfn $"Rendering %s{source}..."
             let! yml = IO.readFile source
@@ -343,11 +343,9 @@ module Rendering =
             return parser yml
         }
 
-    let private readBooklogsSource source =
-        parseBooksSource source Parser.parseBooklogs
+    let private readBooklogsSource = parseBooksSource Parser.parseBooklogs
 
-    let private readBooksSource source =
-        parseBooksSource source Parser.parseBooks
+    let private readBooksSource = parseBooksSource Parser.parseBooks
 
     let private markdownRoot (site: PathConfiguration) (meta: Meta) =
         match meta.layout with
@@ -369,59 +367,72 @@ module Rendering =
         else
             None
 
-    let private writeContent
-        (conf: FrameConfiguration)
-        (root: PathConfiguration)
-        (meta: Meta)
-        (dest: string)
-        prev
-        next
-        =
+    type private PageRenderOptions =
+        {
+            meta: Meta
+            dest: string
+            prev: Meta option
+            next: Meta option
+        }
+
+    type BooklogRenderOptions =
+        {
+            llmOutput: LlmOutput
+            conf: FrameConfiguration
+            site: PathConfiguration
+            priority: string
+            booklogsSourceDir: string
+            booklogsDest: string
+            booksSourceDir: string
+        }
+
+    let private writeContent (conf: FrameConfiguration) (root: PathConfiguration) (options: PageRenderOptions) =
         promise {
-            let path = dest |> normalizeUrlPath |> _.Split($"%s{root.destRoot}/") |> Seq.last
+            let path =
+                options.dest |> normalizeUrlPath |> _.Split($"%s{root.destRoot}/") |> Seq.last
 
             let title =
-                match meta.index, meta.frontMatter with
+                match options.meta.index, options.meta.frontMatter with
                 | false, Some fm -> $"%s{conf.title} - %s{Parser.getTextTitle fm}"
                 | _ -> conf.title
 
             let author =
-                match meta.frontMatter, conf.author with
+                match options.meta.frontMatter, conf.author with
                 | Some fm, Some author -> fm.author |> Option.defaultValue author |> Some
                 | Some fm, None -> fm.author
                 | None, Some author -> Some author
                 | None, None -> None
 
             let header =
-                Component.header $"%s{root.siteRoot}%s{root.tagRoot}/" meta.pubDate meta.frontMatter
+                Component.header $"%s{root.siteRoot}%s{root.tagRoot}/" options.meta.pubDate options.meta.frontMatter
 
             let footer =
-                match meta.layout with
-                | Post _ -> Component.footer $"%s{root.siteRoot}%s{root.postRoot}/" prev next
+                match options.meta.layout with
+                | Post _ -> Component.footer $"%s{root.siteRoot}%s{root.postRoot}/" options.prev options.next
                 | _ -> []
 
             let llmLinks =
-                if meta.index then
+                if options.meta.index then
                     None
                 else
-                    markdownUrl conf root meta |> createLlmLinks conf root
+                    markdownUrl conf root options.meta |> createLlmLinks conf root
 
             let page =
-                List.concat [ header; [ meta.content ]; footer ]
+                List.concat [ header; [ options.meta.content ]; footer ]
                 |> frame
                     { conf with
                         title = title
                         author = author
-                        description = meta.description
+                        description = options.meta.description
                         pagefindSection = Some "archive"
                         llmLinks = llmLinks
                         url = $"%s{conf.url}%s{root.siteRoot}/%s{path}"
                     }
                 |> Parser.parseReactStaticHtml
 
-            printfn $"Writing %s{dest}..."
+            printfn $"Writing %s{options.dest}..."
 
-            do! IO.writeFile dest page
+            do! IO.writeFile options.dest page
         }
 
     let private markdownTitle (meta: Meta) =
@@ -448,7 +459,7 @@ module Rendering =
                 | Page -> None
         }
 
-    let private writeMarkdownContent (conf: FrameConfiguration) (site: PathConfiguration) (meta: Meta) (dest: string) =
+    let private writeMarkdownContent (conf: FrameConfiguration) (site: PathConfiguration) (dest: string) (meta: Meta) =
         promise {
             let url = markdownUrl conf site meta
 
@@ -490,7 +501,7 @@ module Rendering =
         | Some description when description <> "" -> $"- [%s{page.title}](%s{page.url}): %s{description}"
         | _ -> $"- [%s{page.title}](%s{page.url})"
 
-    let renderLlms (conf: FrameConfiguration) (pages: LlmPage list) (dest: string) =
+    let renderLlms (conf: FrameConfiguration) (dest: string) (pages: LlmPage list) =
         promise {
             let section name =
                 let sortedPages =
@@ -528,7 +539,7 @@ module Rendering =
             {
                 writeMarkdown = fun _ _ _ _ -> promise { return () }
                 writeBooklogMarkdown = fun dest _ _ -> IO.removeFile dest
-                writeIndex = fun _ _ dest -> IO.removeFile dest
+                writeIndex = fun _ dest _ -> IO.removeFile dest
             }
 
     let private checkFilenamePattern (files: string list) =
@@ -571,7 +582,7 @@ module Rendering =
 
             do!
                 files
-                |> List.map (fun source -> getMarkdownDestinationPath source destDir |> IO.removeFile)
+                |> List.map (getMarkdownDestinationPath destDir >> IO.removeFile)
                 |> Promise.all
                 |> Promise.map ignore
 
@@ -588,28 +599,32 @@ module Rendering =
                 | true -> None
                 | _ -> Some(metas.[i])
 
+            let createPageRenderOptions i meta =
+                let prev = if i = 0 then None else Some(metas.[i - 1])
+                let next = getMeta (i + 1)
+
+                {
+                    meta = meta
+                    dest = meta.source |> getDestinationPath destDir
+                    prev = prev
+                    next = next
+                }
+
             return!
                 metas
                 |> Seq.mapi (fun i meta ->
                     promise {
-                        let prev, next =
-                            match i with
-                            | 0 -> None, getMeta <| i + 1
-                            | i when i = Seq.length metas - 1 -> Some(metas.[i - 1]), None
-                            | i -> Some(metas.[i - 1]), getMeta <| i + 1
+                        let pageOptions = createPageRenderOptions i meta
 
-                        let dest = getDestinationPath meta.source destDir
-                        do! writeContent conf site meta dest prev next
-                        let markdownDest = getMarkdownDestinationPath meta.source destDir
-                        do! llmOutput.writeMarkdown conf site meta markdownDest
+                        do! writeContent conf site pageOptions
+                        let markdownDest = meta.source |> getMarkdownDestinationPath destDir
+                        do! llmOutput.writeMarkdown conf site markdownDest meta
                         return meta
                     })
                 |> Promise.all
         }
 
-    let renderIndex conf site metaPosts dest =
-        let index (m: Meta) = { m with index = true }
-
+    let private createIndexPageRenderOptions dest metaPosts =
         let meta, metaPrev =
             match
                 metaPosts
@@ -621,12 +636,19 @@ module Rendering =
             | [ post; prev ] -> post, Some prev
             | _ -> failwith "requires at last one post."
 
-        promise {
-            let dest = IO.resolve dest
-            do! writeContent conf site (index meta) dest metaPrev None
+        {
+            meta = { meta with index = true }
+            dest = IO.resolve dest
+            prev = metaPrev
+            next = None
         }
 
-    let renderArchives conf site archives dest =
+    let renderIndex conf site dest metaPosts =
+        let pageOptions = createIndexPageRenderOptions dest metaPosts
+
+        promise { do! writeContent conf site pageOptions }
+
+    let renderArchives conf site dest archives =
         promise {
             printfn "Rendering archives..."
             let! archives, locs = generateArchives site.siteRoot archives
@@ -646,7 +668,7 @@ module Rendering =
             return locs
         }
 
-    let renderTags (conf: FrameConfiguration) (site: PathConfiguration) def dest =
+    let renderTags (conf: FrameConfiguration) (site: PathConfiguration) dest def =
         let tagsContent, tagPageContents, locs = generateTagsContent def
 
         promise {
@@ -689,29 +711,20 @@ module Rendering =
             return locs
         }
 
-    let renderBooklogs
-        (llmOutput: LlmOutput)
-        (conf: FrameConfiguration)
-        (site: PathConfiguration)
-        (priority: string)
-        (booklogsSourceDir: string)
-        (booklogsDest: string)
-        (booksSourceDir: string)
-        (booksDest: string) // TODO: unused booksDest.
-        =
-        let title = $"%s{conf.title} - Booklogs"
+    let renderBooklogs (options: BooklogRenderOptions) =
+        let title = $"%s{options.conf.title} - Booklogs"
 
         promise {
-            printfn "Getting booklogs from %s" booklogsSourceDir
-            let! files = getYamlFiles booklogsSourceDir
+            printfn "Getting booklogs from %s" options.booklogsSourceDir
+            let! files = getYamlFiles options.booklogsSourceDir
             printfn "Getting %d booklogs..." (List.length files)
             let! booklogs = files |> List.map readBooklogsSource |> Promise.all
-            printfn "Getting books from %s" booklogsSourceDir
-            let! files = getYamlFiles booksSourceDir
+            printfn "Getting books from %s" options.booklogsSourceDir
+            let! files = getYamlFiles options.booksSourceDir
             printfn "Getting %d books..." (List.length files)
             let! books = files |> List.map readBooksSource |> Promise.all
             let booklogs = booklogs |> List.ofArray |> List.concat
-            let destDir = booklogsDest.Replace(".html", "")
+            let destDir = options.booklogsDest.Replace(".html", "")
             let minYear, booklogPerYear = booklogs |> groupBooklogsByYear
             let booklogPerTitle = booklogs |> groupBooklogsByTitle
             let bookMap = books |> List.concat |> getBookMap
@@ -728,7 +741,7 @@ module Rendering =
 
             let years = booklogContents |> List.map fst
             let maxYear = years |> List.max
-            let basePath = $"%s{site.siteRoot}/%s{IO.leaf destDir}"
+            let basePath = $"%s{options.site.siteRoot}/%s{IO.leaf destDir}"
             let stats = generateBooklogStats booklogs
             let yearLinks = generateBooklogLinks basePath years
 
@@ -758,9 +771,9 @@ module Rendering =
                 |> fun (year, booklogs) ->
                     booklogs
                     |> generateYearlyBooklogContent
-                        { conf with title = title }
+                        { options.conf with title = title }
                         {
-                            priority = priority
+                            priority = options.priority
                             basePath = basePath
                             links = links
                             books = bookMap
@@ -777,9 +790,9 @@ module Rendering =
                 |> List.map (fun (year, booklogs) ->
                     booklogs
                     |> generateYearlyBooklogContent
-                        { conf with title = title }
+                        { options.conf with title = title }
                         {
-                            priority = priority
+                            priority = options.priority
                             basePath = basePath
                             links = links
                             books = bookMap
@@ -811,15 +824,19 @@ module Rendering =
                             let id = book.id
 
                             let bookConf =
-                                { conf with
-                                    llmLinks = createLlmLinks conf site $"%s{conf.url}%s{basePath}/%s{id}.html.md"
+                                { options.conf with
+                                    llmLinks =
+                                        createLlmLinks
+                                            options.conf
+                                            options.site
+                                            $"%s{options.conf.url}%s{basePath}/%s{id}.html.md"
                                 }
 
                             let content, location, generatedId =
                                 generateBooklogSummaryContent
                                     bookConf
                                     {
-                                        priority = priority
+                                        priority = options.priority
                                         basePath = basePath
                                         links = links
                                         book = book
@@ -841,13 +858,13 @@ module Rendering =
                 bookContents
                 |> List.map (fun (_, _, id, book, logs) ->
                     let dest = $"%s{destDir}/%s{id}.html.md"
-                    llmOutput.writeBooklogMarkdown dest book logs)
+                    options.llmOutput.writeBooklogMarkdown dest book logs)
                 |> Promise.all
                 |> Promise.map ignore
 
             do!
-                printfn $"Writing index of booklog to %s{booklogsDest}..."
-                booklogIndex |> fun (content, _, _) -> IO.writeFile booklogsDest content
+                printfn $"Writing index of booklog to %s{options.booklogsDest}..."
+                booklogIndex |> fun (content, _, _) -> IO.writeFile options.booklogsDest content
 
             let locations =
                 [
@@ -863,7 +880,7 @@ module Rendering =
                         section = "Booklogs"
                         title = book.bookTitle
                         description = Some book.bookAuthor
-                        url = $"%s{conf.url}%s{basePath}/%s{id}.html.md" |> normalizeUrlPath
+                        url = $"%s{options.conf.url}%s{basePath}/%s{id}.html.md" |> normalizeUrlPath
                         sortDate = logs |> List.minBy (fun log -> System.DateTime.Parse log.date) |> _.date |> Some
                     })
 
@@ -984,7 +1001,6 @@ module RenderOptions =
     let feedPath opts = $"/%s{opts.feedName}.xml"
     let archivesPath opts = $"%s{opts.archives.root}.html"
     let tagsPath opts = $"%s{opts.tags.root}.html"
-    let booksPath opts = $"%s{opts.books.root}.html"
     let booklogsPath opts = $"%s{opts.booklogs.root}.html"
     let llmsPath = "/llms.txt"
     let stylePath opts = $"%s{opts.pathRoot}/css/style.css"
@@ -1034,9 +1050,6 @@ module RenderOptions =
 
     let tagsDestinationPath opts =
         $"%s{destinationRoot opts}%s{tagsPath opts}"
-
-    let booksDestinationPath opts =
-        $"%s{destinationRoot opts}%s{booksPath opts}"
 
     let booklogsDestinationPath opts =
         $"%s{destinationRoot opts}%s{booklogsPath opts}"
@@ -1185,8 +1198,9 @@ let render (opts: RenderOptions) =
             <| RenderOptions.pagesDestinationRoot opts
 
         do!
-            renderIndex confWithAuthor site metaPosts
+            renderIndex confWithAuthor site
             <| RenderOptions.indexDestinationPath opts
+            <| metaPosts
 
         let archiveDefs =
             [
@@ -1207,8 +1221,9 @@ let render (opts: RenderOptions) =
             ]
 
         let! archiveLocs =
-            renderArchives conf site archiveDefs
+            renderArchives conf site
             <| RenderOptions.archivesDestinationPath opts
+            <| archiveDefs
 
         let tagDef =
             {
@@ -1220,14 +1235,20 @@ let render (opts: RenderOptions) =
                 priority = string opts.sitemap.tags
             }
 
-        let! tagLocs = renderTags conf site tagDef <| RenderOptions.tagsDestinationPath opts
+        let! tagLocs =
+            renderTags conf site <| RenderOptions.tagsDestinationPath opts <| tagDef
 
         let! booklogLocs, booklogPages =
-            renderBooklogs llmOutput confWithAuthor site (opts.sitemap.booklogs |> string)
-            <| RenderOptions.booklogsSourceRoot opts
-            <| RenderOptions.booklogsDestinationPath opts
-            <| RenderOptions.booksSourceRoot opts
-            <| RenderOptions.booksDestinationPath opts
+            renderBooklogs
+                {
+                    llmOutput = llmOutput
+                    conf = confWithAuthor
+                    site = site
+                    priority = string opts.sitemap.booklogs
+                    booklogsSourceDir = RenderOptions.booklogsSourceRoot opts
+                    booklogsDest = RenderOptions.booklogsDestinationPath opts
+                    booksSourceDir = RenderOptions.booksSourceRoot opts
+                }
 
         let llmPages =
             [
@@ -1242,8 +1263,9 @@ let render (opts: RenderOptions) =
             |> List.concat
 
         do!
-            llmOutput.writeIndex confWithAuthor llmPages
+            llmOutput.writeIndex confWithAuthor
             <| RenderOptions.llmsDestinationPath opts
+            <| llmPages
 
         do! render404 conf site <| RenderOptions.``404DestinationPath`` opts
 
