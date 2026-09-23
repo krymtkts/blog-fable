@@ -624,7 +624,7 @@ module Rendering =
             do! writeContent conf site (index meta) dest metaPrev None
         }
 
-    let renderArchives conf site archives dest =
+    let renderArchives conf site dest archives =
         promise {
             printfn "Rendering archives..."
             let! archives, locs = generateArchives site.siteRoot archives
@@ -1206,8 +1206,9 @@ let render (opts: RenderOptions) =
             ]
 
         let! archiveLocs =
-            renderArchives conf site archiveDefs
+            renderArchives conf site
             <| RenderOptions.archivesDestinationPath opts
+            <| archiveDefs
 
         let tagDef =
             {
