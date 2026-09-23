@@ -335,7 +335,7 @@ module Rendering =
                 }
         }
 
-    let private parseBooksSource source (parser: string -> 'T list) =
+    let private parseBooksSource (parser: string -> 'T list) source =
         promise {
             printfn $"Rendering %s{source}..."
             let! yml = IO.readFile source
@@ -343,11 +343,9 @@ module Rendering =
             return parser yml
         }
 
-    let private readBooklogsSource source =
-        parseBooksSource source Parser.parseBooklogs
+    let private readBooklogsSource = parseBooksSource Parser.parseBooklogs
 
-    let private readBooksSource source =
-        parseBooksSource source Parser.parseBooks
+    let private readBooksSource = parseBooksSource Parser.parseBooks
 
     let private markdownRoot (site: PathConfiguration) (meta: Meta) =
         match meta.layout with
