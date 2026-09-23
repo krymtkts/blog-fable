@@ -286,7 +286,7 @@ module Rendering =
         {
             writeMarkdown: FrameConfiguration -> PathConfiguration -> Meta -> string -> Fable.Core.JS.Promise<unit>
             writeBooklogMarkdown: string -> Book -> Booklog list -> Fable.Core.JS.Promise<unit>
-            writeIndex: FrameConfiguration -> LlmPage list -> string -> Fable.Core.JS.Promise<unit>
+            writeIndex: FrameConfiguration -> string -> LlmPage list -> Fable.Core.JS.Promise<unit>
         }
 
     let private readSource source =
@@ -488,7 +488,7 @@ module Rendering =
         | Some description when description <> "" -> $"- [%s{page.title}](%s{page.url}): %s{description}"
         | _ -> $"- [%s{page.title}](%s{page.url})"
 
-    let renderLlms (conf: FrameConfiguration) (pages: LlmPage list) (dest: string) =
+    let renderLlms (conf: FrameConfiguration) (dest: string) (pages: LlmPage list) =
         promise {
             let section name =
                 let sortedPages =
@@ -526,7 +526,7 @@ module Rendering =
             {
                 writeMarkdown = fun _ _ _ _ -> promise { return () }
                 writeBooklogMarkdown = fun dest _ _ -> IO.removeFile dest
-                writeIndex = fun _ _ dest -> IO.removeFile dest
+                writeIndex = fun _ dest _ -> IO.removeFile dest
             }
 
     let private checkFilenamePattern (files: string list) =
@@ -1243,8 +1243,9 @@ let render (opts: RenderOptions) =
             |> List.concat
 
         do!
-            llmOutput.writeIndex confWithAuthor llmPages
+            llmOutput.writeIndex confWithAuthor
             <| RenderOptions.llmsDestinationPath opts
+            <| llmPages
 
         do! render404 conf site <| RenderOptions.``404DestinationPath`` opts
 
