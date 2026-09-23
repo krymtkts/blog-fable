@@ -79,7 +79,7 @@ module Misc =
                     Some(date, date.AddDays(1.0)))
             startDate
 
-    let private generateYearLink baseUrl year (className: string) =
+    let private generateYearLink baseUrl (className: string) year =
         Html.a [
             prop.className className
             prop.href $"{baseUrl}/{year}.html"
@@ -149,6 +149,11 @@ module Misc =
 
                 Html.tr [ prop.children (dowCell :: dowRows) ])
 
+        let generateYearLinkOf className =
+            function
+            | Some year -> generateYearLink basePath className year
+            | None -> Html.span []
+
         Html.div [
             prop.className "section calendar-container"
             prop.children [
@@ -161,14 +166,8 @@ module Misc =
                                     prop.className "nav"
                                     prop.colSpan (List.length header + 1)
                                     prop.children [
-                                        prevYear
-                                        |> function
-                                            | Some year -> generateYearLink basePath year "prev"
-                                            | None -> Html.span []
-                                        nextYear
-                                        |> function
-                                            | Some year -> generateYearLink basePath year "next"
-                                            | None -> Html.span []
+                                        prevYear |> generateYearLinkOf "prev"
+                                        nextYear |> generateYearLinkOf "next"
                                     ]
                                 ]
                             ]
