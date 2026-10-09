@@ -10,6 +10,8 @@ open DevServer
 open Suave
 open System.Threading
 open System.Threading.Tasks
+open System.Net
+open System.Net.Sockets
 open System.Net.Http
 open System.Diagnostics
 
@@ -188,6 +190,34 @@ let runProcess (fileName: string) (arguments: string list) =
 let tests =
     testSequenced
     <| testList "snapshot testing" [
+
+        testTask "Dev server serves requests after sequential restarts on the same port" {
+            do!
+                task {
+                    for attempt in 1..5 do
+                        do!
+                            task {
+                                use! server = DevServer.StartAsync()
+                                use client = new HttpClient()
+                                let url = $"http://localhost:%d{server.Port}%s{server.Root}/index.html"
+                                use! response = client.GetAsync(url)
+                                let! content = response.Content.ReadAsStringAsync()
+
+                                response.IsSuccessStatusCode
+                                |> Expect.isTrue $"Dev server did not serve index.html after restart %d{attempt}"
+
+                                content.Contains "<!DOCTYPE html>"
+                                |> Expect.isTrue $"Dev server did not return HTML after restart %d{attempt}"
+                            }
+
+                        use listener =
+                            new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+
+                        listener.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true)
+
+                        listener.Bind(IPEndPoint(IPAddress.Loopback, int port))
+                }
+        }
 
         testTask "comparison" {
 
