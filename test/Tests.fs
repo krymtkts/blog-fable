@@ -18,33 +18,79 @@ NOTE: This tests requires the Playwright CLI to be installed.
 ex) PS> ./test/bin/Debug/*/playwright.ps1 install
 *)
 
-type DevServer() =
-    let home = IO.Path.Join [| __SOURCE_DIRECTORY__; ".."; "docs" |]
-    let port = port
-    let root = "/blog-fable"
-    let cancellationTokenSource = new CancellationTokenSource()
-
-    do
-        startWebServerAsync (suaveConfig home cancellationTokenSource.Token) (webpart root)
-        |> ignore
-
-        printfn $"Dev server started at http://localhost:%d{port}%s{root}"
+type DevServer private (cancellationTokenSource: CancellationTokenSource, serverTask: Task) =
+    static let timeout = TimeSpan.FromSeconds 10.
+    static let root = "/blog-fable"
 
     member __.Port = port
     member __.Root = root
-
-    interface IDisposable with
-        member __.Dispose() =
-            printfn "Stopping dev server..."
-            cancellationTokenSource.Cancel()
 
     interface IAsyncDisposable with
         member __.DisposeAsync() =
             task {
                 printfn "Stopping dev server asynchronously..."
-                do! cancellationTokenSource.CancelAsync()
+
+                try
+                    try
+                        let shutdown =
+                            task {
+                                do! cancellationTokenSource.CancelAsync()
+                                // NOTE: Cancellation callbacks completing does not mean Suave has released its listener.
+                                try
+                                    do! serverTask
+                                with :? OperationCanceledException when cancellationTokenSource.IsCancellationRequested ->
+                                    ()
+                            }
+
+                        do! shutdown.WaitAsync(timeout)
+                    with :? TimeoutException as ex ->
+                        raise (TimeoutException("Test server did not stop within 10 seconds.", ex))
+                finally
+                    cancellationTokenSource.Dispose()
             }
             |> ValueTask
+
+    static member StartAsync() : Task<DevServer> =
+        task {
+            let home = IO.Path.Join [| __SOURCE_DIRECTORY__; ".."; "docs" |]
+            let cancellationTokenSource = new CancellationTokenSource()
+
+            let listening, serverTask =
+                try
+                    startWebServerAsync (suaveConfig home cancellationTokenSource.Token) (webpart root)
+                with _ ->
+                    cancellationTokenSource.Dispose()
+                    reraise ()
+
+            let server = new DevServer(cancellationTokenSource, serverTask)
+
+            try
+                let listeningTask =
+                    Async.StartAsTask(listening, cancellationToken = cancellationTokenSource.Token)
+
+                let! completed = Task.WhenAny(listeningTask :> Task, serverTask).WaitAsync(timeout)
+
+                if completed = serverTask then
+                    do! serverTask
+                    failwith "Test server stopped before it started listening."
+
+                let! _ = listeningTask
+                printfn $"Dev server started at http://localhost:%d{port}%s{root}"
+                return server
+            with ex ->
+                let failure =
+                    match ex with
+                    | :? TimeoutException ->
+                        TimeoutException("Test server did not start listening within 10 seconds.", ex) :> exn
+                    | _ -> ex
+
+                try
+                    do! (server :> IAsyncDisposable).DisposeAsync().AsTask()
+                with cleanupError ->
+                    raise (AggregateException("Test server startup and cleanup failed.", [| failure; cleanupError |]))
+
+                return raise failure
+        }
 
 type IPlaywright with
     member __.NewChromiumPage() : Task<IPage> =
@@ -180,7 +226,7 @@ let tests =
                     "/xxx.html" // Test for 404 page
                 ]
 
-            use server = new DevServer()
+            use! (server: DevServer) = DevServer.StartAsync()
             let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
             ensureSnapshotDir ()
 
@@ -222,7 +268,7 @@ let tests =
         }
 
         testTask "Markdown exports serve published content only" {
-            use server = new DevServer()
+            use! (server: DevServer) = DevServer.StartAsync()
             let client = new HttpClient()
             let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
 
@@ -275,7 +321,7 @@ let tests =
         }
 
         testTask "Booklog Markdown exports preserve reading records" {
-            use server = new DevServer()
+            use! (server: DevServer) = DevServer.StartAsync()
             let client = new HttpClient()
             let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
             let path = "/booklogs/a-book.html.md"
@@ -305,7 +351,7 @@ let tests =
         }
 
         testTask "HTML detail pages advertise LLM resources" {
-            use server = new DevServer()
+            use! (server: DevServer) = DevServer.StartAsync()
             let client = new HttpClient()
             let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
             let siteUrl = "https://krymtkts.github.io/blog-fable"
@@ -351,7 +397,7 @@ let tests =
         }
 
         testTask "llms.txt lists published Markdown exports without auto-generated descriptions" {
-            use server = new DevServer()
+            use! (server: DevServer) = DevServer.StartAsync()
             let client = new HttpClient()
             let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
 
@@ -438,7 +484,7 @@ let tests =
         }
 
         testTask "Pagefind filters classify archive and booklog results" {
-            use server = new DevServer()
+            use! (server: DevServer) = DevServer.StartAsync()
             let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
 
             let! (playwright: IPlaywright) = Playwright.CreateAsync()
@@ -568,7 +614,7 @@ let tests =
         }
 
         testTask "Pagefind tag filters use AND semantics" {
-            use server = new DevServer()
+            use! (server: DevServer) = DevServer.StartAsync()
             let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
 
             let! (playwright: IPlaywright) = Playwright.CreateAsync()
