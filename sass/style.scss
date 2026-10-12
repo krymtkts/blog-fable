@@ -33,6 +33,9 @@ $sl-green: #859900;
   $body-line-height: 1.7
 );
 @use "../node_modules/bulma/sass/themes";
+@use "../node_modules/bulma/sass/helpers/typography.scss";
+@use "../node_modules/bulma/sass/helpers/spacing.scss";
+@use "../node_modules/bulma/sass/helpers/visibility.scss";
 @use "../node_modules/bulma/sass/components/tabs.scss";
 @use "../node_modules/bulma/sass/elements/button.scss";
 @use "../node_modules/bulma/sass/elements/content.scss";
