@@ -91,6 +91,7 @@ module Misc =
         (prevYear: int option)
         (nextYear: int option)
         basePath
+        stats
         (logs: Booklog list)
         =
         let dateMap =
@@ -155,25 +156,32 @@ module Misc =
             | None -> Html.span []
 
         Html.div [
-            prop.className "section calendar-container"
+            prop.className "section calendar-layout"
             prop.children [
-                Html.table [
-                    prop.className "calendar"
+                Html.div [
+                    prop.className "calendar-navigation is-flex is-align-items-center"
                     prop.children [
-                        Html.thead [
-                            Html.tr [
-                                Html.th [
-                                    prop.className "nav"
-                                    prop.colSpan (List.length header + 1)
-                                    prop.children [
-                                        prevYear |> generateYearLinkOf "prev"
-                                        nextYear |> generateYearLinkOf "next"
-                                    ]
-                                ]
-                            ]
-                            Html.tr (empty :: header)
+                        Html.div [
+                            prop.className "calendar-year-link has-text-left is-size-7"
+                            prop.children [ prevYear |> generateYearLinkOf "prev" ]
                         ]
-                        Html.tbody calendar
+                        Html.div [
+                            prop.className "calendar-streak has-text-centered mx-2"
+                            prop.children [ stats ]
+                        ]
+                        Html.div [
+                            prop.className "calendar-year-link has-text-right is-size-7"
+                            prop.children [ nextYear |> generateYearLinkOf "next" ]
+                        ]
+                    ]
+                ]
+                Html.div [
+                    prop.className "calendar-container"
+                    prop.children [
+                        Html.table [
+                            prop.className "calendar"
+                            prop.children [ Html.thead [ Html.tr (empty :: header) ]; Html.tbody calendar ]
+                        ]
                     ]
                 ]
             ]
@@ -387,7 +395,7 @@ module Misc =
             Html.h1 [ prop.className "title"; prop.children (Html.text $"Booklog {def.year}") ]
 
         let booklogCalendar =
-            generateCalendar def.year def.prevYear def.nextYear def.basePath logs
+            generateCalendar def.year def.prevYear def.nextYear def.basePath def.stats logs
 
         let booklogRows =
             logs
@@ -451,7 +459,6 @@ module Misc =
 
         [
             header
-            def.stats
             booklogCalendar
             booklogJumpLinks
             Html.div booklogRows
