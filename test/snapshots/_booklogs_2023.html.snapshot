@@ -514,6 +514,11 @@
           - cell
           - cell
           - cell
+    - navigation "Booklog lists":
+      - link "Years ↓":
+        - /url: "#booklog-years"
+      - link "Books ↓":
+        - /url: "#booklog-books"
     - paragraph: 2023-12-31
     - paragraph:
       - link "B book":

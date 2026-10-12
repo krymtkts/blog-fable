@@ -29,6 +29,11 @@
   - main:
     - heading "Booklog - A book" [level=1]
     - paragraph: Jane Doe
+    - navigation "Booklog lists":
+      - link "Years ↓":
+        - /url: "#booklog-years"
+      - link "Books ↓":
+        - /url: "#booklog-books"
     - paragraph
     - paragraph: start day of Jan.
     - paragraph
