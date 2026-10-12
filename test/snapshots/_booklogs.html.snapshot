@@ -28,13 +28,11 @@
         - button "🖥️"
   - main:
     - heading "Booklog 2024" [level=1]
+    - link "« 2023":
+      - /url: /blog-fable/booklogs/2023.html
     - text: "current: 2, longest: 366, max pages read: 39"
     - table:
       - rowgroup:
-        - row "« 2023":
-          - columnheader "« 2023":
-            - link "« 2023":
-              - /url: /blog-fable/booklogs/2023.html
         - row "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec":
           - columnheader
           - columnheader "Jan"
