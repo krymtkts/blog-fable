@@ -753,9 +753,9 @@ module Rendering =
 
             let links =
                 [
-                    Html.h2 $"Years (%d{years |> List.length})"
+                    Html.h2 [ prop.id "booklog-years"; prop.text $"Years (%d{years |> List.length})" ]
                     yearLinks
-                    Html.h2 $"Books (%d{bookMap |> Map.count})"
+                    Html.h2 [ prop.id "booklog-books"; prop.text $"Books (%d{bookMap |> Map.count})" ]
                     bookLinks
                 ]
 

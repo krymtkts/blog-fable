@@ -364,6 +364,24 @@ module Misc =
             index: bool
         }
 
+    let private booklogJumpLinks =
+        Html.nav [
+            prop.className "is-size-7"
+            prop.ariaLabel "Booklog lists"
+            prop.children [
+                Html.a [
+                    prop.className "is-inline-block py-2 mr-4"
+                    prop.href "#booklog-years"
+                    prop.text "Years ↓"
+                ]
+                Html.a [
+                    prop.className "is-inline-block py-2"
+                    prop.href "#booklog-books"
+                    prop.text "Books ↓"
+                ]
+            ]
+        ]
+
     let private generateBooklogList (def: BooklogDef) (logs: Booklog list) =
         let header =
             Html.h1 [ prop.className "title"; prop.children (Html.text $"Booklog {def.year}") ]
@@ -435,6 +453,7 @@ module Misc =
             header
             def.stats
             booklogCalendar
+            booklogJumpLinks
             Html.div booklogRows
             Html.h2 $"Books of %d{def.year} (%d{booksOfYear |> List.length})"
             booksOfYearLinks
@@ -484,6 +503,7 @@ module Misc =
         [
             header
             bookAuthor
+            booklogJumpLinks
             Html.div [ prop.className "section"; prop.children (booklogRows |> List.concat) ]
         ]
         @ links
