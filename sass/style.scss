@@ -36,6 +36,7 @@ $sl-green: #859900;
 @use "../node_modules/bulma/sass/helpers/typography.scss";
 @use "../node_modules/bulma/sass/helpers/spacing.scss";
 @use "../node_modules/bulma/sass/helpers/visibility.scss";
+@use "../node_modules/bulma/sass/helpers/flexbox.scss";
 @use "../node_modules/bulma/sass/components/tabs.scss";
 @use "../node_modules/bulma/sass/elements/button.scss";
 @use "../node_modules/bulma/sass/elements/content.scss";
@@ -313,6 +314,23 @@ pre code {
   }
 }
 
+.calendar-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: fit-content;
+  max-width: 100%;
+}
+
+.calendar-navigation {
+  .calendar-year-link {
+    flex: 1 0 4rem;
+  }
+
+  .calendar-streak {
+    min-width: 0;
+  }
+}
+
 .calendar-container {
   position: relative;
   overflow: auto;
@@ -338,23 +356,6 @@ pre code {
         font-size: small;
         font-weight: normal;
         position: absolute;
-      }
-    }
-    th.nav {
-      width: 100%;
-      position: relative;
-
-      a {
-        position: static;
-        width: 50%;
-      }
-      .prev > span {
-        position: absolute;
-        left: 0.5em;
-      }
-      .next > span {
-        position: absolute;
-        right: 0.5em;
       }
     }
   }
