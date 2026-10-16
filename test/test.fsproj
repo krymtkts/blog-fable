@@ -21,6 +21,8 @@
     <PackageReference Include="Expecto" Version="11.1.0" />
     <PackageReference Include="Fake.Core.Process" Version="6.1.4" />
     <PackageReference Include="Fake.DotNet.Cli" Version="6.1.4" />
+    <!-- NOTE: Add explicit dependency overrides to address vulnerabilities related to Fake.DotNet.Cli v6.1.4 -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="8.0.2" />
     <PackageReference Include="Fake.JavaScript.Npm" Version="6.1.4" />
     <PackageReference Include="Microsoft.Playwright" Version="1.63.0" />
     <PackageReference Include="Serilog" Version="4.4.0" />
