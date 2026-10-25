@@ -24,6 +24,9 @@ runs:
     - name: Install dependencies
       shell: bash
       run: npm install
+    - name: Audit npm dependencies
+      shell: bash
+      run: npm audit --include=dev --audit-level=low
     - name: Build pages
       shell: bash
       run: npm run build
