@@ -15,5 +15,3 @@ jobs:
         uses: actions/checkout@v7
       - name: Build pages
         uses: ./.github/actions/build
-        with:
-          snyk_token: ${{ secrets.SNYK_TOKEN }}
