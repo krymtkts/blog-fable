@@ -17,9 +17,8 @@ updates:
   # Maintain dependencies for NuGet
   - package-ecosystem: "nuget"
     directories:
+      - "/"
       - "/.config"
-      - "/src"
-      - "/test"
     schedule:
       interval: "weekly"
       day: "friday"
