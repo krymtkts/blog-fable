@@ -1,7 +1,6 @@
 # [Blog Fable](https://krymtkts.github.io/blog-fable/index.html)
 
 ![Deploy GitHub Pages](https://github.com/krymtkts/blog-fable/actions/workflows/gh-pages.yml/badge.svg)
-[![Known Vulnerabilities](https://snyk.io/test/github/krymtkts/blog-fable/badge.svg)](https://snyk.io/test/github/krymtkts/blog-fable)
 ![Top Language](https://img.shields.io/github/languages/top/krymtkts/blog-fable?color=%23b845fc)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
