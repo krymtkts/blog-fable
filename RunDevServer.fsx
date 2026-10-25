@@ -1,10 +1,14 @@
 // NOTE: requires all dependencies references.
+#r "nuget: Fake.Core.Process"
 #r "nuget: Fake.DotNet.Cli"
 #r "nuget: Fake.JavaScript.Npm"
 #r "nuget: Serilog"
 #r "nuget: Serilog.Sinks.Console"
-#r "nuget: Suave, = 3.3.0"
-#r "nuget: System.Drawing.Common" // NOTE: To address vulnerabilities in Fake.DotNet.Cli
+#r "nuget: Suave"
+// NOTE: Override vulnerable transitive dependencies of Fake.DotNet.Cli.
+#r "nuget: System.Drawing.Common"
+#r "nuget: System.Security.Cryptography.Pkcs"
+#r "nuget: NuGet.Protocol"
 // NOTE: loading the dev server from test project.
 #load "./test/DevServer.fs"
 
