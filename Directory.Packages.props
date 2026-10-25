@@ -1,0 +1,35 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+  <!-- NOTE: Dependencies of the Fable application, including FSharp.Core shared with the test project. -->
+  <ItemGroup>
+    <PackageVersion Include="FSharp.Core" Version="10.1.402" />
+    <PackageVersion Include="Fable.Browser.Dom" Version="2.20.0" />
+    <PackageVersion Include="Fable.Browser.WebStorage" Version="1.3.0" />
+    <PackageVersion Include="Fable.Core" Version="5.6.0" />
+    <PackageVersion Include="Fable.Promise" Version="3.3.0" />
+    <PackageVersion Include="Fable.SimpleXml" Version="3.4.0" />
+    <PackageVersion Include="Feliz" Version="3.3.3" />
+  </ItemGroup>
+  <!-- NOTE: Dependencies of the test project, including the shared development server. -->
+  <ItemGroup>
+    <PackageVersion Include="Expecto" Version="11.1.1" />
+    <PackageVersion Include="Fake.Core.Process" Version="6.2.0" />
+    <PackageVersion Include="Fake.DotNet.Cli" Version="6.2.0" />
+    <PackageVersion Include="Fake.JavaScript.Npm" Version="6.2.0" />
+    <PackageVersion Include="Microsoft.Playwright" Version="1.64.1" />
+    <PackageVersion Include="Serilog" Version="4.4.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageVersion Include="Suave" Version="3.7.2" />
+    <PackageVersion Include="YoloDev.Expecto.TestSdk" Version="0.16.1" />
+  </ItemGroup>
+  <!-- NOTE: Security pins for transitive dependencies of Fake.DotNet.Cli. -->
+  <ItemGroup>
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+    <PackageVersion Include="System.Drawing.Common" Version="10.0.13" />
+    <PackageVersion Include="NuGet.Packaging" Version="7.9.0" />
+    <PackageVersion Include="NuGet.Protocol" Version="7.9.0" />
+  </ItemGroup>
+</Project>
