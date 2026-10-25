@@ -156,7 +156,7 @@ module Misc =
             | None -> Html.span []
 
         Html.div [
-            prop.className "section calendar-layout"
+            prop.className "calendar-layout block"
             prop.children [
                 Html.div [
                     prop.className "calendar-navigation is-flex is-align-items-center"
@@ -374,7 +374,7 @@ module Misc =
 
     let private booklogJumpLinks =
         Html.nav [
-            prop.className "is-size-7"
+            prop.className "block is-size-7"
             prop.ariaLabel "Booklog lists"
             prop.children [
                 Html.a [
@@ -408,7 +408,7 @@ module Misc =
                 let book = Map.tryFind log.bookTitle def.books
 
                 Html.div [
-                    prop.className "section"
+                    prop.className "block"
                     prop.children [
                         Html.p [
                             prop.id $"{log.date}-{i + 1}"
@@ -459,9 +459,10 @@ module Misc =
 
         [
             header
-            booklogCalendar
-            booklogJumpLinks
-            Html.div booklogRows
+            Html.div [
+                prop.className "section"
+                prop.children [ booklogCalendar; booklogJumpLinks; Html.div booklogRows ]
+            ]
             Html.h2 $"Books of %d{def.year} (%d{booksOfYear |> List.length})"
             booksOfYearLinks
         ]
@@ -480,28 +481,31 @@ module Misc =
         let booklogRows =
             logs
             |> List.map (fun log ->
-                [
-                    log.notes |> generateBooklogNotes
-                    Html.p [
-                        prop.className "content is-small booklog-info"
-                        prop.children [
-                            Html.text log.date
-                            Html.text ", read count: "
-                            Html.text (
-                                let rc =
-                                    log.readCount
-                                    |> function
-                                        | Some rc -> rc
-                                        | None -> 1
+                Html.div [
+                    prop.className "block"
+                    prop.children [
+                        log.notes |> generateBooklogNotes
+                        Html.p [
+                            prop.className "content is-small booklog-info"
+                            prop.children [
+                                Html.text log.date
+                                Html.text ", read count: "
+                                Html.text (
+                                    let rc =
+                                        log.readCount
+                                        |> function
+                                            | Some rc -> rc
+                                            | None -> 1
 
-                                book.previouslyRead
-                                |> function
-                                    | Some pr when pr -> $"n+{rc}"
-                                    | _ -> $"{rc}"
-                            )
-                            Html.text ", page: "
-                            Html.text log.pages
-                            log.pages |> countReadPages |> Html.text
+                                    book.previouslyRead
+                                    |> function
+                                        | Some pr when pr -> $"n+{rc}"
+                                        | _ -> $"{rc}"
+                                )
+                                Html.text ", page: "
+                                Html.text log.pages
+                                log.pages |> countReadPages |> Html.text
+                            ]
                         ]
                     ]
                 ])
@@ -510,8 +514,10 @@ module Misc =
         [
             header
             bookAuthor
-            booklogJumpLinks
-            Html.div [ prop.className "section"; prop.children (booklogRows |> List.concat) ]
+            Html.div [
+                prop.className "section"
+                prop.children [ booklogJumpLinks; Html.div booklogRows ]
+            ]
         ]
         @ links
 
