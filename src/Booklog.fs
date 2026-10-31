@@ -400,22 +400,27 @@ module Misc =
                     @ [
                         Html.div [ prop.id "booklog-bottom" ]
                         Html.nav [
-                            prop.className "booklog-navigation"
+                            prop.className "booklog-navigation container"
                             prop.ariaLabel "Booklog navigation"
                             prop.children [
-                                Html.a [
-                                    prop.className "button"
-                                    prop.href "#booklog-top"
-                                    prop.ariaLabel "Go to top"
-                                    prop.title "Go to top"
-                                    prop.text "↑"
-                                ]
-                                Html.a [
-                                    prop.className "button"
-                                    prop.href "#booklog-bottom"
-                                    prop.ariaLabel "Go to bottom"
-                                    prop.title "Go to bottom"
-                                    prop.text "↓"
+                                Html.div [
+                                    prop.className "section is-flex is-justify-content-flex-end"
+                                    prop.children [
+                                        Html.a [
+                                            prop.className "button"
+                                            prop.href "#booklog-top"
+                                            prop.ariaLabel "Go to top"
+                                            prop.title "Go to top"
+                                            prop.text "↑"
+                                        ]
+                                        Html.a [
+                                            prop.className "button"
+                                            prop.href "#booklog-bottom"
+                                            prop.ariaLabel "Go to bottom"
+                                            prop.title "Go to bottom"
+                                            prop.text "↓"
+                                        ]
+                                    ]
                                 ]
                             ]
                         ]

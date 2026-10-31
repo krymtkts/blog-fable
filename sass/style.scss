@@ -413,9 +413,19 @@ pre code {
 
 .booklog-navigation {
   position: fixed;
-  right: max(1rem, env(safe-area-inset-right));
+  left: 0;
+  right: 0;
   bottom: max(1rem, env(safe-area-inset-bottom));
-  display: flex;
-  gap: 0.5rem;
+  pointer-events: none;
   z-index: 1;
+
+  .section {
+    padding-top: 0;
+    padding-bottom: 0;
+    gap: 0.5rem;
+  }
+
+  a {
+    pointer-events: auto;
+  }
 }

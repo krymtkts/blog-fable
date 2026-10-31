@@ -404,6 +404,27 @@ let tests =
                             failtestf "%s should have exactly one %s" path selector
 
                     let navigation = page.Locator(".booklog-navigation")
+
+                    let! aligned =
+                        page.EvaluateAsync<bool>
+                            """
+                            () => {
+                                const nav = document.querySelector('.booklog-navigation');
+                                const main = document.querySelector('main.container');
+                                const section = document.querySelector('.booklog-page > .section');
+                                const lastLink = nav.querySelector('a:last-child');
+                                const padding = parseFloat(getComputedStyle(section).paddingRight);
+                                const expectedRight = main.getBoundingClientRect().right - padding;
+                                const rect = lastLink.getBoundingClientRect();
+                                return Math.abs(rect.right - expectedRight) <= 1
+                                    && getComputedStyle(nav).pointerEvents === 'none'
+                                    && getComputedStyle(lastLink).pointerEvents === 'auto';
+                            }
+                            """
+
+                    if not aligned then
+                        failtestf "Navigation should align with the content and allow click-through on %s" path
+
                     let! (before: LocatorBoundingBoxResult | null) = navigation.BoundingBoxAsync()
 
                     let before =
