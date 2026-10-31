@@ -406,3 +406,26 @@ pre code {
 .booklog-info {
   text-align: end;
 }
+
+.booklog-page {
+  padding-bottom: 5rem;
+}
+
+.booklog-navigation {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  pointer-events: none;
+  z-index: 1;
+
+  .section {
+    padding-top: 0;
+    padding-bottom: 0;
+    gap: 0.5rem;
+  }
+
+  a {
+    pointer-events: auto;
+  }
+}
