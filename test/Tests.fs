@@ -189,7 +189,7 @@ let runProcess (fileName: string) (arguments: string list) =
 [<Tests>]
 let tests =
     testSequenced
-    <| testList "snapshot testing" [
+    <| testList "Integration testing" [
 
         testTask "Dev server serves requests after sequential restarts on the same port" {
             do!
@@ -219,7 +219,7 @@ let tests =
                 }
         }
 
-        testTask "comparison" {
+        testTask "Generated pages match their ARIA snapshots" {
 
             let paths =
                 [
