@@ -3434,6 +3434,13 @@
         - link "D book":
           - /url: /blog-fable/booklogs/d-book.html
         - text: 2022-01-01〜2022-12-31
+    - navigation "Booklog navigation":
+      - link "Go to top":
+        - /url: "#booklog-top"
+        - text: ↑
+      - link "Go to bottom":
+        - /url: "#booklog-bottom"
+        - text: ↓
   - contentinfo: Copyright © 2023 krymtkts
   - status
   - status
