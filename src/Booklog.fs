@@ -390,6 +390,40 @@ module Misc =
             ]
         ]
 
+    let private withBooklogNavigation content =
+        [
+            Html.div [
+                prop.id "booklog-top"
+                prop.className "booklog-page"
+                prop.children (
+                    content
+                    @ [
+                        Html.div [ prop.id "booklog-bottom" ]
+                        Html.nav [
+                            prop.className "booklog-navigation"
+                            prop.ariaLabel "Booklog navigation"
+                            prop.children [
+                                Html.a [
+                                    prop.className "button"
+                                    prop.href "#booklog-top"
+                                    prop.ariaLabel "Go to top"
+                                    prop.title "Go to top"
+                                    prop.text "↑"
+                                ]
+                                Html.a [
+                                    prop.className "button"
+                                    prop.href "#booklog-bottom"
+                                    prop.ariaLabel "Go to bottom"
+                                    prop.title "Go to bottom"
+                                    prop.text "↓"
+                                ]
+                            ]
+                        ]
+                    ]
+                )
+            ]
+        ]
+
     let private generateBooklogList (def: BooklogDef) (logs: Booklog list) =
         let header =
             Html.h1 [ prop.className "title"; prop.children (Html.text $"Booklog {def.year}") ]
@@ -467,6 +501,7 @@ module Misc =
             booksOfYearLinks
         ]
         @ def.links
+        |> withBooklogNavigation
 
     let private generateBooklogSummary (links: Fable.React.ReactElement list) (book: Book) (logs: Booklog list) =
         let header =
@@ -520,6 +555,7 @@ module Misc =
             ]
         ]
         @ links
+        |> withBooklogNavigation
 
     let groupBooklogsByYear (booklogs: Booklog list) =
         let minYear = booklogs |> List.map (_.date >> DateTime.Parse >> _.Year) |> List.min
