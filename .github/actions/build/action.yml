@@ -28,8 +28,7 @@ runs:
       shell: pwsh
       run: |
         dotnet build ./test/test.fsproj
-        ./test/bin/Debug/*/playwright.ps1 install-deps
-        ./test/bin/Debug/*/playwright.ps1 install
+        ./test/bin/Debug/*/playwright.ps1 install --with-deps chromium
     - name: Snapshot tests
       shell: bash
       # NOTE: Simplify test command to prevent no zero tests ran in MTP v2.
