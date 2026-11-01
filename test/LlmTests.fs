@@ -32,6 +32,13 @@ let private publishedMarkdown =
                 if response.IsSuccessStatusCode |> not then
                     failtestf "Failed to load Markdown export %s: %O" path response.StatusCode
 
+                let mediaType =
+                    response.Content.Headers.ContentType
+                    |> Option.ofObj
+                    |> Option.bind (_.MediaType >> Option.ofObj)
+
+                Expect.equal mediaType (Some "text/markdown") $"Unexpected Content-Type for %s{path}"
+
                 if content.StartsWith expectedTitle |> not then
                     failtestf "Markdown export has unexpected title for %s: %s" path content
 
@@ -73,6 +80,13 @@ let private booklogMarkdown =
 
             if response.IsSuccessStatusCode |> not then
                 failtestf "Failed to load booklog Markdown export %s: %O" path response.StatusCode
+
+            let mediaType =
+                response.Content.Headers.ContentType
+                |> Option.ofObj
+                |> Option.bind (_.MediaType >> Option.ofObj)
+
+            Expect.equal mediaType (Some "text/markdown") $"Unexpected Content-Type for %s{path}"
 
             for expected in
                 [
