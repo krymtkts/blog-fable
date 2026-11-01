@@ -21,6 +21,7 @@
     <Compile Include="SearchTests.fs" />
     <Compile Include="ThemeTests.fs" />
     <Compile Include="XmlTests.fs" />
+    <Compile Include="LinkTests.fs" />
     <Compile Include="Tests.fs" />
   </ItemGroup>
 

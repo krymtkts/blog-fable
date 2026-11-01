@@ -12,5 +12,6 @@ let tests =
         SearchTests.tests
         ThemeTests.tests
         XmlTests.tests
+        LinkTests.tests
         LlmTests.tests
     ]
