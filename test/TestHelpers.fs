@@ -88,21 +88,42 @@ type DevServer private (cancellationTokenSource: CancellationTokenSource, server
                 return raise failure
         }
 
-type IPlaywright with
-    member __.NewChromiumPage() : Task<IPage> =
-        task {
-            let! browser = __.Chromium.LaunchAsync()
-            return! browser.NewPageAsync()
-        }
+type TestBrowser private (playwright: IPlaywright, browser: IBrowser, context: IBrowserContext, page: IPage) =
+    member _.Page = page
 
-type PlaywrightAsyncDisposable(playwright: IPlaywright) =
     interface IAsyncDisposable with
         member _.DisposeAsync() =
-            playwright.Dispose()
-            printfn "Playwright disposed."
-            () |> ValueTask
+            task {
+                use _ = playwright
+                use _ = browser
+                use _ = context
+                return ()
+            }
+            |> ValueTask
 
-    member _.Instance = playwright
+    static member StartAsync() : Task<TestBrowser> =
+        task {
+            let! playwright = Playwright.CreateAsync()
+
+            try
+                let! browser = playwright.Chromium.LaunchAsync()
+
+                try
+                    let! context = browser.NewContextAsync()
+
+                    try
+                        let! page = context.NewPageAsync()
+                        return new TestBrowser(playwright, browser, context, page)
+                    with ex ->
+                        do! context.CloseAsync()
+                        return raise ex
+                with ex ->
+                    do! browser.CloseAsync()
+                    return raise ex
+            with ex ->
+                playwright.Dispose()
+                return raise ex
+        }
 
 type IPage with
     member __.GotoAndCheck(url: string) =

@@ -10,9 +10,8 @@ let private filters =
         use! (server: DevServer) = DevServer.StartAsync()
         let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
 
-        let! (playwright: IPlaywright) = Playwright.CreateAsync()
-        use _ = PlaywrightAsyncDisposable playwright
-        let! (page: IPage) = playwright.NewChromiumPage()
+        use! (browser: TestBrowser) = TestBrowser.StartAsync()
+        let page = browser.Page
 
         let! response = $"%s{baseUrl}/index.html" |> page.GotoAndCheck
 
@@ -139,9 +138,8 @@ let private tagAnd =
         use! (server: DevServer) = DevServer.StartAsync()
         let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
 
-        let! (playwright: IPlaywright) = Playwright.CreateAsync()
-        use _ = PlaywrightAsyncDisposable playwright
-        let! (page: IPage) = playwright.NewChromiumPage()
+        use! (browser: TestBrowser) = TestBrowser.StartAsync()
+        let page = browser.Page
 
         let! response = $"%s{baseUrl}/index.html" |> page.GotoAndCheck
 

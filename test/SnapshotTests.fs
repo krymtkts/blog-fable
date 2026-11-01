@@ -3,7 +3,6 @@ module SnapshotTests
 open System
 open Expecto
 open Expecto.Flip
-open Microsoft.Playwright
 open TestHelpers
 
 let snapshotDir = IO.Path.Combine(__SOURCE_DIRECTORY__, "snapshots")
@@ -78,9 +77,8 @@ let private generatedPages =
         let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
         ensureSnapshotDir ()
 
-        let! (playwright: IPlaywright) = Playwright.CreateAsync()
-        use _ = PlaywrightAsyncDisposable playwright
-        let! (page: IPage) = playwright.NewChromiumPage()
+        use! (browser: TestBrowser) = TestBrowser.StartAsync()
+        let page = browser.Page
         let overwriteSnapshots = overwriteSnapshotsEnabled ()
         let failures = ResizeArray<string>()
 
