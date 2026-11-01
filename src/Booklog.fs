@@ -607,7 +607,7 @@ module Misc =
 
         let loc: Xml.SiteLocation =
             {
-                loc = sourceToSitemap def.basePath id
+                loc = sourceToSitemap def.basePath $"%s{id}.html"
                 lastmod = lastmod
                 priority = def.priority
             }

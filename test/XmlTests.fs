@@ -114,6 +114,13 @@ let private sitemap =
                     "/archives.html"
                     "/tags.html"
                     "/booklogs.html"
+                    "/booklogs/2022.html"
+                    "/booklogs/2023.html"
+                    "/booklogs/2024.html"
+                    "/booklogs/a-book.html"
+                    "/booklogs/b-book.html"
+                    "/booklogs/c-book.html"
+                    "/booklogs/d-book.html"
                     "/pages/about.html"
                     "/pages/sampla-page.html"
                     "/pages/sampla-page-without-front-matter.html"
@@ -135,6 +142,15 @@ let private sitemap =
                 Expect.isFalse
                     (url.EndsWith ".md" || url.EndsWith "/404.html" || url.EndsWith "/llms.txt")
                     "Sitemap should list public HTML pages only"
+
+                let relative =
+                    (Uri url).AbsolutePath.Substring(server.Root.Length + 1)
+                    |> Uri.UnescapeDataString
+
+                let filePath =
+                    IO.Path.Combine(server.OutputRoot, relative.Replace('/', IO.Path.DirectorySeparatorChar))
+
+                Expect.isTrue (IO.File.Exists filePath) $"Sitemap URL should resolve to a generated file: %s{url}"
 
                 Expect.isTrue
                     (DateOnly.TryParseExact(
