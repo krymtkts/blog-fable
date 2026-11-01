@@ -12,10 +12,9 @@ let private internalLinks =
         use! (server: DevServer) = DevServer.StartAsync()
         use! (browser: TestBrowser) = TestBrowser.StartAsync()
         let page = browser.Page
-        let baseUrl = $"http://localhost:%d{server.Port}%s{server.Root}"
+        let baseUrl = server.BaseUrl
 
-        let outputRoot =
-            Path.GetFullPath(Path.Combine(repositoryRoot, "docs", "blog-fable"))
+        let outputRoot = server.OutputRoot
 
         let origin = (Uri baseUrl).GetLeftPart(UriPartial.Authority)
         let root = server.Root + "/"

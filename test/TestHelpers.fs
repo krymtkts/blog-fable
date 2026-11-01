@@ -9,6 +9,13 @@ open System.Threading
 open System.Threading.Tasks
 open System.Diagnostics
 
+let repositoryRoot =
+    IO.Path.GetFullPath(IO.Path.Combine(__SOURCE_DIRECTORY__, ".."))
+
+let private serverRoot = "/blog-fable"
+let private serverHome = IO.Path.Combine(repositoryRoot, "docs")
+let outputRoot = IO.Path.Combine(serverHome, serverRoot.TrimStart '/')
+
 (*
 NOTE: This tests requires the Playwright CLI to be installed.
 ex) PS> ./test/bin/Debug/*/playwright.ps1 install
@@ -16,10 +23,10 @@ ex) PS> ./test/bin/Debug/*/playwright.ps1 install
 
 type DevServer private (cancellationTokenSource: CancellationTokenSource, serverTask: Task) =
     static let timeout = TimeSpan.FromSeconds 10.
-    static let root = "/blog-fable"
-
     member __.Port = port
-    member __.Root = root
+    member __.Root = serverRoot
+    member __.BaseUrl = $"http://localhost:%d{port}%s{serverRoot}"
+    member __.OutputRoot = outputRoot
 
     interface IAsyncDisposable with
         member __.DisposeAsync() =
@@ -48,12 +55,11 @@ type DevServer private (cancellationTokenSource: CancellationTokenSource, server
 
     static member StartAsync() : Task<DevServer> =
         task {
-            let home = IO.Path.Join [| __SOURCE_DIRECTORY__; ".."; "docs" |]
             let cancellationTokenSource = new CancellationTokenSource()
 
             let listening, serverTask =
                 try
-                    startWebServerAsync (suaveConfig home cancellationTokenSource.Token) (webpart root)
+                    startWebServerAsync (suaveConfig serverHome cancellationTokenSource.Token) (webpart serverRoot)
                 with _ ->
                     cancellationTokenSource.Dispose()
                     reraise ()
@@ -71,7 +77,7 @@ type DevServer private (cancellationTokenSource: CancellationTokenSource, server
                     failwith "Test server stopped before it started listening."
 
                 let! _ = listeningTask
-                printfn $"Dev server started at http://localhost:%d{port}%s{root}"
+                printfn $"Dev server started at %s{server.BaseUrl}"
                 return server
             with ex ->
                 let failure =
@@ -140,9 +146,6 @@ type IPage with
             | r when not r.Ok -> return Result.Error $"Failed to load page: %s{url}"
             | r -> return Result.Ok r
         }
-
-let repositoryRoot =
-    IO.Path.GetFullPath(IO.Path.Combine(__SOURCE_DIRECTORY__, ".."))
 
 let runProcess (fileName: string) (arguments: string list) =
     task {

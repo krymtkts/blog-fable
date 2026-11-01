@@ -9,7 +9,7 @@ open TestHelpers
 let private filters =
     testTask "Pagefind filters classify archive and booklog results" {
         use! (server: DevServer) = DevServer.StartAsync()
-        let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+        let baseUrl = server.BaseUrl
 
         use! (browser: TestBrowser) = TestBrowser.StartAsync()
         let page = browser.Page
@@ -137,7 +137,7 @@ let private filters =
 let private tagAnd =
     testTask "Pagefind tag filters use AND semantics" {
         use! (server: DevServer) = DevServer.StartAsync()
-        let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+        let baseUrl = server.BaseUrl
 
         use! (browser: TestBrowser) = TestBrowser.StartAsync()
         let page = browser.Page

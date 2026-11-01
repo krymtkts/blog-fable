@@ -17,7 +17,7 @@ let private sequentialRestarts =
                         task {
                             use! server = DevServer.StartAsync()
                             use client = new HttpClient()
-                            let url = $"http://localhost:%d{server.Port}%s{server.Root}/index.html"
+                            let url = $"%s{server.BaseUrl}/index.html"
                             use! response = client.GetAsync(url)
                             let! content = response.Content.ReadAsStringAsync()
 

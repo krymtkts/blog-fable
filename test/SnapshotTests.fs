@@ -74,7 +74,7 @@ let private generatedPages =
             ]
 
         use! (server: DevServer) = DevServer.StartAsync()
-        let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+        let baseUrl = server.BaseUrl
         ensureSnapshotDir ()
 
         use! (browser: TestBrowser) = TestBrowser.StartAsync()

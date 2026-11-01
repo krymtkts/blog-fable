@@ -10,8 +10,7 @@ let private selectionPersists =
         use! (browser: TestBrowser) = TestBrowser.StartAsync()
         let page = browser.Page
 
-        let! response =
-            page.GotoAndCheck $"http://localhost:%d{server.Port}%s{server.Root}/index.html"
+        let! response = page.GotoAndCheck $"%s{server.BaseUrl}/index.html"
 
         match response with
         | Result.Error message -> failtest message

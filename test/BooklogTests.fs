@@ -7,7 +7,7 @@ open TestHelpers
 let private fixedNavigation =
     testTask "Booklog fixed navigation jumps to its top and bottom" {
         use! (server: DevServer) = DevServer.StartAsync()
-        let baseUrl = $"http://localhost:%d{server.Port}%s{server.Root}"
+        let baseUrl = server.BaseUrl
         use! (browser: TestBrowser) = TestBrowser.StartAsync()
         let page = browser.Page
 

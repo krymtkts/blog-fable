@@ -11,7 +11,7 @@ let private publishedMarkdown =
         task {
             use! (server: DevServer) = DevServer.StartAsync()
             use client = new HttpClient()
-            let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+            let baseUrl = server.BaseUrl
 
             let pages =
                 [
@@ -72,7 +72,7 @@ let private booklogMarkdown =
         task {
             use! (server: DevServer) = DevServer.StartAsync()
             use client = new HttpClient()
-            let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+            let baseUrl = server.BaseUrl
             let path = "/booklogs/a-book.html.md"
 
             use! response: HttpResponseMessage = client.GetAsync(baseUrl + path)
@@ -110,7 +110,7 @@ let private discoveryLinks =
         task {
             use! (server: DevServer) = DevServer.StartAsync()
             use client = new HttpClient()
-            let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+            let baseUrl = server.BaseUrl
             let siteUrl = "https://krymtkts.github.io/blog-fable"
 
             let detailPaths =
@@ -157,7 +157,7 @@ let private llmsIndex =
         task {
             use! (server: DevServer) = DevServer.StartAsync()
             use client = new HttpClient()
-            let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+            let baseUrl = server.BaseUrl
 
             use! response: HttpResponseMessage = client.GetAsync(baseUrl + "/llms.txt")
             let! content: string = response.Content.ReadAsStringAsync()
@@ -211,9 +211,7 @@ let private llmsIndex =
 
             assertLinksInOrder "Booklogs" [ "c-book.html.md"; "b-book.html.md"; "a-book.html.md"; "d-book.html.md" ]
 
-            let outputRoot =
-                System.IO.Path.Combine(__SOURCE_DIRECTORY__, "..", "docs", "blog-fable")
-                |> System.IO.Path.GetFullPath
+            let outputRoot = server.OutputRoot
 
             let urls =
                 [ "posts"; "pages"; "booklogs" ]
@@ -241,7 +239,6 @@ let private llmsIndex =
 
 let private disabledOutput =
     testTask "Disabled LLM output removes Markdown exports and discovery links" {
-        let outputRoot = IO.Path.Combine(repositoryRoot, "docs", "blog-fable")
         let markdownRoot = IO.Path.Combine(outputRoot, "posts")
         let pagesRoot = IO.Path.Combine(outputRoot, "pages")
         let booklogsRoot = IO.Path.Combine(outputRoot, "booklogs")

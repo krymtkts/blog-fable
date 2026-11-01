@@ -33,8 +33,7 @@ let private rss =
             use! (server: DevServer) = DevServer.StartAsync()
             use client = new HttpClient()
 
-            use! response =
-                client.GetAsync($"http://localhost:%d{server.Port}%s{server.Root}/feed.xml")
+            use! response = client.GetAsync($"%s{server.BaseUrl}/feed.xml")
 
             Expect.isTrue response.IsSuccessStatusCode "RSS should be served successfully"
             let! content = response.Content.ReadAsStringAsync()
@@ -88,8 +87,7 @@ let private sitemap =
             use! (server: DevServer) = DevServer.StartAsync()
             use client = new HttpClient()
 
-            use! response =
-                client.GetAsync($"http://localhost:%d{server.Port}%s{server.Root}/sitemap.xml")
+            use! response = client.GetAsync($"%s{server.BaseUrl}/sitemap.xml")
 
             Expect.isTrue response.IsSuccessStatusCode "Sitemap should be served successfully"
             let! content = response.Content.ReadAsStringAsync()
