@@ -1,5 +1,6 @@
 module SearchTests
 
+open System
 open Expecto
 open Microsoft.Playwright
 open System.Threading.Tasks
@@ -8,11 +9,10 @@ open TestHelpers
 let private filters =
     testTask "Pagefind filters classify archive and booklog results" {
         use! (server: DevServer) = DevServer.StartAsync()
-        let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+        let baseUrl = server.BaseUrl
 
-        let! (playwright: IPlaywright) = Playwright.CreateAsync()
-        use _ = PlaywrightAsyncDisposable playwright
-        let! (page: IPage) = playwright.NewChromiumPage()
+        use! (browser: TestBrowser) = TestBrowser.StartAsync()
+        let page = browser.Page
 
         let! response = $"%s{baseUrl}/index.html" |> page.GotoAndCheck
 
@@ -137,11 +137,10 @@ let private filters =
 let private tagAnd =
     testTask "Pagefind tag filters use AND semantics" {
         use! (server: DevServer) = DevServer.StartAsync()
-        let baseUrl: string = $"http://localhost:%d{server.Port}%s{server.Root}"
+        let baseUrl = server.BaseUrl
 
-        let! (playwright: IPlaywright) = Playwright.CreateAsync()
-        use _ = PlaywrightAsyncDisposable playwright
-        let! (page: IPage) = playwright.NewChromiumPage()
+        use! (browser: TestBrowser) = TestBrowser.StartAsync()
+        let page = browser.Page
 
         let! response = $"%s{baseUrl}/index.html" |> page.GotoAndCheck
 
@@ -171,13 +170,66 @@ let private tagAnd =
         let tagTrigger = tagDropdown.Locator(".pf-dropdown-trigger")
         do! tagTrigger.ClickAsync()
 
+        let expectedSampleUrls =
+            [|
+                "/blog-fable/pages/sampla-page.html"
+                "/blog-fable/posts/2022-12-31-flatten-posts-in-nested-directory.html"
+                "/blog-fable/posts/2023-02-01-about-markdown-parser.html"
+                "/blog-fable/posts/2023-03-01-sample-post.html"
+                "/blog-fable/posts/2023-04-01-default-color-scheme.html"
+                "/blog-fable/posts/2023-09-10-blog-fable.html"
+            |]
+
+        let expectedTagUrls =
+            [|
+                "/blog-fable/pages/sampla-page.html"
+                "/blog-fable/posts/2023-03-01-sample-post.html"
+            |]
+
+        let assertDisplayedUrls (expected: string array) =
+            task {
+                let results = page.Locator("pagefind-results .pf-result")
+                do! Assertions.Expect(results).ToHaveCountAsync(expected.Length)
+                let actual = ResizeArray<string>()
+
+                for i in 0 .. expected.Length - 1 do
+                    let result = results.Nth(i)
+                    // NOTE: Scrolling loads lazy results and replaces placeholders before Playwright's stability check completes.
+                    let! _ =
+                        result.EvaluateAsync("element => element.scrollIntoView({ block: 'nearest' })")
+
+                    let link = result.Locator(".pf-result-link")
+                    do! Assertions.Expect(link).ToBeVisibleAsync()
+                    let! href = link.GetAttributeAsync("href")
+
+                    let href =
+                        Expect.wantSome (Option.ofObj href) "A displayed result should have a URL"
+
+                    actual.Add(Uri(Uri(baseUrl), href).AbsolutePath)
+
+                Expect.equal
+                    (actual |> Seq.sort |> Seq.toArray)
+                    (Array.sort expected)
+                    "Displayed search results should match the selected tags"
+
+                let! _ =
+                    tagTrigger.EvaluateAsync("element => element.scrollIntoView({ block: 'start' })")
+
+                return ()
+            }
+
         let sampleOption = tagDropdown.Locator("[role='option'][data-value='sample']")
         do! sampleOption.WaitForAsync()
         do! sampleOption.ClickAsync()
+        do! tagTrigger.ClickAsync()
+        do! assertDisplayedUrls expectedSampleUrls
 
+        do! tagTrigger.ClickAsync()
         let yamlOption = tagDropdown.Locator("[role='option'][data-value='yaml']")
         do! yamlOption.WaitForAsync()
         do! yamlOption.ClickAsync()
+        do! tagTrigger.ClickAsync()
+        do! assertDisplayedUrls expectedTagUrls
 
         let! selectedValues =
             page.EvaluateAsync<string array>
@@ -218,14 +270,17 @@ let private tagAnd =
 
         let! tagUrls = tagUrlsTask
 
-        let expectedTagUrls =
-            [|
-                "/blog-fable/pages/sampla-page.html"
-                "/blog-fable/posts/2023-03-01-sample-post.html"
-            |]
-
         if tagUrls <> expectedTagUrls then
             failtestf "Tag AND filter returned unexpected URLs: %s" (String.concat ", " tagUrls)
+
+        do! tagTrigger.ClickAsync()
+        // NOTE: The short result list lets the modal footer overlap the last option; use the dropdown's keyboard navigation.
+        do! tagTrigger.PressAsync("y")
+        do! tagTrigger.PressAsync("Enter")
+        do! tagTrigger.ClickAsync()
+        do! Assertions.Expect(yamlOption).ToHaveAttributeAsync("aria-selected", "false")
+        do! Assertions.Expect(sampleOption).ToHaveAttributeAsync("aria-selected", "true")
+        do! assertDisplayedUrls expectedSampleUrls
     }
 
 let tests = testList "Search" [ filters; tagAnd ]

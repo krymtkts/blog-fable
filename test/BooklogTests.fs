@@ -7,10 +7,9 @@ open TestHelpers
 let private fixedNavigation =
     testTask "Booklog fixed navigation jumps to its top and bottom" {
         use! (server: DevServer) = DevServer.StartAsync()
-        let baseUrl = $"http://localhost:%d{server.Port}%s{server.Root}"
-        let! (playwright: IPlaywright) = Playwright.CreateAsync()
-        use _ = PlaywrightAsyncDisposable playwright
-        let! (page: IPage) = playwright.NewChromiumPage()
+        let baseUrl = server.BaseUrl
+        use! (browser: TestBrowser) = TestBrowser.StartAsync()
+        let page = browser.Page
 
         for width in [ 1280; 375 ] do
             do! page.SetViewportSizeAsync(width, 800)
