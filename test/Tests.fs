@@ -11,5 +11,6 @@ let tests =
         BooklogTests.tests
         SearchTests.tests
         ThemeTests.tests
+        XmlTests.tests
         LlmTests.tests
     ]

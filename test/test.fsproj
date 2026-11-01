@@ -20,6 +20,7 @@
     <Compile Include="BooklogTests.fs" />
     <Compile Include="SearchTests.fs" />
     <Compile Include="ThemeTests.fs" />
+    <Compile Include="XmlTests.fs" />
     <Compile Include="Tests.fs" />
   </ItemGroup>
 
