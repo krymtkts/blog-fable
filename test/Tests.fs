@@ -10,5 +10,6 @@ let tests =
         SnapshotTests.tests
         BooklogTests.tests
         SearchTests.tests
+        ThemeTests.tests
         LlmTests.tests
     ]
