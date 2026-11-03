@@ -4,12 +4,19 @@ description: "Setup .NET and Node.js, install dependencies and build pages."
 runs:
   using: "composite"
   steps:
+    - name: Verify workflow dependencies
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh extension install github/gh-actions-lock
+        gh actions-lock --verify
     - name: Setup .NET
-      uses: actions/setup-dotnet@v6
+      uses: actions/setup-dotnet@v6.1.0
       with:
         global-json-file: ./global.json
     - name: Setup Node.js
-      uses: actions/setup-node@v7
+      uses: actions/setup-node@v7.1.0
       with:
         node-version-file: ./package.json
     - name: Install dependencies
