@@ -19,7 +19,7 @@
     <PackageVersion Include="Fake.Core.Process" Version="6.2.0" />
     <PackageVersion Include="Fake.DotNet.Cli" Version="6.2.0" />
     <PackageVersion Include="Fake.JavaScript.Npm" Version="6.2.0" />
-    <PackageVersion Include="Microsoft.Playwright" Version="1.64.1" />
+    <PackageVersion Include="Microsoft.Playwright" Version="1.65.1" />
     <PackageVersion Include="Serilog" Version="4.4.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageVersion Include="Suave" Version="3.7.2" />
