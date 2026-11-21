@@ -19,7 +19,7 @@
   "devDependencies": {
     "bulma": "^1.0.4",
     "pagefind": "^1.6.0",
-    "sass": "^1.108.1",
+    "sass": "^1.108.2",
     "ts2fable": "^0.7.1"
   },
   "dependencies": {
