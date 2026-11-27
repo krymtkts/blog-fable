@@ -11,7 +11,7 @@
     <PackageVersion Include="Fable.Core" Version="5.6.1" />
     <PackageVersion Include="Fable.Promise" Version="3.3.0" />
     <PackageVersion Include="Fable.SimpleXml" Version="3.4.0" />
-    <PackageVersion Include="Feliz" Version="3.3.3" />
+    <PackageVersion Include="Feliz" Version="3.4.0" />
   </ItemGroup>
   <!-- NOTE: Dependencies of the test project, including the shared development server. -->
   <ItemGroup>
