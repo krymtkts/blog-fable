@@ -1,5 +1,6 @@
 module ThemeTests
 
+open System
 open Expecto
 open Microsoft.Playwright
 open TestHelpers
@@ -9,6 +10,8 @@ let private selectionPersists =
         use! (server: DevServer) = DevServer.StartAsync()
         use! (browser: TestBrowser) = TestBrowser.StartAsync()
         let page = browser.Page
+        page.PageError.Add(fun message -> printfn "Browser error: %s" message)
+        page.RequestFailed.Add(fun request -> printfn "Request failed: %s (%s)" request.Url request.Failure)
 
         let! response = page.GotoAndCheck $"%s{server.BaseUrl}/index.html"
 
@@ -16,7 +19,19 @@ let private selectionPersists =
         | Result.Error message -> failtest message
         | _ -> ()
 
-        do! page.WaitForLoadStateAsync(LoadState.Load)
+        try
+            do! page.WaitForLoadStateAsync(LoadState.Load)
+        with :? TimeoutException as timeout ->
+            let! diagnostic =
+                task {
+                    try
+                        return! page.EvaluateAsync<string>("document.readyState").WaitAsync(TimeSpan.FromSeconds 2.)
+                    with ex ->
+                        return $"unavailable (%s{ex.Message})"
+                }
+
+            return raise (TimeoutException($"Page load timed out. document.readyState: %s{diagnostic}", timeout))
+
         let root = page.Locator("html")
 
         let assertTheme (systemTheme: string) (mode: string option) =
