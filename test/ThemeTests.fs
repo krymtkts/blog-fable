@@ -1,6 +1,5 @@
 module ThemeTests
 
-open System
 open Expecto
 open Microsoft.Playwright
 open TestHelpers
@@ -13,25 +12,23 @@ let private selectionPersists =
         page.PageError.Add(fun message -> printfn "Browser error: %s" message)
         page.RequestFailed.Add(fun request -> printfn "Request failed: %s (%s)" request.Url request.Failure)
 
+        let waitForPageLoad () =
+            task {
+                let! state =
+                    page.WaitForFunctionAsync(
+                        "document.readyState === 'complete' && performance.getEntriesByType('navigation')[0]?.loadEventEnd > 0"
+                    )
+
+                do! state.DisposeAsync()
+            }
+
         let! response = page.GotoAndCheck $"%s{server.BaseUrl}/index.html"
 
         match response with
         | Result.Error message -> failtest message
         | _ -> ()
 
-        try
-            do! page.WaitForLoadStateAsync(LoadState.Load)
-        with :? TimeoutException as timeout ->
-            let! diagnostic =
-                task {
-                    try
-                        return! page.EvaluateAsync<string>("document.readyState").WaitAsync(TimeSpan.FromSeconds 2.)
-                    with ex ->
-                        return $"unavailable (%s{ex.Message})"
-                }
-
-            return raise (TimeoutException($"Page load timed out. document.readyState: %s{diagnostic}", timeout))
-
+        do! waitForPageLoad ()
         let root = page.Locator("html")
 
         let assertTheme (systemTheme: string) (mode: string option) =
@@ -63,7 +60,11 @@ let private selectionPersists =
                 ] do
                 do! page.GetByTitle(title, PageGetByTitleOptions(Exact = true)).ClickAsync()
                 do! assertTheme systemTheme mode
-                let! _ = page.ReloadAsync()
+
+                let! _ =
+                    page.ReloadAsync(PageReloadOptions(WaitUntil = WaitUntilState.DOMContentLoaded))
+
+                do! waitForPageLoad ()
                 do! assertTheme systemTheme mode
     }
 
